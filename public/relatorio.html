@@ -3,48 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatórios Detalhados - Maranata</title>
+    <title>Relatórios - Maranata</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
-        body { background-color: #000000; color: #ffffff; padding-bottom: 80px; font-family: sans-serif; }
+        /* --- ESTILO DE TELA (DARK MODE TOTAL) --- */
+        body { background-color: #000000; color: #ffffff; padding-bottom: 50px; font-family: sans-serif; }
         .card-relatorio { background: #121212; border: 1px solid #333; border-radius: 12px; }
         
         .text-yellow { color: #ffca28 !important; }
         .text-blue { color: #0d6efd !important; }
         .text-red { color: #ff4444 !important; }
 
-        .table { color: #ffffff !important; border-color: #333; }
+        .table { color: #ffffff !important; border-color: #444; vertical-align: middle; }
         .table-dark { --bs-table-bg: #121212; }
-        .td-nome { font-weight: bold; font-size: 0.9rem; }
-        .td-funcao { color: #0d6efd; font-size: 0.75rem; text-transform: uppercase; font-weight: bold; }
+        .td-nome { font-weight: bold; font-size: 0.95rem; display: block; color: #fff; }
+        .td-funcao { color: #0d6efd; font-size: 0.7rem; text-transform: uppercase; font-weight: bold; }
         
-        .status-badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; }
-        .bg-presenca { background-color: rgba(13, 110, 253, 0.2); color: #0d6efd; border: 1px solid #0d6efd; }
-        .bg-ausencia { background-color: rgba(255, 68, 68, 0.2); color: #ff4444; border: 1px solid #ff4444; }
+        /* Tags dos dias na tela - Agora com fundo cinza escuro para destaque */
+        .dia-tag { 
+            display: inline-block; 
+            background: #2a2a2a; 
+            border: 1px solid #444; 
+            padding: 3px 8px; 
+            border-radius: 4px; 
+            margin: 2px; 
+            font-size: 0.8rem; 
+            color: #fff;
+        }
 
         .navbar-custom { border-bottom: 2px solid #0d6efd; background-color: #000 !important; }
 
-        /* --- ESTILO PARA DOWNLOAD/IMPRESSÃO --- */
+        /* Cabeçalho e Rodapé de Impressão (Escondidos na tela) */
+        .print-only { display: none; }
+
+        /* --- CONFIGURAÇÃO EXCLUSIVA PARA PDF / IMPRESSÃO --- */
         @media print {
+            @page { size: portrait; margin: 1cm; }
             body { background-color: #ffffff !important; color: #000000 !important; }
-            .navbar, .card-relatorio, .btn-download, a.btn { display: none !important; }
-            .table { color: #000000 !important; width: 100% !important; }
-            .table-dark { background-color: #fff !important; }
-            .td-funcao { color: #555 !important; }
-            .status-badge { border: 1px solid #000 !important; background: none !important; color: #000 !important; }
-            #resultadoRelatorio { margin-top: 0 !important; }
-            h6.text-yellow { color: #000 !important; font-size: 1.5rem; }
+            .navbar, .card-relatorio, .btn-print-hide, a.btn { display: none !important; }
+            
+            .print-only { display: block !important; color: #000; text-align: center; }
+            .header-print { border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px; }
+            
+            .table { color: #000 !important; border: 1px solid #000 !important; width: 100% !important; }
+            .table td, .table th { border: 1px solid #000 !important; color: #000 !important; }
+            
+            .td-nome { color: #000 !important; }
+            .td-funcao { color: #333 !important; }
+            .dia-tag { border: 1px solid #000; background: none; color: #000; margin-right: 5px; }
+            .text-blue, .text-red { font-weight: bold; color: #000 !important; }
+
+            .footer-print { margin-top: 50px; }
+            .sig-box { display: flex; justify-content: space-around; margin-top: 40px; }
+            .sig-line { border-top: 1px solid #000; width: 40%; text-align: center; font-size: 0.8rem; padding-top: 5px; }
         }
     </style>
 </head>
 <body>
 
+<div class="print-only header-print">
+    <h2 style="margin:0;">RELATÓRIO DE FREQUÊNCIA - MARANATA</h2>
+    <p id="info-referencia" style="margin:5px 0;"></p>
+</div>
+
 <nav class="navbar navbar-dark bg-black sticky-top navbar-custom p-3 shadow">
     <div class="container-fluid">
-        <span class="navbar-brand fw-bold"><i class="bi bi-file-earmark-ruled text-primary me-2"></i>RELATÓRIOS</span>
+        <span class="navbar-brand fw-bold"><i class="bi bi-file-earmark-bar-graph text-primary me-2"></i>RELATÓRIOS</span>
         <div>
-            <button onclick="window.print()" class="btn btn-success btn-sm me-2 btn-download">
+            <button onclick="gerarPDF()" class="btn btn-success btn-sm me-2 btn-print-hide">
                 <i class="bi bi-download"></i> BAIXAR PDF
             </button>
             <a href="index.html" class="btn btn-outline-light btn-sm">Voltar</a>
@@ -56,24 +83,26 @@
     <div class="card card-relatorio p-3 mb-4 shadow">
         <div class="row g-2">
             <div class="col-12 mb-2">
-                <label class="small text-white-50">Membro:</label>
+                <label class="small text-white-50">Individual (Opcional):</label>
                 <select id="selectMembro" class="form-select bg-dark text-white border-secondary">
-                    <option value="">Todos os Membros (Geral)</option>
+                    <option value="">RELATÓRIO GERAL (Membros com Função)</option>
                 </select>
             </div>
             <div class="col-6">
                 <label class="small text-white-50">Mês:</label>
                 <select id="selectMes" class="form-select bg-dark text-white border-secondary">
-                    <option value="">Todos</option>
-                    <option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option>
-                    <option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option>
+                    <option value="01">Janeiro</option><option value="02" selected>Fevereiro</option>
+                    <option value="03">Março</option><option value="04">Abril</option>
+                    <option value="05">Maio</option><option value="06">Junho</option>
+                    <option value="07">Julho</option><option value="08">Agosto</option>
+                    <option value="09">Setembro</option><option value="10">Outubro</option>
+                    <option value="11">Novembro</option><option value="12">Dezembro</option>
                 </select>
             </div>
             <div class="col-6">
                 <label class="small text-white-50">Ano:</label>
                 <select id="selectAno" class="form-select bg-dark text-white border-secondary">
-                    <option value="2025">2025</option>
-                    <option value="2026" selected>2026</option>
+                    <option value="2025">2025</option><option value="2026" selected>2026</option>
                 </select>
             </div>
         </div>
@@ -84,12 +113,20 @@
     </div>
 
     <div id="resultadoRelatorio">
-        <div id="listaHistorico" class="table-responsive"></div>
+        <div id="listaHistorico" class="table-responsive">
+            <p class="text-center text-white-50 p-5">Selecione o período e gere o relatório.</p>
+        </div>
+    </div>
+
+    <div class="print-only footer-print">
+        <div class="sig-box">
+            <div class="sig-line">Assinatura do Responsável</div>
+            <div class="sig-line">Coordenador / Pastor</div>
+        </div>
     </div>
 </div>
 
 <script type="module">
-    // Mantenha seu script do Firebase exatamente como está
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, query, where, getDocs, orderBy, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -105,13 +142,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    function formatarDataComDia(dataISO) {
-        const diasSemana = ["Dom", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
-        const partes = dataISO.split('-');
-        const dataObj = new Date(partes[0], partes[1] - 1, partes[2]);
-        return `${diasSemana[dataObj.getDay()]}, ${partes[2]}/${partes[1]}`;
-    }
-
     async function carregarMembros() {
         const q = query(collection(db, "membros"), orderBy("nome", "asc"));
         const snap = await getDocs(q);
@@ -119,6 +149,14 @@
         snap.forEach(doc => { select.innerHTML += `<option value="${doc.id}">${doc.id}</option>`; });
     }
 
+    window.gerarPDF = () => {
+        const mesText = document.getElementById('selectMes').options[document.getElementById('selectMes').selectedIndex].text;
+        const anoText = document.getElementById('selectAno').value;
+        document.getElementById('info-referencia').innerText = `Referência: ${mesText} de ${anoText} | Gerado em: ${new Date().toLocaleDateString()}`;
+        window.print();
+    };
+
+    // RELATÓRIO INDIVIDUAL (Sem travar)
     document.getElementById('btnIndividual').onclick = async () => {
         const nome = document.getElementById('selectMembro').value;
         const mes = document.getElementById('selectMes').value;
@@ -128,68 +166,69 @@
         const listaDiv = document.getElementById('listaHistorico');
         listaDiv.innerHTML = '<div class="text-center p-4"><div class="spinner-border text-primary"></div></div>';
 
-        const membroDoc = await getDoc(doc(db, "membros", nome));
-        const funcoes = membroDoc.data().funcoes ? membroDoc.data().funcoes.join(" • ") : "GERAL";
+        const mDoc = await getDoc(doc(db, "membros", nome));
+        const funs = mDoc.data().funcoes ? mDoc.data().funcoes.join(" • ") : "GERAL";
 
-        const q = query(collection(db, "chamada_diaria"), where("nome", "==", nome), orderBy("data", "desc"));
+        const q = query(collection(db, "chamada_diaria"), where("nome", "==", nome));
         const snap = await getDocs(q);
 
-        let html = `<div class="mb-3"><span class="td-nome d-block">${nome}</span><span class="td-funcao">${funcoes}</span></div>`;
-        html += `<table class="table table-dark"><thead><tr><th>Data</th><th>Status</th></tr></thead><tbody>`;
-        
-        let temDados = false;
-        snap.forEach(docSnap => {
-            const p = docSnap.data();
+        let regs = [];
+        snap.forEach(d => {
+            const p = d.data();
             const [pAno, pMes] = p.data.split('-');
-            if ((mes === "" || pMes === mes) && pAno === ano) {
-                temDados = true;
-                const isP = p.status === 'Presente';
-                html += `<tr>
-                    <td class="small">${formatarDataComDia(p.data)}</td>
-                    <td><span class="status-badge ${isP ? 'bg-presenca' : 'bg-ausencia'}">${p.status.toUpperCase()}</span></td>
-                </tr>`;
-            }
+            if (pMes === mes && pAno === ano) regs.push(p);
         });
-        if(!temDados) html += `<tr><td colspan="2" class="text-center text-white-50">Nenhum registro encontrado.</td></tr>`;
+        regs.sort((a,b) => b.data.localeCompare(a.data));
+
+        let html = `<h4 class="text-white">${nome}</h4><p class="td-funcao">${funs}</p>`;
+        html += `<table class="table table-dark table-bordered"><thead><tr><th>Data</th><th>Status</th></tr></thead><tbody>`;
+        regs.forEach(p => {
+            const cor = p.status === 'Presente' ? 'text-blue' : 'text-red';
+            html += `<tr><td>${p.data.split('-').reverse().join('/')}</td><td class="${cor} fw-bold">${p.status.toUpperCase()}</td></tr>`;
+        });
         listaDiv.innerHTML = html + "</tbody></table>";
     };
 
+    // RELATÓRIO GERAL (Somente com Função + Datas)
     document.getElementById('btnGeral').onclick = async () => {
         const mes = document.getElementById('selectMes').value;
         const ano = document.getElementById('selectAno').value;
         const listaDiv = document.getElementById('listaHistorico');
-        listaDiv.innerHTML = '<div class="text-center p-4"><div class="spinner-border text-warning"></div></div>';
+        listaDiv.innerHTML = 'Processando relatório geral...';
 
-        const qPresencas = await getDocs(collection(db, "chamada_diaria"));
-        const qMembros = await getDocs(collection(db, "membros"));
+        const qP = await getDocs(collection(db, "chamada_diaria"));
+        const qM = await getDocs(query(collection(db, "membros"), orderBy("nome", "asc")));
 
-        let resumo = {};
-        qPresencas.forEach(docSnap => {
+        let registros = {};
+        qP.forEach(docSnap => {
             const p = docSnap.data();
             const [pAno, pMes] = p.data.split('-');
-            if ((mes === "" || pMes === mes) && pAno === ano) {
-                if (!resumo[p.nome]) resumo[p.nome] = { p: 0, f: 0 };
-                p.status === 'Presente' ? resumo[p.nome].p++ : resumo[p.nome].f++;
+            if (pMes === mes && pAno === ano) {
+                if (!registros[p.nome]) registros[p.nome] = [];
+                registros[p.nome].push({ dia: p.data.split('-')[2], status: p.status === 'Presente' ? 'P' : 'F' });
             }
         });
 
-        let html = `<h6 class="text-yellow mb-3">Resumo Geral: ${mes || 'Anual'} / ${ano}</h6>`;
-        html += `<table class="table table-dark table-striped"><thead><tr><th>Nome / Função</th><th class="text-center">P</th><th class="text-center">F</th></tr></thead><tbody>`;
-
-        qMembros.forEach(docSnap => {
-            const m = docSnap.data();
-            const d = resumo[m.nome] || { p: 0, f: 0 };
-            const funs = m.funcoes ? m.funcoes.join(", ") : "---";
-            html += `<tr>
-                <td><div class="td-nome">${m.nome}</div><div class="td-funcao">${funs}</div></td>
-                <td class="text-center text-blue fw-bold">${d.p}</td>
-                <td class="text-center text-red fw-bold">${d.f}</td>
-            </tr>`;
+        let html = `<table class="table table-dark table-bordered"><thead><tr><th>Membro / Funções</th><th>Histórico do Mês</th></tr></thead><tbody>`;
+        let count = 0;
+        qM.forEach(mDoc => {
+            const m = mDoc.data();
+            if (m.funcoes && m.funcoes.length > 0) {
+                count++;
+                const lista = (registros[m.nome] || []).sort((a,b) => a.dia - b.dia);
+                let tags = "";
+                lista.forEach(d => {
+                    const cor = d.status === 'P' ? 'text-blue' : 'text-red';
+                    tags += `<span class="dia-tag"><b class="${cor}">${d.status}</b> ${d.dia}</span>`;
+                });
+                html += `<tr><td><span class="td-nome">${m.nome}</span><span class="td-funcao">${m.funcoes.join(', ')}</span></td><td>${tags}</td></tr>`;
+            }
         });
         listaDiv.innerHTML = html + "</tbody></table>";
     };
 
     carregarMembros();
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
