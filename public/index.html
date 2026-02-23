@@ -1,70 +1,44 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chamada - Igreja</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <style>
-        body { background-color: #0b0b0b; color: #ffffff; }
-        .navbar { border-bottom: 2px solid #0d6efd; } /* Azul */
-        .card { background-color: #1a1a1a; border: none; }
-        .text-yellow { color: #ffca28; }
-        .btn-check-in { color: #0d6efd; border: 1px solid #0d6efd; }
-        .btn-check-in:hover { background: #0d6efd; color: white; }
-        .btn-absent { color: #ff4444; border: 1px solid #ff4444; }
-        .btn-absent:hover { background: #ff4444; color: white; }
-        .badge-funcao { background-color: #ffca28; color: #000; }
-    </style>
-</head>
-<body>
-
-<nav class="navbar navbar-dark bg-black p-3 mb-4">
-    <div class="container d-flex justify-content-between">
-        <h4 class="mb-0 text-white"><i class="bi bi-person-check text-primary"></i> CHAMADA</h4>
-        <input type="file" id="pdfInput" hidden>
-        <button class="btn btn-outline-primary btn-sm" onclick="document.getElementById('pdfInput').click()">
-            <i class="bi bi-file-pdf"></i> Importar PDF
-        </button>
-    </div>
-</nav>
-
-<div class="container">
-    <div id="avisoSexta" class="alert alert-warning d-none" role="alert">
-        <i class="bi bi-house-heart"></i> Hoje é Sexta-feira: <b>Culto no Lar</b>. Chamada desabilitada.
-    </div>
-
-    <div class="row g-3 mb-4 text-center">
-        <div class="col-6">
-            <div class="card p-3 border-start border-primary border-4">
-                <small class="text-white-50">Presentes</small>
-                <h2 id="countPresente" class="text-primary">0</h2>
+<div id="containerChamada">
+    <h2 class="text-white mb-4">Chamada por Funções</h2>
+    
+    <div class="accordion" id="accordionFuncoes">
+        
+        <div class="accordion-item bg-dark text-white border-secondary">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed bg-dark text-warning" type="button" data-bs-toggle="collapse" data-bs-target="#groupObreiros">
+                    OBREIROS
+                </button>
+            </h2>
+            <div id="groupObreiros" class="accordion-collapse collapse" data-bs-parent="#accordionFuncoes">
+                <div class="accordion-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center border-secondary">
+                            <span class="membro-nome" style="cursor:pointer" onclick="verDetalhes('ADRIANO')">ADRIANO</span>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary">P</button>
+                                <button class="btn btn-sm btn-outline-danger">F</button>
+                            </div>
+                        </li>
+                        </ul>
+                </div>
             </div>
         </div>
-        <div class="col-6">
-            <div class="card p-3 border-start border-danger border-4">
-                <small class="text-white-50">Faltas</small>
-                <h2 id="countFalta" class="text-danger">0</h2>
-            </div>
-        </div>
-    </div>
 
-    <div id="listaMembros" class="mb-5">
-        </div>
+    </div>
 </div>
 
-<footer class="fixed-bottom bg-black border-top border-secondary p-2 text-center">
-    <a href="relatorio.html" class="text-white-50 text-decoration-none small">Ir para Relatórios <i class="bi bi-arrow-right"></i></a>
-</footer>
-
-<script>
-    // Bloqueio de Sexta-feira
-    const hoje = new Date();
-    if (hoje.getDay() === 5) {
-        document.getElementById('avisoSexta').classList.remove('d-none');
-        document.querySelector('.btn-outline-primary').disabled = true;
-    }
-</script>
-</body>
-</html>
+<div class="modal fade" id="modalFuncoes" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white border-primary">
+      <div class="modal-header">
+        <h5 class="modal-title" id="nomeMembroModal">Nome do Membro</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <h6>Funções vinculadas:</h6>
+        <ul id="listaFuncoesMembro" class="list-group">
+            </ul>
+      </div>
+    </div>
+  </div>
+</div>
