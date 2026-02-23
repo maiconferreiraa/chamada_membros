@@ -2,53 +2,84 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chamada Maranata</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
-        body { background-color: #0b0b0b; color: white; padding-bottom: 80px; }
-        .card-membro { background: #1a1a1a; border-left: 4px solid #0d6efd; margin-bottom: 10px; }
-        .text-yellow { color: #ffca28; }
-        .btn-presenca { background: #0d6efd; border: none; }
-        .btn-falta { background: #ff4444; border: none; }
-        .navbar-custom { border-bottom: 2px solid #ffca28; }
+        :root {
+            --bg-dark: #0b0b0b;
+            --card-bg: #1a1a1a;
+            --primary-blue: #0d6efd;
+            --danger-red: #ff4444;
+            --accent-yellow: #ffca28;
+        }
+
+        body { background-color: var(--bg-dark); color: white; padding-bottom: 90px; font-family: sans-serif; }
+        
+        /* Acordeão Estilo Dark */
+        .accordion-item { background-color: var(--card-bg); border: 1px solid #333; margin-bottom: 8px; border-radius: 8px !important; overflow: hidden; }
+        .accordion-button { background-color: var(--card-bg); color: var(--accent-yellow); font-weight: bold; box-shadow: none !important; }
+        .accordion-button:not(.collapsed) { background-color: #252525; color: var(--accent-yellow); border-bottom: 1px solid #333; }
+        .accordion-button::after { filter: invert(1); }
+
+        /* Linha do Membro */
+        .member-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid #333; }
+        .member-info { flex-grow: 1; }
+        .member-name { font-size: 0.95rem; font-weight: 500; display: block; }
+        .member-sub { font-size: 0.75rem; color: #aaa; }
+
+        /* Botões de Chamada */
+        .btn-call { width: 45px; height: 35px; border: 1px solid #444; background: transparent; transition: 0.2s; font-weight: bold; }
+        .btn-p { color: var(--primary-blue); border-color: var(--primary-blue); border-radius: 5px 0 0 5px; }
+        .btn-f { color: var(--danger-red); border-color: var(--danger-red); border-radius: 0 5px 5px 0; }
+        
+        .btn-p.active { background: var(--primary-blue); color: white; }
+        .btn-f.active { background: var(--danger-red); color: white; }
+
+        .navbar-custom { border-bottom: 2px solid var(--primary-blue); background-color: black !important; }
+        .sticky-top { z-index: 1020; }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-dark bg-black sticky-top navbar-custom p-3">
+<nav class="navbar navbar-dark bg-black sticky-top navbar-custom p-3 shadow">
     <div class="container-fluid">
-        <span class="navbar-brand fw-bold">CHAMADA MARANATA</span>
-        <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalNovo">
-            <i class="bi bi-person-plus"></i>
+        <span class="navbar-brand fw-bold small"><i class="bi bi-church me-2"></i> MARANATA</span>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalGerenciar">
+            <i class="bi bi-gear-fill me-1"></i> FUNÇÕES
         </button>
     </div>
 </nav>
 
 <div class="container mt-3">
-    <input type="text" id="busca" class="form-control bg-dark text-white border-secondary mb-3" placeholder="Buscar por nome ou função...">
-
-    <div id="listaChamada">
+    <div class="accordion" id="accordionChamada">
+        <div class="text-center p-5" id="loader">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-white-50">Sincronizando membros e funções...</p>
         </div>
+    </div>
 </div>
 
-<div class="modal fade" id="modalNovo" tabindex="-1">
+<div class="modal fade" id="modalGerenciar" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-dark border-primary">
+        <div class="modal-content bg-dark border-primary shadow-lg">
             <div class="modal-header border-secondary">
-                <h5 class="modal-title">Gerenciar Membro</h5>
+                <h5 class="modal-title text-warning">Lincar Membro à Função</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <input type="text" id="nomeMembro" class="form-control mb-2" placeholder="Nome">
-                <input type="text" id="funcoesMembro" class="form-control mb-2" placeholder="Funções (ex: Obreiro, Som)">
-                <select id="catMembro" class="form-select mb-2">
-                    <option value="Adulto">Adulto</option>
-                    <option value="Jovem">Jovem</option>
-                    <option value="Adolescente">Adolescente</option>
-                </select>
-                <button onclick="salvarMembro()" class="btn btn-primary w-100">Salvar no Firebase</button>
+                <div class="mb-3">
+                    <label class="form-label small text-white-50">Selecione o Membro:</label>
+                    <select id="selectMembros" class="form-select bg-black text-white border-secondary">
+                        <option value="">Carregando...</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small text-white-50">Nova Função (ex: LOUVOR, SOM, OBREIRO):</label>
+                    <input type="text" id="inputFuncao" class="form-control bg-black text-white border-secondary" placeholder="Digite a função">
+                </div>
+                <button id="btnSalvarFuncao" class="btn btn-warning w-100 fw-bold">VINCULAR AGORA</button>
             </div>
         </div>
     </div>
@@ -57,56 +88,138 @@
 <nav class="navbar fixed-bottom bg-black border-top border-secondary py-2">
     <div class="container d-flex justify-content-around">
         <a href="index.html" class="text-primary text-center text-decoration-none">
-            <i class="bi bi-person-check fs-4"></i><br><small>Chamada</small>
+            <i class="bi bi-person-check fs-4 d-block"></i>
+            <span style="font-size: 0.7rem;">Chamada</span>
         </a>
         <a href="relatorio.html" class="text-white-50 text-center text-decoration-none">
-            <i class="bi bi-file-bar-graph fs-4"></i><br><small>Relatórios</small>
+            <i class="bi bi-file-earmark-bar-graph fs-4 d-block"></i>
+            <span style="font-size: 0.7rem;">Relatórios</span>
         </a>
     </div>
 </nav>
 
 <script type="module">
-    // Aqui entra o firebaseConfig que você pegou no console do Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, doc, setDoc, updateDoc, arrayUnion, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = { /* COLE SEUS DADOS AQUI */ };
+    // --- CONFIGURAÇÃO DO FIREBASE (SUBSTITUA PELOS SEUS DADOS) ---
+    const firebaseConfig = {
+        apiKey: "AIzaSy...",
+        authDomain: "seu-projeto.firebaseapp.com",
+        projectId: "seu-projeto",
+        storageBucket: "seu-projeto.appspot.com",
+        messagingSenderId: "12345",
+        appId: "1:12345:web:abcd"
+    };
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Função para Salvar/Editar
-    window.salvarMembro = async () => {
-        const nome = document.getElementById('nomeMembro').value.toUpperCase();
-        const funcoes = document.getElementById('funcoesMembro').value.split(',').map(f => f.trim());
-        const categoria = document.getElementById('catMembro').value;
+    // 1. Carregar Membros no Select do Modal
+    const qMembros = query(collection(db, "membros"), orderBy("nome", "asc"));
+    onSnapshot(qMembros, (snapshot) => {
+        const select = document.getElementById('selectMembros');
+        select.innerHTML = '<option value="">Escolha um membro...</option>';
+        snapshot.forEach(doc => {
+            select.innerHTML += `<option value="${doc.id}">${doc.id}</option>`;
+        });
+    });
 
-        await setDoc(doc(db, "membros", nome), { nome, funcoes, categoria }, { merge: true });
-        bootstrap.Modal.getInstance(document.getElementById('modalNovo')).hide();
+    // 2. Lógica para Salvar Nova Função
+    document.getElementById('btnSalvarFuncao').onclick = async () => {
+        const nome = document.getElementById('selectMembros').value;
+        const funcao = document.getElementById('inputFuncao').value.trim().toUpperCase();
+        
+        if (!nome || !funcao) return alert("Preencha todos os campos!");
+
+        try {
+            await updateDoc(doc(db, "membros", nome), {
+                funcoes: arrayUnion(funcao)
+            });
+            alert(`Sucesso! ${nome} agora faz parte do grupo ${funcao}`);
+            document.getElementById('inputFuncao').value = "";
+        } catch (e) {
+            alert("Erro ao vincular: " + e.message);
+        }
     };
 
-    // Renderizar Lista em Ordem Alfabética
-    const q = query(collection(db, "membros"), orderBy("nome", "asc"));
-    onSnapshot(q, (snapshot) => {
-        const lista = document.getElementById('listaChamada');
-        lista.innerHTML = '';
+    // 3. Renderizar Grupos de Chamada em Tempo Real
+    onSnapshot(collection(db, "membros"), (snapshot) => {
+        const accordion = document.getElementById('accordionChamada');
+        const loader = document.getElementById('loader');
+        let funcoesMap = {};
+
+        if (snapshot.empty) {
+            loader.innerHTML = `<div class="alert alert-warning">Nenhum membro no banco. O servidor deve importar o TXT automaticamente no próximo reinício.</div>`;
+            return;
+        }
+
         snapshot.forEach(doc => {
             const m = doc.data();
-            lista.innerHTML += `
-                <div class="card card-membro p-3">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div onclick="abrirEdicao('${m.nome}', '${m.funcoes.join(',')}')">
-                            <strong class="d-block">${m.nome}</strong>
-                            <small class="text-yellow">${m.funcoes.join(' • ')}</small>
+            const gruposMembro = m.funcoes && m.funcoes.length > 0 ? m.funcoes : ["AGUARDANDO FUNÇÃO"];
+            
+            gruposMembro.forEach(f => {
+                if (!funcoesMap[f]) funcoesMap[f] = [];
+                funcoesMap[f].push({ nome: m.nome, grupo: m.grupo });
+            });
+        });
+
+        accordion.innerHTML = "";
+        Object.keys(funcoesMap).sort().forEach(funcao => {
+            const idGroup = funcao.replace(/[^A-Z0-9]/ig, ""); // ID limpo para o Bootstrap
+            let membrosHTML = "";
+            
+            funcoesMap[funcao].sort((a,b) => a.nome.localeCompare(b.nome)).forEach(membro => {
+                membrosHTML += `
+                    <div class="member-row">
+                        <div class="member-info">
+                            <span class="member-name text-white">${membro.nome}</span>
+                            <span class="member-sub text-warning">${membro.grupo}</span>
                         </div>
-                        <div class="btn-group">
-                            <button class="btn btn-sm btn-presenca">P</button>
-                            <button class="btn btn-sm btn-falta">F</button>
+                        <div class="btn-group" data-id="${membro.nome}">
+                            <button onclick="fazerChamada('${membro.nome}', 'P')" class="btn-call btn-p" id="P_${membro.nome}">P</button>
+                            <button onclick="fazerChamada('${membro.nome}', 'F')" class="btn-call btn-f" id="F_${membro.nome}">F</button>
                         </div>
+                    </div>`;
+            });
+
+            accordion.innerHTML += `
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${idGroup}">
+                            ${funcao} <span class="badge bg-primary ms-2" style="font-size: 0.6rem;">${funcoesMap[funcao].length}</span>
+                        </button>
+                    </h2>
+                    <div id="collapse${idGroup}" class="accordion-collapse collapse">
+                        <div class="accordion-body p-0">${membrosHTML}</div>
                     </div>
                 </div>`;
         });
     });
+
+    // 4. Função de Chamada (Sincronizada em todos os grupos)
+    window.fazerChamada = async (nome, status) => {
+        const hoje = new Date().toISOString().split('T')[0];
+        
+        try {
+            await setDoc(doc(db, "chamada_diaria", `${hoje}_${nome}`), {
+                nome: nome,
+                data: hoje,
+                status: status === 'P' ? 'Presente' : 'Ausente'
+            });
+
+            // Sincroniza visualmente todos os botões desse membro em qualquer grupo
+            document.querySelectorAll(`[data-id="${nome}"]`).forEach(group => {
+                group.querySelector('.btn-p').classList.toggle('active', status === 'P');
+                group.querySelector('.btn-f').classList.toggle('active', status === 'F');
+            });
+        } catch (e) {
+            console.error("Erro ao salvar chamada:", e);
+        }
+    };
+
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
