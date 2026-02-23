@@ -12,69 +12,46 @@
             --card-bg: #121212;
             --primary-blue: #0d6efd;
             --danger-red: #ff4444;
-            --accent-yellow: #ffca28;
+            --warning-yellow: #ffca28;
             --text-white: #ffffff;
         }
 
         body { background-color: var(--bg-dark); color: var(--text-white); padding-bottom: 90px; font-family: sans-serif; }
-        
-        /* Cabeçalho de Data */
         .header-data { background: #1a1a1a; padding: 15px; border-bottom: 2px solid var(--primary-blue); text-align: center; }
-        .data-texto { font-size: 1.1rem; font-weight: bold; color: var(--accent-yellow); margin: 0; }
+        .data-texto { font-size: 1.1rem; font-weight: bold; color: var(--warning-yellow); margin: 0; }
 
-        /* Estilo das Abas */
         .nav-tabs { border-bottom: 1px solid #333; justify-content: center; background: #000; }
         .nav-link { color: #888 !important; border: none !important; font-weight: bold; text-transform: uppercase; font-size: 0.75rem; padding: 12px 15px; }
         .nav-link.active { color: var(--primary-blue) !important; background: transparent !important; border-bottom: 3px solid var(--primary-blue) !important; }
 
-        /* Cards de Membro */
-        .member-card { 
-            background-color: var(--card-bg); 
-            border: 1px solid #333; 
-            margin: 8px 12px; 
-            border-radius: 10px;
-            padding: 10px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .member-info { flex: 1; margin-right: 10px; overflow: hidden; min-width: 0; }
+        .member-card { background-color: var(--card-bg); border: 1px solid #333; margin: 8px 12px; border-radius: 10px; padding: 10px 10px; display: flex; justify-content: space-between; align-items: center; }
+        .member-info { flex: 1; margin-right: 5px; overflow: hidden; min-width: 0; }
         .member-name { font-size: 0.95rem; font-weight: bold; color: var(--text-white); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
-        /* Tags de Grupo e Função */
         .tag-container { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 4px; }
-        .badge-grupo { background-color: var(--accent-yellow); color: #000; font-size: 0.65rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
-        .badge-funcao { font-size: 0.65rem; color: var(--primary-blue); text-transform: uppercase; border: 1px solid var(--primary-blue); padding: 1px 5px; border-radius: 4px; font-weight: bold; }
+        .badge-grupo { background-color: var(--warning-yellow); color: #000; font-size: 0.6rem; font-weight: bold; padding: 2px 5px; border-radius: 4px; text-transform: uppercase; }
+        .badge-funcao { font-size: 0.6rem; color: var(--primary-blue); text-transform: uppercase; border: 1px solid var(--primary-blue); padding: 1px 4px; border-radius: 4px; font-weight: bold; }
 
-        /* Botões Compactos P/F */
-        .btn-call { width: 45px; height: 38px; border: 1px solid #444; background: transparent; font-weight: bold; transition: 0.2s; }
+        .btn-call { width: 40px; height: 38px; border: 1px solid #444; background: transparent; font-weight: bold; font-size: 0.85rem; transition: 0.2s; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .btn-p { color: var(--primary-blue); border-color: var(--primary-blue); border-radius: 6px 0 0 6px; }
-        .btn-f { color: var(--danger-red); border-color: var(--danger-red); border-radius: 0 6px 6px 0; }
-        .btn-p.active { background: var(--primary-blue); color: white; }
-        .btn-f.active { background: var(--danger-red); color: white; }
+        .btn-f { color: var(--danger-red); border-color: var(--danger-red); border-radius: 0; border-left: none; border-right: none; }
+        .btn-fj { color: var(--warning-yellow); border-color: var(--warning-yellow); border-radius: 0 6px 6px 0; }
+        .btn-p.active { background-color: var(--primary-blue) !important; color: white !important; }
+        .btn-f.active { background-color: var(--danger-red) !important; color: white !important; }
+        .btn-fj.active { background-color: var(--warning-yellow) !important; color: black !important; }
 
-        /* Botão Editar */
-        .btn-edit { color: #555; border: none; background: transparent; font-size: 1.1rem; margin-right: 8px; padding: 0; }
+        .btn-edit { color: #555; border: none; background: transparent; font-size: 1.1rem; margin-right: 5px; padding: 0; cursor: pointer; }
+        .btn-float { position: fixed; bottom: 85px; right: 20px; width: 55px; height: 55px; border-radius: 50%; background: var(--primary-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: none; z-index: 1000; }
 
-        /* Botão Flutuante ADD */
-        .btn-float { position: fixed; bottom: 85px; right: 20px; width: 55px; height: 55px; border-radius: 50%; background: var(--primary-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: none; z-index: 1000; box-shadow: 0 4px 10px rgba(13, 110, 253, 0.4); }
-
-        /* --- AJUSTE DE VISIBILIDADE NOS INPUTS --- */
+        /* --- CORREÇÃO DE VISIBILIDADE DOS CAMPOS --- */
         .modal-content { background-color: #121212; border: 1px solid var(--primary-blue); }
         .form-control-custom { 
-            color: #ffffff !important;           /* Letra Branca ao digitar */
-            background-color: #1a1a1a !important; /* Fundo Cinza Escuro */
-            border: 1px solid #444 !important;    /* Borda Visível */
+            color: #ffffff !important;           /* Texto branco */
+            background-color: #2a2a2a !important; /* Fundo cinza visível */
+            border: 1px solid #555 !important; 
         }
-        .form-control-custom:focus {
-            background-color: #222 !important;
-            border-color: var(--primary-blue) !important;
-            color: #ffffff !important;
-            outline: none;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-        }
-        .form-control-custom::placeholder { color: #888 !important; }
+        .form-control-custom:focus { border-color: var(--primary-blue) !important; outline: none; background-color: #333 !important; }
+        .form-control-custom::placeholder { color: #aaa !important; }
 
         .navbar-custom { background-color: #000 !important; border-top: 1px solid #222; }
     </style>
@@ -86,13 +63,9 @@
     <p class="small text-white-50 m-0">LISTA DE PRESENÇA</p>
 </div>
 
-<ul class="nav nav-tabs sticky-top" id="tabChamada">
-    <li class="nav-item">
-        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#comFuncao">Com Função</button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#semFuncao">Geral (Sem Função)</button>
-    </li>
+<ul class="nav nav-tabs sticky-top">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#comFuncao">Com Função</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#semFuncao">Geral</button></li>
 </ul>
 
 <div class="tab-content">
@@ -106,18 +79,12 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header border-secondary">
-                <h5 class="modal-title text-yellow">Cadastrar Novo Membro</h5>
+                <h5 class="modal-title text-warning">Novo Membro</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-3">
-                    <label class="text-white small fw-bold mb-1">Nome Completo:</label>
-                    <input type="text" id="novoNomeMembro" class="form-control form-control-custom" placeholder="Nome do Membro">
-                </div>
-                <div class="mb-3">
-                    <label class="text-white small fw-bold mb-1">Grupo:</label>
-                    <input type="text" id="novoGrupoMembro" class="form-control form-control-custom" placeholder="Ex: GRUPO 1">
-                </div>
+                <input type="text" id="novoNomeMembro" class="form-control form-control-custom mb-3" placeholder="Nome Completo">
+                <input type="text" id="novoGrupoMembro" class="form-control form-control-custom mb-3" placeholder="Grupo (Ex: GRUPO 1)">
                 <button id="btnSalvarNovoMembro" class="btn btn-primary w-100 fw-bold">SALVAR NO BANCO</button>
             </div>
         </div>
@@ -128,15 +95,24 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header border-secondary">
-                <h5 class="modal-title text-yellow" id="editNomeMembro">Gerenciar Membro</h5>
+                <h5 class="modal-title text-warning" id="editNomeMembro">Gerenciar Registro</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div id="containerTagsFuncao" class="mb-3 d-flex flex-wrap"></div>
-                <div class="input-group mb-4">
+                <label class="text-white-50 small mb-1">Mudar Grupo:</label>
+                <div class="input-group mb-3">
+                    <input type="text" id="inputMudarGrupo" class="form-control form-control-custom" placeholder="Ex: GRUPO 2">
+                    <button id="btnSalvarGrupo" class="btn btn-success btn-sm">SALVAR</button>
+                </div>
+
+                <label class="text-white-50 small mb-1">Adicionar Função:</label>
+                <div class="input-group mb-3">
                     <input type="text" id="inputNovaFuncao" class="form-control form-control-custom" placeholder="EX: SOM, OBREIRO...">
                     <button id="btnAddFuncao" class="btn btn-primary">ADD</button>
                 </div>
+                
+                <div id="containerTagsFuncao" class="mb-3 d-flex flex-wrap"></div>
+
                 <hr class="border-secondary">
                 <button id="btnLimparChamadaDia" class="btn btn-outline-warning btn-sm w-100 mb-2">LIMPAR CHAMADA DE HOJE</button>
                 <button id="btnExcluirMembro" class="btn btn-outline-danger btn-sm w-100">EXCLUIR DEFINITIVAMENTE</button>
@@ -154,7 +130,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, doc, setDoc, updateDoc, deleteDoc, arrayUnion, arrayRemove, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, doc, setDoc, updateDoc, deleteDoc, arrayUnion, arrayRemove, query, orderBy, getDocs, where, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCEMfA8_6LAbvanYwXE_6KcO0WQWoI5nSQ",
@@ -169,18 +145,24 @@
     const db = getFirestore(app);
 
     const hojeISO = new Date().toISOString().split('T')[0];
-    const dias = ["Domingo", "Segunda-Feira", "Terça-Feira", "Quarta-Feira", "Quinta-Feira", "Sexta-Feira", "Sábado"];
-    document.getElementById('exibirData').innerText = new Date().toLocaleDateString('pt-BR') + " - " + dias[new Date().getDay()];
+    const diasSemanas = ["Dom", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+    document.getElementById('exibirData').innerText = new Date().toLocaleDateString('pt-BR') + " - " + diasSemanas[new Date().getDay()];
 
     let membroSendoEditado = "";
 
-    onSnapshot(query(collection(db, "membros"), orderBy("nome", "asc")), (snapshot) => {
+    onSnapshot(query(collection(db, "membros"), orderBy("nome", "asc")), async (membroSnapshot) => {
+        const chamadaHojeQuery = query(collection(db, "chamada_diaria"), where("data", "==", hojeISO));
+        const chamadaHojeSnap = await getDocs(chamadaHojeQuery);
+        let chamadasFeitas = {};
+        chamadaHojeSnap.forEach(d => { chamadasFeitas[d.data().nome] = d.data().status; });
+
         const listaCom = document.getElementById('listaComFuncao');
         const listaSem = document.getElementById('listaSemFuncao');
         listaCom.innerHTML = ""; listaSem.innerHTML = "";
 
-        snapshot.forEach(docSnap => {
+        membroSnapshot.forEach(docSnap => {
             const m = docSnap.data();
+            const statusAtual = chamadasFeitas[m.nome] || "";
             const temFun = m.funcoes && m.funcoes.length > 0;
             const tagGrupo = m.grupo ? `<span class="badge-grupo">${m.grupo}</span>` : '';
             const tagsFuncao = temFun ? m.funcoes.map(f => `<span class="badge-funcao">${f}</span>`).join('') : '';
@@ -192,9 +174,10 @@
                         <span class="member-name">${m.nome}</span>
                         <div class="tag-container">${tagGrupo}${tagsFuncao}</div>
                     </div>
-                    <div class="btn-group" data-id="${m.nome}">
-                        <button onclick="fazerChamada('${m.nome}', 'P')" class="btn-call btn-p">P</button>
-                        <button onclick="fazerChamada('${m.nome}', 'F')" class="btn-call btn-f">F</button>
+                    <div class="d-flex" id="group-${m.nome}">
+                        <button onclick="fazerChamada('${m.nome}', 'P')" class="btn-call btn-p ${statusAtual === 'Presente' ? 'active' : ''}">P</button>
+                        <button onclick="fazerChamada('${m.nome}', 'F')" class="btn-call btn-f ${statusAtual === 'Ausente' ? 'active' : ''}">F</button>
+                        <button onclick="fazerChamada('${m.nome}', 'FJ')" class="btn-call btn-fj ${statusAtual === 'Justificada' ? 'active' : ''}">FJ</button>
                     </div>
                 </div>`;
             
@@ -203,42 +186,49 @@
         });
     });
 
-    window.abrirEditor = (nome) => {
+    window.abrirEditor = async (nome) => {
         membroSendoEditado = nome;
         document.getElementById('editNomeMembro').innerText = nome;
         const modal = new bootstrap.Modal(document.getElementById('modalEditarMembro'));
+        
+        const mSnap = await getDoc(doc(db, "membros", nome));
+        if(mSnap.exists()) {
+            document.getElementById('inputMudarGrupo').value = mSnap.data().grupo || "";
+        }
+
         onSnapshot(doc(db, "membros", nome), (docSnap) => {
             if(!docSnap.exists()) return;
             const tagsDiv = document.getElementById('containerTagsFuncao');
             tagsDiv.innerHTML = "";
             (docSnap.data().funcoes || []).forEach(f => {
-                tagsDiv.innerHTML += `<span class="badge-funcao m-1">${f} <i class="bi bi-x-circle text-danger ms-1" onclick="removerFuncao('${f}')"></i></span>`;
+                tagsDiv.innerHTML += `<span class="badge-funcao m-1">${f} <i class="bi bi-x-circle text-danger ms-1" style="cursor:pointer" onclick="removerFuncao('${f}')"></i></span>`;
             });
         });
         modal.show();
     };
 
-    window.fazerChamada = async (nome, status) => {
-        await setDoc(doc(db, "chamada_diaria", `${hojeISO}_${nome}`), {
-            nome, data: hojeISO, status: status === 'P' ? 'Presente' : 'Ausente'
-        });
+    document.getElementById('btnSalvarGrupo').onclick = async () => {
+        const novoG = document.getElementById('inputMudarGrupo').value.trim().toUpperCase();
+        await updateDoc(doc(db, "membros", membroSendoEditado), { grupo: novoG });
+        alert("Grupo atualizado!");
     };
 
-    document.getElementById('btnSalvarNovoMembro').onclick = async () => {
-        const nome = document.getElementById('novoNomeMembro').value.trim().toUpperCase();
-        const grupo = document.getElementById('novoGrupoMembro').value.trim().toUpperCase();
-        if(!nome) return;
-        await setDoc(doc(db, "membros", nome), { nome, grupo, funcoes: [] });
-        bootstrap.Modal.getInstance(document.getElementById('modalNovoMembro')).hide();
+    window.fazerChamada = async (nome, statusAbv) => {
+        let statusFinal = statusAbv === 'P' ? "Presente" : (statusAbv === 'F' ? "Ausente" : "Justificada");
+        await setDoc(doc(db, "chamada_diaria", `${hojeISO}_${nome}`), { nome, data: hojeISO, status: statusFinal });
+        const container = document.getElementById(`group-${nome}`);
+        container.querySelector('.btn-p').classList.toggle('active', statusAbv === 'P');
+        container.querySelector('.btn-f').classList.toggle('active', statusAbv === 'F');
+        container.querySelector('.btn-fj').classList.toggle('active', statusAbv === 'FJ');
     };
 
     document.getElementById('btnLimparChamadaDia').onclick = async () => {
-        await deleteDoc(doc(db, "chamada_diaria", `${hojeISO}_${membroSendoEditado}`));
-        bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
-    };
-
-    document.getElementById('btnExcluirMembro').onclick = async () => {
-        if(confirm("Excluir definitivamente?")) await deleteDoc(doc(db, "membros", membroSendoEditado));
+        if(confirm(`Limpar chamada?`)) {
+            await deleteDoc(doc(db, "chamada_diaria", `${hojeISO}_${membroSendoEditado}`));
+            const container = document.getElementById(`group-${membroSendoEditado}`);
+            if(container) container.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
+            bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
+        }
     };
 
     document.getElementById('btnAddFuncao').onclick = async () => {
@@ -250,6 +240,21 @@
 
     window.removerFuncao = async (f) => {
         await updateDoc(doc(db, "membros", membroSendoEditado), { funcoes: arrayRemove(f) });
+    };
+
+    document.getElementById('btnSalvarNovoMembro').onclick = async () => {
+        const nome = document.getElementById('novoNomeMembro').value.trim().toUpperCase();
+        const grupo = document.getElementById('novoGrupoMembro').value.trim().toUpperCase();
+        if(!nome) return;
+        await setDoc(doc(db, "membros", nome), { nome, grupo, funcoes: [] });
+        bootstrap.Modal.getInstance(document.getElementById('modalNovoMembro')).hide();
+    };
+
+    document.getElementById('btnExcluirMembro').onclick = async () => {
+        if(confirm(`Excluir ${membroSendoEditado}?`)) {
+            await deleteDoc(doc(db, "membros", membroSendoEditado));
+            bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
+        }
     };
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
