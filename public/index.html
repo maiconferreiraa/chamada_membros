@@ -17,8 +17,13 @@
         }
 
         body { background-color: var(--bg-dark); color: var(--text-white); padding-bottom: 90px; font-family: sans-serif; }
+        
         .header-data { background: #1a1a1a; padding: 15px; border-bottom: 2px solid var(--primary-blue); text-align: center; }
         .data-texto { font-size: 1.1rem; font-weight: bold; color: var(--warning-yellow); margin: 0; }
+
+        /* Estilo do Aviso de Chamada Já Realizada */
+        #avisoChamadaFeita { display: none; }
+        .alert-custom { background: rgba(255, 202, 40, 0.1); color: var(--warning-yellow); border: 1px solid var(--warning-yellow); font-size: 0.85rem; border-radius: 8px; }
 
         .nav-tabs { border-bottom: 1px solid #333; justify-content: center; background: #000; }
         .nav-link { color: #888 !important; border: none !important; font-weight: bold; text-transform: uppercase; font-size: 0.75rem; padding: 12px 15px; }
@@ -36,6 +41,7 @@
         .btn-p { color: var(--primary-blue); border-color: var(--primary-blue); border-radius: 6px 0 0 6px; }
         .btn-f { color: var(--danger-red); border-color: var(--danger-red); border-radius: 0; border-left: none; border-right: none; }
         .btn-fj { color: var(--warning-yellow); border-color: var(--warning-yellow); border-radius: 0 6px 6px 0; }
+        
         .btn-p.active { background-color: var(--primary-blue) !important; color: white !important; }
         .btn-f.active { background-color: var(--danger-red) !important; color: white !important; }
         .btn-fj.active { background-color: var(--warning-yellow) !important; color: black !important; }
@@ -43,13 +49,8 @@
         .btn-edit { color: #555; border: none; background: transparent; font-size: 1.1rem; margin-right: 5px; padding: 0; cursor: pointer; }
         .btn-float { position: fixed; bottom: 85px; right: 20px; width: 55px; height: 55px; border-radius: 50%; background: var(--primary-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: none; z-index: 1000; }
 
-        /* --- CORREÇÃO DE VISIBILIDADE DOS CAMPOS --- */
         .modal-content { background-color: #121212; border: 1px solid var(--primary-blue); }
-        .form-control-custom { 
-            color: #ffffff !important;           /* Texto branco */
-            background-color: #2a2a2a !important; /* Fundo cinza visível */
-            border: 1px solid #555 !important; 
-        }
+        .form-control-custom { color: #ffffff !important; background-color: #2a2a2a !important; border: 1px solid #555 !important; }
         .form-control-custom:focus { border-color: var(--primary-blue) !important; outline: none; background-color: #333 !important; }
         .form-control-custom::placeholder { color: #aaa !important; }
 
@@ -61,6 +62,13 @@
 <div class="header-data">
     <p id="exibirData" class="data-texto"></p>
     <p class="small text-white-50 m-0">LISTA DE PRESENÇA</p>
+</div>
+
+<div id="avisoChamadaFeita" class="container mt-2">
+    <div class="alert alert-custom text-center shadow-sm">
+        <i class="bi bi-info-circle-fill me-2"></i>
+        A chamada de hoje já foi iniciada por outra pessoa.
+    </div>
 </div>
 
 <ul class="nav nav-tabs sticky-top">
@@ -104,15 +112,12 @@
                     <input type="text" id="inputMudarGrupo" class="form-control form-control-custom" placeholder="Ex: GRUPO 2">
                     <button id="btnSalvarGrupo" class="btn btn-success btn-sm">SALVAR</button>
                 </div>
-
                 <label class="text-white-50 small mb-1">Adicionar Função:</label>
                 <div class="input-group mb-3">
                     <input type="text" id="inputNovaFuncao" class="form-control form-control-custom" placeholder="EX: SOM, OBREIRO...">
                     <button id="btnAddFuncao" class="btn btn-primary">ADD</button>
                 </div>
-                
                 <div id="containerTagsFuncao" class="mb-3 d-flex flex-wrap"></div>
-
                 <hr class="border-secondary">
                 <button id="btnLimparChamadaDia" class="btn btn-outline-warning btn-sm w-100 mb-2">LIMPAR CHAMADA DE HOJE</button>
                 <button id="btnExcluirMembro" class="btn btn-outline-danger btn-sm w-100">EXCLUIR DEFINITIVAMENTE</button>
@@ -150,7 +155,14 @@
 
     let membroSendoEditado = "";
 
+    async function verificarStatusGeral() {
+        const q = query(collection(db, "chamada_diaria"), where("data", "==", hojeISO));
+        const snap = await getDocs(q);
+        document.getElementById('avisoChamadaFeita').style.display = snap.empty ? 'none' : 'block';
+    }
+
     onSnapshot(query(collection(db, "membros"), orderBy("nome", "asc")), async (membroSnapshot) => {
+        verificarStatusGeral();
         const chamadaHojeQuery = query(collection(db, "chamada_diaria"), where("data", "==", hojeISO));
         const chamadaHojeSnap = await getDocs(chamadaHojeQuery);
         let chamadasFeitas = {};
@@ -180,7 +192,6 @@
                         <button onclick="fazerChamada('${m.nome}', 'FJ')" class="btn-call btn-fj ${statusAtual === 'Justificada' ? 'active' : ''}">FJ</button>
                     </div>
                 </div>`;
-            
             if(temFun) listaCom.innerHTML += html;
             else listaSem.innerHTML += html;
         });
@@ -190,12 +201,8 @@
         membroSendoEditado = nome;
         document.getElementById('editNomeMembro').innerText = nome;
         const modal = new bootstrap.Modal(document.getElementById('modalEditarMembro'));
-        
         const mSnap = await getDoc(doc(db, "membros", nome));
-        if(mSnap.exists()) {
-            document.getElementById('inputMudarGrupo').value = mSnap.data().grupo || "";
-        }
-
+        if(mSnap.exists()) document.getElementById('inputMudarGrupo').value = mSnap.data().grupo || "";
         onSnapshot(doc(db, "membros", nome), (docSnap) => {
             if(!docSnap.exists()) return;
             const tagsDiv = document.getElementById('containerTagsFuncao');
@@ -207,24 +214,25 @@
         modal.show();
     };
 
-    document.getElementById('btnSalvarGrupo').onclick = async () => {
-        const novoG = document.getElementById('inputMudarGrupo').value.trim().toUpperCase();
-        await updateDoc(doc(db, "membros", membroSendoEditado), { grupo: novoG });
-        alert("Grupo atualizado!");
-    };
-
     window.fazerChamada = async (nome, statusAbv) => {
         let statusFinal = statusAbv === 'P' ? "Presente" : (statusAbv === 'F' ? "Ausente" : "Justificada");
         await setDoc(doc(db, "chamada_diaria", `${hojeISO}_${nome}`), { nome, data: hojeISO, status: statusFinal });
+        document.getElementById('avisoChamadaFeita').style.display = 'block';
         const container = document.getElementById(`group-${nome}`);
         container.querySelector('.btn-p').classList.toggle('active', statusAbv === 'P');
         container.querySelector('.btn-f').classList.toggle('active', statusAbv === 'F');
         container.querySelector('.btn-fj').classList.toggle('active', statusAbv === 'FJ');
     };
 
+    document.getElementById('btnSalvarGrupo').onclick = async () => {
+        const novoG = document.getElementById('inputMudarGrupo').value.trim().toUpperCase();
+        await updateDoc(doc(db, "membros", membroSendoEditado), { grupo: novoG });
+    };
+
     document.getElementById('btnLimparChamadaDia').onclick = async () => {
-        if(confirm(`Limpar chamada?`)) {
+        if(confirm(`Limpar chamada de hoje?`)) {
             await deleteDoc(doc(db, "chamada_diaria", `${hojeISO}_${membroSendoEditado}`));
+            verificarStatusGeral();
             const container = document.getElementById(`group-${membroSendoEditado}`);
             if(container) container.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
             bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
@@ -251,7 +259,7 @@
     };
 
     document.getElementById('btnExcluirMembro').onclick = async () => {
-        if(confirm(`Excluir ${membroSendoEditado}?`)) {
+        if(confirm(`Excluir definitivamente?`)) {
             await deleteDoc(doc(db, "membros", membroSendoEditado));
             bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
         }

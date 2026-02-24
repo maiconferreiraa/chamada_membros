@@ -21,7 +21,6 @@
         .td-info { color: #0d6efd; font-size: 0.75rem; text-transform: uppercase; font-weight: bold; }
         .badge-grupo { background-color: #333; color: #ffca28; padding: 1px 4px; border-radius: 3px; font-size: 0.65rem; margin-left: 5px; }
         
-        /* Ajuste para Celular: Tags de dias agora quebram linha corretamente */
         .dia-tag { 
             display: inline-flex; 
             background: #2a2a2a; 
@@ -48,15 +47,9 @@
             .td-info { color: #333 !important; }
             .badge-grupo { border: 1px solid #000; color: #000; background: none; }
             .dia-tag { border: 1px solid #000; background: none; color: #000; }
-            .text-blue, .text-red { font-weight: bold; color: #000 !important; }
+            .text-blue, .text-red, .text-yellow { font-weight: bold; color: #000 !important; }
             .sig-box { display: flex; justify-content: space-around; margin-top: 50px; }
             .sig-line { border-top: 1px solid #000; width: 40%; text-align: center; font-size: 0.7rem; }
-        }
-
-        /* Ajuste de largura da coluna no celular */
-        @media (max-width: 576px) {
-            .table th:first-child, .table td:first-child { width: 40%; }
-            .td-nome { font-size: 0.8rem; }
         }
     </style>
 </head>
@@ -82,7 +75,7 @@
         <div class="row g-2">
             <div class="col-12 mb-2">
                 <select id="selectMembro" class="form-select bg-dark text-white border-secondary">
-                    <option value="">RELATÓRIO GERAL (Com Função)</option>
+                    <option value="">RELATÓRIO GERAL (Membros com Função)</option>
                 </select>
             </div>
             <div class="col-6">
@@ -109,7 +102,7 @@
 
     <div id="resultadoRelatorio">
         <div id="listaHistorico" class="table-responsive">
-            <p class="text-center text-white-50 p-5">Aguardando seleção...</p>
+            <p class="text-center text-white-50 p-5">Aguardando geração do relatório...</p>
         </div>
     </div>
 
@@ -173,12 +166,21 @@
             const [pAno, pMes] = p.data.split('-');
             if (pMes === mes && pAno === ano) regs.push(p);
         });
+
+        if (regs.length === 0) {
+            listaDiv.innerHTML = `<p class="text-center text-white-50 p-5">Nenhum registro encontrado para este membro no período selecionado.</p>`;
+            return;
+        }
+
         regs.sort((a,b) => b.data.localeCompare(a.data));
 
         let html = `<div class="mb-2"><span class="td-nome">${nome}</span><span class="td-info">${funs}</span> <span class="badge-grupo">${grupo}</span></div>`;
         html += `<table class="table table-dark table-bordered"><thead><tr><th>Data</th><th>Status</th></tr></thead><tbody>`;
         regs.forEach(p => {
-            const cor = p.status === 'Presente' ? 'text-blue' : 'text-red';
+            let cor = 'text-white';
+            if(p.status === 'Presente') cor = 'text-blue';
+            if(p.status === 'Ausente') cor = 'text-red';
+            if(p.status === 'Justificada') cor = 'text-yellow';
             html += `<tr><td>${p.data.split('-').reverse().join('/')}</td><td class="${cor} fw-bold">${p.status.toUpperCase()}</td></tr>`;
         });
         listaDiv.innerHTML = html + "</tbody></table>";
@@ -188,7 +190,7 @@
         const mes = document.getElementById('selectMes').value;
         const ano = document.getElementById('selectAno').value;
         const listaDiv = document.getElementById('listaHistorico');
-        listaDiv.innerHTML = 'Carregando...';
+        listaDiv.innerHTML = 'Gerando relatório...';
 
         const qP = await getDocs(collection(db, "chamada_diaria"));
         const qM = await getDocs(query(collection(db, "membros"), orderBy("nome", "asc")));
@@ -199,21 +201,32 @@
             const [pAno, pMes] = p.data.split('-');
             if (pMes === mes && pAno === ano) {
                 if (!registros[p.nome]) registros[p.nome] = [];
-                registros[p.nome].push({ dia: p.data.split('-')[2], status: p.status === 'Presente' ? 'P' : 'F' });
+                registros[p.nome].push({ dia: p.data.split('-')[2], status: p.status });
             }
         });
 
-        let html = `<table class="table table-dark table-bordered"><thead><tr><th>Membro / Grupo / Função</th><th>Dias</th></tr></thead><tbody>`;
+        let html = `<table class="table table-dark table-bordered"><thead><tr><th>Membro / Grupo / Função</th><th>Histórico</th></tr></thead><tbody>`;
         let count = 0;
+
         qM.forEach(mDoc => {
             const m = mDoc.data();
-            if (m.funcoes && m.funcoes.length > 0) {
+            const lista = registros[m.nome] || [];
+
+            // REGRAS DE EXIBIÇÃO:
+            // 1. Deve ter função cadastrada
+            // 2. Deve ter registro no mês (Não aparece se estiver limpo)
+            if (m.funcoes && m.funcoes.length > 0 && lista.length > 0) {
                 count++;
-                const lista = (registros[m.nome] || []).sort((a,b) => a.dia - b.dia);
+                lista.sort((a,b) => a.dia - b.dia);
                 let tags = "";
                 lista.forEach(d => {
-                    const cor = d.status === 'P' ? 'text-blue' : 'text-red';
-                    tags += `<span class="dia-tag"><b class="${cor}">${d.status}</b>${d.dia}</span>`;
+                    let cor = 'text-white';
+                    let abrev = 'P';
+                    if(d.status === 'Presente') { cor = 'text-blue'; abrev = 'P'; }
+                    if(d.status === 'Ausente') { cor = 'text-red'; abrev = 'F'; }
+                    if(d.status === 'Justificada') { cor = 'text-yellow'; abrev = 'FJ'; }
+                    
+                    tags += `<span class="dia-tag"><b class="${cor}">${abrev}</b> ${d.dia}</span>`;
                 });
                 html += `<tr>
                     <td>
@@ -224,7 +237,12 @@
                 </tr>`;
             }
         });
-        listaDiv.innerHTML = html + "</tbody></table>";
+
+        if (count === 0) {
+            listaDiv.innerHTML = `<p class="text-center text-white-50 p-5">Nenhum membro com função possui registros para este mês.</p>`;
+        } else {
+            listaDiv.innerHTML = html + "</tbody></table>";
+        }
     };
 
     carregarMembros();
