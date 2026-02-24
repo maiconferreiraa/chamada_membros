@@ -10,6 +10,7 @@
         :root {
             --bg-dark: #000000;
             --card-bg: #121212;
+            --modal-claro: #2c2c2c; /* Cinza chumbo bem mais claro que o fundo */
             --primary-blue: #0d6efd;
             --danger-red: #ff4444;
             --warning-yellow: #ffca28;
@@ -21,7 +22,6 @@
         .header-data { background: #1a1a1a; padding: 15px; border-bottom: 2px solid var(--primary-blue); text-align: center; }
         .data-texto { font-size: 1.1rem; font-weight: bold; color: var(--warning-yellow); margin: 0; }
 
-        /* Estilo do Aviso de Chamada Já Realizada */
         #avisoChamadaFeita { display: none; }
         .alert-custom { background: rgba(255, 202, 40, 0.1); color: var(--warning-yellow); border: 1px solid var(--warning-yellow); font-size: 0.85rem; border-radius: 8px; }
 
@@ -29,7 +29,27 @@
         .nav-link { color: #888 !important; border: none !important; font-weight: bold; text-transform: uppercase; font-size: 0.75rem; padding: 12px 15px; }
         .nav-link.active { color: var(--primary-blue) !important; background: transparent !important; border-bottom: 3px solid var(--primary-blue) !important; }
 
-        .member-card { background-color: var(--card-bg); border: 1px solid #333; margin: 8px 12px; border-radius: 10px; padding: 10px 10px; display: flex; justify-content: space-between; align-items: center; }
+        /* --- ESTILO DOS MODAIS (FORÇANDO COR CLARA) --- */
+        .modal-content { 
+            background-color: var(--modal-claro) !important; 
+            border: 2px solid var(--primary-blue) !important; 
+            border-radius: 15px !important;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5) !important;
+        }
+        .modal-header { border-bottom: 1px solid #444 !important; }
+        .modal-footer { border-top: 1px solid #444 !important; }
+        
+        .form-control-custom { 
+            color: #ffffff !important; 
+            background-color: #3d3d3d !important; 
+            border: 1px solid #555 !important; 
+        }
+        .form-control-custom:focus { 
+            background-color: #444 !important; 
+            border-color: var(--primary-blue) !important;
+        }
+
+        .member-card { background-color: var(--card-bg); border: 1px solid #333; margin: 8px 12px; border-radius: 10px; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
         .member-info { flex: 1; margin-right: 5px; overflow: hidden; min-width: 0; }
         .member-name { font-size: 0.95rem; font-weight: bold; color: var(--text-white); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
@@ -37,23 +57,17 @@
         .badge-grupo { background-color: var(--warning-yellow); color: #000; font-size: 0.6rem; font-weight: bold; padding: 2px 5px; border-radius: 4px; text-transform: uppercase; }
         .badge-funcao { font-size: 0.6rem; color: var(--primary-blue); text-transform: uppercase; border: 1px solid var(--primary-blue); padding: 1px 4px; border-radius: 4px; font-weight: bold; }
 
-        .btn-call { width: 40px; height: 38px; border: 1px solid #444; background: transparent; font-weight: bold; font-size: 0.85rem; transition: 0.2s; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .btn-call { width: 40px; height: 38px; border: 1px solid #444; background: transparent; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .btn-p { color: var(--primary-blue); border-color: var(--primary-blue); border-radius: 6px 0 0 6px; }
-        .btn-f { color: var(--danger-red); border-color: var(--danger-red); border-radius: 0; border-left: none; border-right: none; }
+        .btn-f { color: var(--danger-red); border-color: var(--danger-red); border-radius: 0; }
         .btn-fj { color: var(--warning-yellow); border-color: var(--warning-yellow); border-radius: 0 6px 6px 0; }
         
         .btn-p.active { background-color: var(--primary-blue) !important; color: white !important; }
         .btn-f.active { background-color: var(--danger-red) !important; color: white !important; }
         .btn-fj.active { background-color: var(--warning-yellow) !important; color: black !important; }
 
-        .btn-edit { color: #555; border: none; background: transparent; font-size: 1.1rem; margin-right: 5px; padding: 0; cursor: pointer; }
+        .btn-edit { color: #555; border: none; background: transparent; font-size: 1.1rem; margin-right: 5px; cursor: pointer; }
         .btn-float { position: fixed; bottom: 85px; right: 20px; width: 55px; height: 55px; border-radius: 50%; background: var(--primary-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: none; z-index: 1000; }
-
-        .modal-content { background-color: #121212; border: 1px solid var(--primary-blue); }
-        .form-control-custom { color: #ffffff !important; background-color: #2a2a2a !important; border: 1px solid #555 !important; }
-        .form-control-custom:focus { border-color: var(--primary-blue) !important; outline: none; background-color: #333 !important; }
-        .form-control-custom::placeholder { color: #aaa !important; }
-
         .navbar-custom { background-color: #000 !important; border-top: 1px solid #222; }
     </style>
 </head>
@@ -61,13 +75,13 @@
 
 <div class="header-data">
     <p id="exibirData" class="data-texto"></p>
-    <p class="small text-white-50 m-0">LISTA DE PRESENÇa - MEMBROS COM FUNÇÃO</p>
+    <p class="small text-white-50 m-0">LISTA DE PRESENÇA - MEMBROS COM FUNÇÃO</p>
 </div>
 
 <div id="avisoChamadaFeita" class="container mt-2">
     <div class="alert alert-custom text-center shadow-sm">
         <i class="bi bi-info-circle-fill me-2"></i>
-        A chamada de hoje já foi iniciada por outra pessoa.
+        A chamada de hoje já foi iniciada por <span id="nomeQuemIniciou" class="fw-bold text-white">...</span>
     </div>
 </div>
 
@@ -83,10 +97,25 @@
 
 <button class="btn-float shadow" data-bs-toggle="modal" data-bs-target="#modalNovoMembro"><i class="bi bi-person-plus-fill"></i></button>
 
+<div class="modal fade" id="modalIdentificacao" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-warning">Identificação para iniciar a Chamada</h5>
+            </div>
+            <div class="modal-body text-center">
+                <p class="small text-white-50">Digite seu nome para iniciar o registro da chamada.</p>
+                <input type="text" id="nomeOperador" class="form-control form-control-custom" placeholder="Digite seu Nome (Ex: MAICON)">
+                <button id="btnSalvarIdentificacao" class="btn btn-primary w-100 mt-4 fw-bold">ENTRAR NO SISTEMA</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="modalNovoMembro" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header border-secondary">
+            <div class="modal-header">
                 <h5 class="modal-title text-warning">Novo Membro</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -102,14 +131,14 @@
 <div class="modal fade" id="modalEditarMembro" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header border-secondary">
+            <div class="modal-header">
                 <h5 class="modal-title text-warning" id="editNomeMembro">Gerenciar Registro</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <label class="text-white-50 small mb-1">Mudar Grupo:</label>
                 <div class="input-group mb-3">
-                    <input type="text" id="inputMudarGrupo" class="form-control form-control-custom" placeholder="Ex: GRUPO 2">
+                    <input type="text" id="inputMudarGrupo" class="form-control form-control-custom">
                     <button id="btnSalvarGrupo" class="btn btn-success btn-sm">SALVAR</button>
                 </div>
                 <label class="text-white-50 small mb-1">Adicionar Função:</label>
@@ -133,6 +162,8 @@
     </div>
 </nav>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, onSnapshot, doc, setDoc, updateDoc, deleteDoc, arrayUnion, arrayRemove, query, orderBy, getDocs, where, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -154,15 +185,46 @@
     document.getElementById('exibirData').innerText = new Date().toLocaleDateString('pt-BR') + " - " + diasSemanas[new Date().getDay()];
 
     let membroSendoEditado = "";
+    let meuNome = localStorage.getItem('usuario_maranata');
+
+    function checkUser() {
+        if (!meuNome) {
+            const modalEl = document.getElementById('modalIdentificacao');
+            const modalInst = new bootstrap.Modal(modalEl);
+            modalInst.show();
+        }
+    }
+    
+    // Pequeno delay para garantir que o Bootstrap carregou
+    setTimeout(checkUser, 500);
+
+    document.getElementById('btnSalvarIdentificacao').onclick = () => {
+        const nomeInput = document.getElementById('nomeOperador').value.trim().toUpperCase();
+        if (nomeInput.length < 3) {
+            alert("Digite seu nome.");
+            return;
+        }
+        localStorage.setItem('usuario_maranata', nomeInput);
+        meuNome = nomeInput;
+        bootstrap.Modal.getInstance(document.getElementById('modalIdentificacao')).hide();
+    };
 
     async function verificarStatusGeral() {
         const q = query(collection(db, "chamada_diaria"), where("data", "==", hojeISO));
         const snap = await getDocs(q);
-        document.getElementById('avisoChamadaFeita').style.display = snap.empty ? 'none' : 'block';
+        const avisoDiv = document.getElementById('avisoChamadaFeita');
+        
+        if (!snap.empty) {
+            const operador = snap.docs[0].data().operador || "OUTRA PESSOA";
+            document.getElementById('nomeQuemIniciou').innerText = operador;
+            avisoDiv.style.display = 'block';
+        } else {
+            avisoDiv.style.display = 'none';
+        }
     }
 
     onSnapshot(query(collection(db, "membros"), orderBy("nome", "asc")), async (membroSnapshot) => {
-        verificarStatusGeral();
+        await verificarStatusGeral();
         const chamadaHojeQuery = query(collection(db, "chamada_diaria"), where("data", "==", hojeISO));
         const chamadaHojeSnap = await getDocs(chamadaHojeQuery);
         let chamadasFeitas = {};
@@ -197,46 +259,61 @@
         });
     });
 
+    window.fazerChamada = async (nomeMembro, statusAbv) => {
+        if (!meuNome) { checkUser(); return; }
+        let statusFinal = statusAbv === 'P' ? "Presente" : (statusAbv === 'F' ? "Ausente" : "Justificada");
+        
+        document.getElementById('nomeQuemIniciou').innerText = meuNome;
+        document.getElementById('avisoChamadaFeita').style.display = 'block';
+
+        await setDoc(doc(db, "chamada_diaria", `${hojeISO}_${nomeMembro}`), { 
+            nome: nomeMembro, 
+            data: hojeISO, 
+            status: statusFinal,
+            operador: meuNome 
+        });
+
+        const container = document.getElementById(`group-${nomeMembro}`);
+        container.querySelector('.btn-p').classList.toggle('active', statusAbv === 'P');
+        container.querySelector('.btn-f').classList.toggle('active', statusAbv === 'F');
+        container.querySelector('.btn-fj').classList.toggle('active', statusAbv === 'FJ');
+    };
+
+    document.getElementById('btnLimparChamadaDia').onclick = async () => {
+        if(confirm(`Limpar chamada de hoje para ${membroSendoEditado}?`)) {
+            document.getElementById('btnLimparChamadaDia').blur();
+            await deleteDoc(doc(db, "chamada_diaria", `${hojeISO}_${membroSendoEditado}`));
+            
+            const q = query(collection(db, "chamada_diaria"), where("data", "==", hojeISO));
+            const snap = await getDocs(q);
+            if(snap.empty) {
+                document.getElementById('avisoChamadaFeita').style.display = 'none';
+                localStorage.removeItem('usuario_maranata');
+                meuNome = null;
+                checkUser();
+            }
+            bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
+        }
+    };
+
     window.abrirEditor = async (nome) => {
         membroSendoEditado = nome;
         document.getElementById('editNomeMembro').innerText = nome;
         const modal = new bootstrap.Modal(document.getElementById('modalEditarMembro'));
         const mSnap = await getDoc(doc(db, "membros", nome));
         if(mSnap.exists()) document.getElementById('inputMudarGrupo').value = mSnap.data().grupo || "";
-        onSnapshot(doc(db, "membros", nome), (docSnap) => {
-            if(!docSnap.exists()) return;
-            const tagsDiv = document.getElementById('containerTagsFuncao');
-            tagsDiv.innerHTML = "";
-            (docSnap.data().funcoes || []).forEach(f => {
-                tagsDiv.innerHTML += `<span class="badge-funcao m-1">${f} <i class="bi bi-x-circle text-danger ms-1" style="cursor:pointer" onclick="removerFuncao('${f}')"></i></span>`;
-            });
+        
+        const tagsDiv = document.getElementById('containerTagsFuncao');
+        tagsDiv.innerHTML = "";
+        (mSnap.data().funcoes || []).forEach(f => {
+            tagsDiv.innerHTML += `<span class="badge-funcao m-1">${f} <i class="bi bi-x-circle text-danger ms-1" style="cursor:pointer" onclick="removerFuncao('${f}')"></i></span>`;
         });
         modal.show();
-    };
-
-    window.fazerChamada = async (nome, statusAbv) => {
-        let statusFinal = statusAbv === 'P' ? "Presente" : (statusAbv === 'F' ? "Ausente" : "Justificada");
-        await setDoc(doc(db, "chamada_diaria", `${hojeISO}_${nome}`), { nome, data: hojeISO, status: statusFinal });
-        document.getElementById('avisoChamadaFeita').style.display = 'block';
-        const container = document.getElementById(`group-${nome}`);
-        container.querySelector('.btn-p').classList.toggle('active', statusAbv === 'P');
-        container.querySelector('.btn-f').classList.toggle('active', statusAbv === 'F');
-        container.querySelector('.btn-fj').classList.toggle('active', statusAbv === 'FJ');
     };
 
     document.getElementById('btnSalvarGrupo').onclick = async () => {
         const novoG = document.getElementById('inputMudarGrupo').value.trim().toUpperCase();
         await updateDoc(doc(db, "membros", membroSendoEditado), { grupo: novoG });
-    };
-
-    document.getElementById('btnLimparChamadaDia').onclick = async () => {
-        if(confirm(`Limpar chamada de hoje?`)) {
-            await deleteDoc(doc(db, "chamada_diaria", `${hojeISO}_${membroSendoEditado}`));
-            verificarStatusGeral();
-            const container = document.getElementById(`group-${membroSendoEditado}`);
-            if(container) container.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
-            bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
-        }
     };
 
     document.getElementById('btnAddFuncao').onclick = async () => {
@@ -259,12 +336,11 @@
     };
 
     document.getElementById('btnExcluirMembro').onclick = async () => {
-        if(confirm(`Excluir definitivamente?`)) {
+        if(confirm(`Excluir definitivamente ${membroSendoEditado}?`)) {
             await deleteDoc(doc(db, "membros", membroSendoEditado));
             bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
         }
     };
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
