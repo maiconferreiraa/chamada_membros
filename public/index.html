@@ -15,6 +15,7 @@
             --danger-red: #ff4444;
             --warning-yellow: #ffca28;
             --text-white: #ffffff;
+            --input-bg: #3d3d3d; /* Cinza claro para os campos de digitação */
         }
 
         body { background-color: var(--bg-dark); color: var(--text-white); padding-bottom: 90px; font-family: sans-serif; }
@@ -29,8 +30,32 @@
         .nav-link { color: #888 !important; border: none !important; font-weight: bold; text-transform: uppercase; font-size: 0.75rem; padding: 12px 15px; }
         .nav-link.active { color: var(--primary-blue) !important; background: transparent !important; border-bottom: 3px solid var(--primary-blue) !important; }
 
-        .modal-content { background-color: var(--modal-claro) !important; border: 2px solid var(--primary-blue) !important; border-radius: 15px !important; }
-        .form-control-custom { color: #000 !important; background-color: #fff !important; border: 2px solid var(--primary-blue) !important; font-weight: bold; }
+        /* --- ESTILO DOS MODAIS E INPUTS --- */
+        .modal-content { 
+            background-color: var(--modal-claro) !important; 
+            border: 2px solid var(--primary-blue) !important; 
+            border-radius: 15px !important; 
+        }
+        
+        /* Forçando a cor cinza em todos os inputs de texto dentro dos modais */
+        .modal-body input.form-control, 
+        .form-control-custom { 
+            color: #ffffff !important; 
+            background-color: var(--input-bg) !important; 
+            border: 1px solid #555 !important; 
+            font-weight: normal;
+        }
+
+        .modal-body input.form-control:focus,
+        .form-control-custom:focus {
+            background-color: #4a4a4a !important;
+            border-color: var(--primary-blue) !important;
+            box-shadow: none !important;
+            color: #fff !important;
+        }
+
+        /* Placeholder mais visível no fundo escuro */
+        ::placeholder { color: #aaa !important; opacity: 1; }
 
         .member-card { background-color: var(--card-bg); border: 1px solid #333; margin: 8px 12px; border-radius: 10px; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
         .member-info { flex: 1; margin-right: 5px; overflow: hidden; min-width: 0; }
@@ -88,8 +113,8 @@
             </div>
             <div class="modal-body text-center">
                 <p class="small text-white-50">Seja o primeiro a iniciar a chamada hoje!</p>
-                <input type="text" id="nomeOperador" class="form-control form-control-custom" placeholder="Seu Nome">
-                <button id="btnSalvarIdentificacao" class="btn btn-primary w-100 mt-4 fw-bold">INICIAR CHAMADA</button>
+                <input type="text" id="nomeOperador" class="form-control mb-3" placeholder="Seu Nome">
+                <button id="btnSalvarIdentificacao" class="btn btn-primary w-100 mt-2 fw-bold">INICIAR CHAMADA</button>
             </div>
         </div>
     </div>
@@ -103,8 +128,8 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <input type="text" id="novoNomeMembro" class="form-control form-control-custom mb-3" placeholder="Nome Completo">
-                <input type="text" id="novoGrupoMembro" class="form-control form-control-custom mb-3" placeholder="Grupo (Ex: GRUPO 1)">
+                <input type="text" id="novoNomeMembro" class="form-control mb-3" placeholder="Nome Completo">
+                <input type="text" id="novoGrupoMembro" class="form-control mb-3" placeholder="Grupo (Ex: GRUPO 1)">
                 <button id="btnSalvarNovoMembro" class="btn btn-primary w-100 fw-bold">SALVAR NO BANCO</button>
             </div>
         </div>
@@ -121,12 +146,12 @@
             <div class="modal-body">
                 <label class="text-white-50 small mb-1">Mudar Grupo:</label>
                 <div class="input-group mb-3">
-                    <input type="text" id="inputMudarGrupo" class="form-control form-control-custom">
+                    <input type="text" id="inputMudarGrupo" class="form-control" placeholder="Ex: GRUPO 2">
                     <button id="btnSalvarGrupo" class="btn btn-success btn-sm">SALVAR</button>
                 </div>
-                <label class="text-white-50 small mb-1">Add Função:</label>
+                <label class="text-white-50 small mb-1">Adicionar Função:</label>
                 <div class="input-group mb-3">
-                    <input type="text" id="inputNovaFuncao" class="form-control form-control-custom">
+                    <input type="text" id="inputNovaFuncao" class="form-control" placeholder="EX: SOM, OBREIRO...">
                     <button id="btnAddFuncao" class="btn btn-primary">ADD</button>
                 </div>
                 <div id="containerTagsFuncao" class="mb-3 d-flex flex-wrap"></div>
@@ -170,14 +195,10 @@
     let meuNome = localStorage.getItem('usuario_maranata');
     let membroSendoEditado = "";
 
-    // FUNÇÃO PARA PINTAR OS BOTÕES (RESISTENTE A ATUALIZAÇÃO)
     async function colorirBotoes() {
         const q = query(collection(db, "chamada_diaria"), where("data", "==", hojeISO));
         const snap = await getDocs(q);
-        
-        // Limpa tudo antes de pintar
         document.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
-        
         snap.forEach(dDoc => {
             const d = dDoc.data();
             const container = document.getElementById(`group-${d.nome}`);
@@ -189,16 +210,13 @@
         });
     }
 
-    // MONITORAMENTO DA CHAMADA E OPERADOR
     onSnapshot(query(collection(db, "chamada_diaria"), where("data", "==", hojeISO)), (snap) => {
         const avisoDiv = document.getElementById('avisoChamadaFeita');
+        const spanOperador = document.getElementById('nomeQuemIniciou');
         if (!snap.empty) {
-            const operador = snap.docs[0].data().operador || "OUTRA PESSOA";
-            document.getElementById('nomeQuemIniciou').innerText = operador;
+            spanOperador.innerText = snap.docs[0].data().operador || "OUTRA PESSOA";
             avisoDiv.style.display = 'block';
-            
-            const modalEl = document.getElementById('modalIdentificacao');
-            const inst = bootstrap.Modal.getInstance(modalEl);
+            const inst = bootstrap.Modal.getInstance(document.getElementById('modalIdentificacao'));
             if(inst) inst.hide();
         } else {
             avisoDiv.style.display = 'none';
@@ -218,12 +236,10 @@
         bootstrap.Modal.getInstance(document.getElementById('modalIdentificacao')).hide();
     };
 
-    // LISTA DE MEMBROS
     onSnapshot(query(collection(db, "membros"), orderBy("nome", "asc")), (membroSnapshot) => {
         const listaCom = document.getElementById('listaComFuncao');
         const listaSem = document.getElementById('listaSemFuncao');
         listaCom.innerHTML = ""; listaSem.innerHTML = "";
-
         membroSnapshot.forEach(docSnap => {
             const m = docSnap.data();
             const html = `
@@ -245,8 +261,6 @@
             if(m.funcoes && m.funcoes.length > 0) listaCom.innerHTML += html;
             else listaSem.innerHTML += html;
         });
-        
-        // Após criar a lista, pinta os botões imediatamente
         colorirBotoes();
     });
 
@@ -261,7 +275,6 @@
     window.abrirEditor = async (nome) => {
         membroSendoEditado = nome;
         document.getElementById('editNomeMembro').innerText = nome;
-        const modal = new bootstrap.Modal(document.getElementById('modalEditarMembro'));
         const mSnap = await getDoc(doc(db, "membros", nome));
         if(mSnap.exists()) document.getElementById('inputMudarGrupo').value = mSnap.data().grupo || "";
         const tagsDiv = document.getElementById('containerTagsFuncao');
@@ -269,20 +282,18 @@
         (mSnap.data().funcoes || []).forEach(f => {
             tagsDiv.innerHTML += `<span class="badge-funcao m-1">${f} <i class="bi bi-x-circle text-danger ms-1" style="cursor:pointer" onclick="removerFuncao('${f}')"></i></span>`;
         });
-        modal.show();
+        new bootstrap.Modal(document.getElementById('modalEditarMembro')).show();
     };
 
     document.getElementById('btnLimparChamadaDia').onclick = async () => {
-        if(confirm(`Limpar chamada de hoje para ${membroSendoEditado}?`)) {
+        if(confirm(`Limpar chamada de hoje?`)) {
             await deleteDoc(doc(db, "chamada_diaria", `${hojeISO}_${membroSendoEditado}`));
-            const q = query(collection(db, "chamada_diaria"), where("data", "==", hojeISO));
-            const snap = await getDocs(q);
+            const snap = await getDocs(query(collection(db, "chamada_diaria"), where("data", "==", hojeISO)));
             if(snap.empty) { localStorage.removeItem('usuario_maranata'); meuNome = null; }
             bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
         }
     };
 
-    // Funções extras
     document.getElementById('btnSalvarGrupo').onclick = async () => { await updateDoc(doc(db, "membros", membroSendoEditado), { grupo: document.getElementById('inputMudarGrupo').value.toUpperCase() }); };
     document.getElementById('btnAddFuncao').onclick = async () => { const f = document.getElementById('inputNovaFuncao').value.toUpperCase(); if(f) await updateDoc(doc(db, "membros", membroSendoEditado), { funcoes: arrayUnion(f) }); document.getElementById('inputNovaFuncao').value = ""; };
     window.removerFuncao = async (f) => { await updateDoc(doc(db, "membros", membroSendoEditado), { funcoes: arrayRemove(f) }); };
