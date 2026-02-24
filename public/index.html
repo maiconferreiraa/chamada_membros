@@ -84,10 +84,10 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header border-secondary">
-                <h5 class="modal-title text-warning">Identificação para Iniciar a Chamada</h5>
+                <h5 class="modal-title text-warning">Identificação</h5>
             </div>
             <div class="modal-body text-center">
-                <p class="small text-white-50">Identifique-se com seu nome!</p>
+                <p class="small text-white-50">Seja o primeiro a iniciar a chamada hoje!</p>
                 <input type="text" id="nomeOperador" class="form-control form-control-custom" placeholder="Seu Nome">
                 <button id="btnSalvarIdentificacao" class="btn btn-primary w-100 mt-4 fw-bold">INICIAR CHAMADA</button>
             </div>
@@ -121,12 +121,12 @@
             <div class="modal-body">
                 <label class="text-white-50 small mb-1">Mudar Grupo:</label>
                 <div class="input-group mb-3">
-                    <input type="text" id="inputMudarGrupo" class="form-control form-control-custom" placeholder="Ex: GRUPO 2">
+                    <input type="text" id="inputMudarGrupo" class="form-control form-control-custom">
                     <button id="btnSalvarGrupo" class="btn btn-success btn-sm">SALVAR</button>
                 </div>
-                <label class="text-white-50 small mb-1">Adicionar Função:</label>
+                <label class="text-white-50 small mb-1">Add Função:</label>
                 <div class="input-group mb-3">
-                    <input type="text" id="inputNovaFuncao" class="form-control form-control-custom" placeholder="EX: SOM, OBREIRO...">
+                    <input type="text" id="inputNovaFuncao" class="form-control form-control-custom">
                     <button id="btnAddFuncao" class="btn btn-primary">ADD</button>
                 </div>
                 <div id="containerTagsFuncao" class="mb-3 d-flex flex-wrap"></div>
@@ -170,30 +170,14 @@
     let meuNome = localStorage.getItem('usuario_maranata');
     let membroSendoEditado = "";
 
-    // MONITORAMENTO EM TEMPO REAL
-    onSnapshot(query(collection(db, "chamada_diaria"), where("data", "==", hojeISO)), (snap) => {
-        const avisoDiv = document.getElementById('avisoChamadaFeita');
-        const spanOperador = document.getElementById('nomeQuemIniciou');
+    // FUNÇÃO PARA PINTAR OS BOTÕES (RESISTENTE A ATUALIZAÇÃO)
+    async function colorirBotoes() {
+        const q = query(collection(db, "chamada_diaria"), where("data", "==", hojeISO));
+        const snap = await getDocs(q);
         
-        if (!snap.empty) {
-            const dadosPrimeiro = snap.docs[0].data();
-            spanOperador.innerText = dadosPrimeiro.operador || "OUTRA PESSOA";
-            avisoDiv.style.display = 'block';
-            
-            const modalEl = document.getElementById('modalIdentificacao');
-            const inst = bootstrap.Modal.getInstance(modalEl);
-            if(inst) inst.hide();
-        } else {
-            avisoDiv.style.display = 'none';
-            // Se o banco estiver vazio e não houver nome salvo, abre o modal
-            if (!meuNome) {
-                const m = new bootstrap.Modal(document.getElementById('modalIdentificacao'));
-                m.show();
-            }
-        }
-
-        // PINTA OS BOTÕES
+        // Limpa tudo antes de pintar
         document.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
+        
         snap.forEach(dDoc => {
             const d = dDoc.data();
             const container = document.getElementById(`group-${d.nome}`);
@@ -203,6 +187,27 @@
                 if (d.status === "Justificada") container.querySelector('.btn-fj').classList.add('active');
             }
         });
+    }
+
+    // MONITORAMENTO DA CHAMADA E OPERADOR
+    onSnapshot(query(collection(db, "chamada_diaria"), where("data", "==", hojeISO)), (snap) => {
+        const avisoDiv = document.getElementById('avisoChamadaFeita');
+        if (!snap.empty) {
+            const operador = snap.docs[0].data().operador || "OUTRA PESSOA";
+            document.getElementById('nomeQuemIniciou').innerText = operador;
+            avisoDiv.style.display = 'block';
+            
+            const modalEl = document.getElementById('modalIdentificacao');
+            const inst = bootstrap.Modal.getInstance(modalEl);
+            if(inst) inst.hide();
+        } else {
+            avisoDiv.style.display = 'none';
+            if (!meuNome) {
+                const m = new bootstrap.Modal(document.getElementById('modalIdentificacao'));
+                m.show();
+            }
+        }
+        colorirBotoes();
     });
 
     document.getElementById('btnSalvarIdentificacao').onclick = () => {
@@ -213,6 +218,7 @@
         bootstrap.Modal.getInstance(document.getElementById('modalIdentificacao')).hide();
     };
 
+    // LISTA DE MEMBROS
     onSnapshot(query(collection(db, "membros"), orderBy("nome", "asc")), (membroSnapshot) => {
         const listaCom = document.getElementById('listaComFuncao');
         const listaSem = document.getElementById('listaSemFuncao');
@@ -220,7 +226,6 @@
 
         membroSnapshot.forEach(docSnap => {
             const m = docSnap.data();
-            const temFun = m.funcoes && m.funcoes.length > 0;
             const html = `
                 <div class="member-card">
                     <button class="btn-edit" onclick="abrirEditor('${m.nome}')"><i class="bi bi-pencil-square"></i></button>
@@ -228,7 +233,7 @@
                         <span class="member-name">${m.nome}</span>
                         <div class="tag-container">
                             ${m.grupo ? `<span class="badge-grupo">${m.grupo}</span>` : ''}
-                            ${temFun ? m.funcoes.map(f => `<span class="badge-funcao">${f}</span>`).join('') : ''}
+                            ${m.funcoes ? m.funcoes.map(f => `<span class="badge-funcao">${f}</span>`).join('') : ''}
                         </div>
                     </div>
                     <div class="d-flex" id="group-${m.nome}">
@@ -237,17 +242,16 @@
                         <button onclick="fazerChamada('${m.nome}', 'FJ')" class="btn-call btn-fj">FJ</button>
                     </div>
                 </div>`;
-            if(temFun) listaCom.innerHTML += html;
+            if(m.funcoes && m.funcoes.length > 0) listaCom.innerHTML += html;
             else listaSem.innerHTML += html;
         });
+        
+        // Após criar a lista, pinta os botões imediatamente
+        colorirBotoes();
     });
 
     window.fazerChamada = async (nome, statusAbv) => {
-        if (!meuNome) {
-            const m = new bootstrap.Modal(document.getElementById('modalIdentificacao'));
-            m.show();
-            return;
-        }
+        if (!meuNome) return;
         let statusFinal = statusAbv === 'P' ? "Presente" : (statusAbv === 'F' ? "Ausente" : "Justificada");
         await setDoc(doc(db, "chamada_diaria", `${hojeISO}_${nome}`), { 
             nome, data: hojeISO, status: statusFinal, operador: meuNome 
@@ -268,25 +272,17 @@
         modal.show();
     };
 
-    // --- MODIFICAÇÃO PARA O MODAL APARECER NA HORA DA LIMPEZA ---
     document.getElementById('btnLimparChamadaDia').onclick = async () => {
         if(confirm(`Limpar chamada de hoje para ${membroSendoEditado}?`)) {
             await deleteDoc(doc(db, "chamada_diaria", `${hojeISO}_${membroSendoEditado}`));
-            bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
-            
-            // Verifica se o dia ficou vazio para forçar o modal na hora
             const q = query(collection(db, "chamada_diaria"), where("data", "==", hojeISO));
             const snap = await getDocs(q);
-            if(snap.empty) { 
-                localStorage.removeItem('usuario_maranata'); 
-                meuNome = null;
-                // Abre o modal imediatamente sem esperar o snapshot
-                const m = new bootstrap.Modal(document.getElementById('modalIdentificacao'));
-                m.show();
-            }
+            if(snap.empty) { localStorage.removeItem('usuario_maranata'); meuNome = null; }
+            bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
         }
     };
 
+    // Funções extras
     document.getElementById('btnSalvarGrupo').onclick = async () => { await updateDoc(doc(db, "membros", membroSendoEditado), { grupo: document.getElementById('inputMudarGrupo').value.toUpperCase() }); };
     document.getElementById('btnAddFuncao').onclick = async () => { const f = document.getElementById('inputNovaFuncao').value.toUpperCase(); if(f) await updateDoc(doc(db, "membros", membroSendoEditado), { funcoes: arrayUnion(f) }); document.getElementById('inputNovaFuncao').value = ""; };
     window.removerFuncao = async (f) => { await updateDoc(doc(db, "membros", membroSendoEditado), { funcoes: arrayRemove(f) }); };
