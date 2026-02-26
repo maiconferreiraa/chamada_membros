@@ -303,9 +303,8 @@
         colorirBotoes();
     };
 
-    window.abrirEditor = async (nome) => {
-        window.membroSendoEditado = nome;
-        document.getElementById('editNomeMembro').innerText = nome;
+    // --- FUNÇÃO AUXILIAR PARA ATUALIZAR VISUAL DO MODAL SEM TRAVAR ---
+    async function atualizarVisualizacaoModal(nome) {
         const mSnap = await getDoc(doc(db, "membros", nome));
         if(mSnap.exists()) {
             const m = mSnap.data();
@@ -318,27 +317,42 @@
                 });
             }
         }
+    }
+
+    window.abrirEditor = async (nome) => {
+        window.membroSendoEditado = nome;
+        document.getElementById('editNomeMembro').innerText = nome;
+        await atualizarVisualizacaoModal(nome);
         new bootstrap.Modal(document.getElementById('modalEditarMembro')).show();
     };
 
     document.getElementById('btnSalvarGrupo').onclick = async () => {
-        await updateDoc(doc(db, "membros", window.membroSendoEditado), { grupo: document.getElementById('inputMudarGrupo').value.toUpperCase() });
-        alert("Grupo atualizado!");
+        try {
+            await updateDoc(doc(db, "membros", window.membroSendoEditado), { grupo: document.getElementById('inputMudarGrupo').value.toUpperCase() });
+            alert("Grupo atualizado com sucesso!");
+            await atualizarVisualizacaoModal(window.membroSendoEditado);
+        } catch (e) { alert("Erro ao salvar grupo."); }
     };
 
     document.getElementById('btnAddFuncao').onclick = async () => {
-        const novaF = document.getElementById('inputNovaFuncao').value.toUpperCase();
+        const input = document.getElementById('inputNovaFuncao');
+        const novaF = input.value.trim().toUpperCase();
         if(novaF) {
-            await updateDoc(doc(db, "membros", window.membroSendoEditado), { funcoes: arrayUnion(novaF) });
-            document.getElementById('inputNovaFuncao').value = "";
-            abrirEditor(window.membroSendoEditado);
+            try {
+                await updateDoc(doc(db, "membros", window.membroSendoEditado), { funcoes: arrayUnion(novaF) });
+                input.value = "";
+                alert("Função adicionada com sucesso!");
+                await atualizarVisualizacaoModal(window.membroSendoEditado);
+            } catch (e) { alert("Erro ao adicionar função."); }
         }
     };
 
     window.removerFuncao = async (funcao) => {
         if(confirm(`Remover ${funcao}?`)) {
-            await updateDoc(doc(db, "membros", window.membroSendoEditado), { funcoes: arrayRemove(funcao) });
-            abrirEditor(window.membroSendoEditado);
+            try {
+                await updateDoc(doc(db, "membros", window.membroSendoEditado), { funcoes: arrayRemove(funcao) });
+                await atualizarVisualizacaoModal(window.membroSendoEditado);
+            } catch (e) { alert("Erro ao remover função."); }
         }
     };
 
