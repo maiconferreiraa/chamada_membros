@@ -25,7 +25,6 @@
             --input-bg: #3d3d3d;
         }
 
-        /* Aumentado para garantir que o último membro apareça acima dos botões fixos */
         body { background-color: var(--bg-dark); color: var(--text-white); padding-bottom: 220px; font-family: sans-serif; }
         
         .user-logged-info { background: var(--primary-blue); color: white; font-size: 0.75rem; text-align: center; padding: 4px; font-weight: bold; text-transform: uppercase; }
@@ -55,7 +54,6 @@
 
         .btn-edit { color: #555; border: none; background: transparent; font-size: 1.1rem; margin-right: 5px; cursor: pointer; }
         
-        /* --- BOTÃO REDONDO (POSIÇÃO AJUSTADA PARA NÃO TAMPAR A CHAMADA) --- */
         .btn-float { 
             position: fixed; 
             bottom: 180px; 
@@ -74,7 +72,6 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.8);
             transition: 0.2s;
         }
-        .btn-float:active { transform: scale(0.9); opacity: 0.8; }
         
         .navbar-custom { background-color: #000 !important; border-top: 1px solid #222; z-index: 1100; }
         .admin-only { display: none; }
@@ -94,10 +91,26 @@
             align-items: center; 
         }
 
+        /* --- CORREÇÃO DE CONTRASTE NOS INPUTS DO MODAL --- */
         .modal-content { background-color: var(--modal-claro) !important; border: 2px solid var(--primary-blue) !important; border-radius: 15px !important; color: var(--text-white) !important; }
         .modal-header { border-bottom: 1px solid #333 !important; }
         .modal-title { color: var(--warning-yellow) !important; }
-        .modal-body input.form-control { color: #ffffff !important; background-color: var(--input-bg) !important; border: 1px solid #555 !important; }
+        
+        /* Força o texto a ser branco e visível nos campos de digitação */
+        .modal-body input.form-control { 
+            color: #ffffff !important; 
+            background-color: #2a2a2a !important; 
+            border: 1px solid #555 !important; 
+        }
+        .modal-body input.form-control:focus {
+            background-color: #333 !important;
+            border-color: var(--primary-blue) !important;
+            box-shadow: 0 0 5px rgba(13, 110, 253, 0.5);
+        }
+        /* Ajuste para o texto de placeholder */
+        .modal-body input.form-control::placeholder {
+            color: #888 !important;
+        }
     </style>
 </head>
 <body>
@@ -166,7 +179,7 @@
                     </div>
                     <label class="small mb-1">Adicionar Nova Função:</label>
                     <div class="input-group mb-2">
-                        <input type="text" id="inputNovaFuncao" class="form-control">
+                        <input type="text" id="inputNovaFuncao" class="form-control" placeholder="Digite a função...">
                         <button id="btnAddFuncao" class="btn btn-primary btn-sm">ADD</button>
                     </div>
                     <div id="containerTagsFuncao" class="d-flex flex-wrap gap-1 mb-3"></div>
@@ -303,7 +316,6 @@
         colorirBotoes();
     };
 
-    // --- FUNÇÃO AUXILIAR PARA ATUALIZAR VISUAL DO MODAL SEM TRAVAR ---
     async function atualizarVisualizacaoModal(nome) {
         const mSnap = await getDoc(doc(db, "membros", nome));
         if(mSnap.exists()) {
