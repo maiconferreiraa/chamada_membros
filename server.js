@@ -9,17 +9,24 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// Inicialização do Firebase
-/// Substitua as linhas 13 a 17 por estas:
-const serviceAccount = require("./firebase-key.json"); // Importa o arquivo direto
+// --- INICIALIZAÇÃO DO FIREBASE (CORRIGIDA PARA DEPLOY) ---
+let serviceAccount;
+
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    // Se estiver no Render, usa a Variável de Ambiente
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+} else {
+    // Se estiver no seu PC, usa o arquivo local
+    serviceAccount = require("./firebase-key.json");
+}
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
+
 const db = admin.firestore();
 
 // --- ROTA PRINCIPAL (Login) ---
-// Adicionada para garantir que a primeira página aberta seja o login
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
@@ -37,9 +44,8 @@ async function importarMembrosAutomatico() {
         const data = fs.readFileSync(filePath, 'utf8');
         const linhas = data.split('\n').filter(l => l.trim() !== "");
         const batch = db.batch();
-        let total = 0;
-
-        linhas.forEach(linha => {
+        
+        for (const linha of linhas) {
             const partes = linha.split(' - ');
             if (partes.length >= 3) {
                 const nome = partes[0].trim().toUpperCase();
@@ -47,24 +53,21 @@ async function importarMembrosAutomatico() {
                 const categoria = partes[2].trim();
 
                 const ref = db.collection('membros').doc(nome);
-                // O merge: true é vital para não apagar as funções que você já adicionou manualmente
                 batch.set(ref, { 
                     nome, 
                     grupo, 
                     categoria 
                 }, { merge: true });
-                total++;
             }
-        });
+        }
 
         await batch.commit();
-        console.log(`Sucesso: ${total} membros sincronizados automaticamente.`);
+        console.log("Sucesso: Membros sincronizados automaticamente.");
     } catch (err) {
         console.error("Erro na importação automática:", err);
     }
 }
 
-// Executa a importação assim que o app inicia
 importarMembrosAutomatico();
 
 const PORT = process.env.PORT || 10000;

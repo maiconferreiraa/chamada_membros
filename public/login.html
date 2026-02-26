@@ -10,16 +10,31 @@
         body { background-color: #000; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; color: white; }
         .login-card { background-color: #1e1e1e; padding: 35px; border-radius: 20px; border: 2px solid #0d6efd; width: 90%; max-width: 400px; box-shadow: 0 0 20px rgba(13, 110, 253, 0.3); }
         
-        /* Estilo para o campo de senha com ícone */
         .password-container { position: relative; }
-        .form-control { background-color: #2d2d2d !important; border: 1px solid #444 !important; color: white !important; margin-bottom: 15px; padding: 12px; padding-right: 45px; }
+
+        /* --- CORREÇÃO DE CONTRASTE AQUI --- */
+        .form-control { 
+            background-color: #121212 !important; /* Fundo bem escuro */
+            border: 1px solid #444 !important; 
+            color: #ffffff !important;           /* Letra BRANCO PURO ao digitar */
+            margin-bottom: 15px; 
+            padding: 12px; 
+            padding-right: 45px;
+            font-size: 1rem;
+        }
+
+        /* Cor do texto de exemplo (Senha de Acesso) */
+        .form-control::placeholder {
+            color: #888 !important; /* Cinza médio para ser visível mas discreto */
+            opacity: 1;
+        }
         
         .toggle-password { 
             position: absolute; 
             right: 15px; 
-            top: 12px; 
+            top: 14px; 
             cursor: pointer; 
-            color: #888; 
+            color: #0d6efd; /* Ícone em Azul para destacar */
             font-size: 1.2rem;
             z-index: 10;
         }
@@ -43,7 +58,6 @@
 </div>
 
 <script>
-    // Lógica para Mostrar/Esconder Senha
     const senhaInput = document.getElementById('senhaAcesso');
     const toggleIcon = document.getElementById('toggleIcon');
 
@@ -59,10 +73,8 @@
         }
     };
 
-    // Lógica de Login
     document.getElementById('btnEntrar').onclick = function() {
         const senha = senhaInput.value;
-        
         if(senha === "admin123") {
             sessionStorage.setItem('logado_maranata', 'true');
             sessionStorage.setItem('perfil_maranata', 'admin');
@@ -74,16 +86,13 @@
             window.location.href = "index.html";
         } 
         else {
-            alert("Senha incorreta! Verifique se o Caps Lock está ativado.");
+            alert("Senha incorreta!");
             senhaInput.value = "";
         }
     };
 
-    // Atalho Tecla ENTER
     senhaInput.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            document.getElementById('btnEntrar').click();
-        }
+        if (e.key === 'Enter') { document.getElementById('btnEntrar').click(); }
     });
 </script>
 </body>

@@ -25,7 +25,8 @@
             --input-bg: #3d3d3d;
         }
 
-        body { background-color: var(--bg-dark); color: var(--text-white); padding-bottom: 150px; font-family: sans-serif; }
+        /* Aumentado para garantir que o último membro apareça acima dos botões fixos */
+        body { background-color: var(--bg-dark); color: var(--text-white); padding-bottom: 220px; font-family: sans-serif; }
         
         .user-logged-info { background: var(--primary-blue); color: white; font-size: 0.75rem; text-align: center; padding: 4px; font-weight: bold; text-transform: uppercase; }
         .header-data { background: #1a1a1a; padding: 15px; border-bottom: 2px solid var(--primary-blue); text-align: center; }
@@ -53,13 +54,45 @@
         .btn-fj.active { background-color: var(--warning-yellow) !important; color: black !important; }
 
         .btn-edit { color: #555; border: none; background: transparent; font-size: 1.1rem; margin-right: 5px; cursor: pointer; }
-        .btn-float { position: fixed; bottom: 100px; right: 20px; width: 55px; height: 55px; border-radius: 50%; background: var(--primary-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: none; z-index: 1000; }
         
-        .navbar-custom { background-color: #000 !important; border-top: 1px solid #222; }
+        /* --- BOTÃO REDONDO (POSIÇÃO AJUSTADA PARA NÃO TAMPAR A CHAMADA) --- */
+        .btn-float { 
+            position: fixed; 
+            bottom: 180px; 
+            right: 15px; 
+            width: 55px; 
+            height: 55px; 
+            border-radius: 50%; 
+            background: var(--primary-blue); 
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 1.6rem; 
+            border: 2px solid #000; 
+            z-index: 2000; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            transition: 0.2s;
+        }
+        .btn-float:active { transform: scale(0.9); opacity: 0.8; }
+        
+        .navbar-custom { background-color: #000 !important; border-top: 1px solid #222; z-index: 1100; }
         .admin-only { display: none; }
 
-        /* PAINEL INFERIOR DE SALVAMENTO */
-        .bottom-save-bar { position: fixed; bottom: 65px; left: 0; width: 100%; padding: 10px; background: #1a1a1a; border-top: 1px solid #333; z-index: 1050; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+        .bottom-save-bar { 
+            position: fixed; 
+            bottom: 65px; 
+            left: 0; 
+            width: 100%; 
+            padding: 10px; 
+            background: #1a1a1a; 
+            border-top: 1px solid #333; 
+            z-index: 1050; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+            align-items: center; 
+        }
 
         .modal-content { background-color: var(--modal-claro) !important; border: 2px solid var(--primary-blue) !important; border-radius: 15px !important; color: var(--text-white) !important; }
         .modal-header { border-bottom: 1px solid #333 !important; }
@@ -90,14 +123,32 @@
 
 <div class="bottom-save-bar">
     <button id="btnFinalizarChamada" class="btn btn-success w-75 fw-bold shadow">
-        <i class="bi bi-check-circle-fill"></i> FINALIZAR CHAMADA (FUNÇÕES)
+        <i class="bi bi-check-circle-fill"></i> FINALIZAR CHAMADA
     </button>
     <button id="btnLimparTudoHoje" class="btn btn-outline-danger btn-sm w-50 admin-only" style="font-size: 0.7rem;">
         <i class="bi bi-trash3-fill"></i> LIMPAR TODA A CHAMADA DE HOJE
     </button>
 </div>
 
-<button class="btn-float shadow admin-only" data-bs-toggle="modal" data-bs-target="#modalNovoMembro"><i class="bi bi-person-plus-fill"></i></button>
+<button class="btn-float shadow admin-only" data-bs-toggle="modal" data-bs-target="#modalNovoMembro">
+    <i class="bi bi-person-plus-fill"></i>
+</button>
+
+<div class="modal fade" id="modalNovoMembro" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-warning">Cadastrar Novo Membro</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="novoNomeMembro" class="form-control mb-3" placeholder="Nome Completo">
+                <input type="text" id="novoGrupoMembro" class="form-control mb-3" placeholder="Grupo (Ex: GRUPO 1)">
+                <button id="btnSalvarNovoMembro" class="btn btn-primary w-100 fw-bold">SALVAR NO BANCO</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="modal fade" id="modalEditarMembro" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -166,19 +217,13 @@
         document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
     }
 
-    // --- FUNÇÃO LIMPAR TUDO (SOMENTE ADMIN) ---
     document.getElementById('btnLimparTudoHoje').onclick = async () => {
         if(confirm("ATENÇÃO: Isso apagará TODOS os registros de presença de HOJE. Deseja continuar?")) {
             const q = query(collection(db, "chamada_diaria"), where("data", "==", hojeISO));
             const snap = await getDocs(q);
-            
-            // Deleta um por um
             const promessas = snap.docs.map(d => deleteDoc(doc(db, "chamada_diaria", d.id)));
             await Promise.all(promessas);
-            
-            // Remove a trava de finalização se existir
             await deleteDoc(doc(db, "status_sistema", hojeISO));
-            
             alert("Toda a chamada de hoje foi limpa!");
             colorirBotoes();
         }
@@ -297,6 +342,16 @@
         }
     };
 
+    document.getElementById('btnSalvarNovoMembro').onclick = async () => {
+        const n = document.getElementById('novoNomeMembro').value.toUpperCase();
+        const g = document.getElementById('novoGrupoMembro').value.toUpperCase();
+        if(n) {
+            await setDoc(doc(db, "membros", n), { nome: n, grupo: g, funcoes: [] });
+            alert("Membro adicionado!");
+            bootstrap.Modal.getInstance(document.getElementById('modalNovoMembro')).hide();
+        }
+    };
+
     document.getElementById('btnLimparChamadaDia').onclick = async () => {
         const statusSnap = await getDoc(doc(db, "status_sistema", hojeISO));
         if (perfil !== 'admin' && statusSnap.exists() && statusSnap.data().status === "FINALIZADO") {
@@ -306,6 +361,14 @@
         if(confirm("Apagar marcação deste membro?")) {
             await deleteDoc(doc(db, "chamada_diaria", `${hojeISO}_${window.membroSendoEditado}`));
             colorirBotoes();
+            bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
+        }
+    };
+
+    document.getElementById('btnExcluirMembro').onclick = async () => {
+        if(confirm("Deseja EXCLUIR DEFINITIVAMENTE este membro do sistema?")) {
+            await deleteDoc(doc(db, "membros", window.membroSendoEditado));
+            alert("Membro excluído!");
             bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
         }
     };
