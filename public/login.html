@@ -75,12 +75,12 @@
 
     document.getElementById('btnEntrar').onclick = function() {
         const senha = senhaInput.value;
-        if(senha === "admin123") {
+        if(senha === "admin@2026") {
             sessionStorage.setItem('logado_maranata', 'true');
             sessionStorage.setItem('perfil_maranata', 'admin');
             window.location.href = "index.html";
         } 
-        else if(senha === "diacono123") {
+        else if(senha === "oper@2026") {
             sessionStorage.setItem('logado_maranata', 'true');
             sessionStorage.setItem('perfil_maranata', 'diacono');
             window.location.href = "index.html";
