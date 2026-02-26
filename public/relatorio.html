@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatórios - Maranata</title>
+
+    <script>
+    if (sessionStorage.getItem('logado_maranata') !== 'true') {
+        window.location.href = "login.html";
+    }
+    if (sessionStorage.getItem('perfil_maranata') !== 'admin') {
+        alert("Acesso restrito ao Administrador!");
+        window.location.href = "index.html";
+    }
+    </script>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
@@ -14,13 +25,13 @@
         .text-blue { color: #0d6efd !important; }
         .text-red { color: #ff4444 !important; }
 
-        .table { color: #ffffff !important; border-color: #444; vertical-align: middle; width: 100%; }
+        .table { color: #ffffff !important; border-color: #444; vertical-align: middle; width: 100%; font-size: 0.85rem; }
         .table-dark { --bs-table-bg: #121212; }
         
-        .td-nome { font-weight: bold; font-size: 0.9rem; color: #fff; display: block; line-height: 1.2; }
-        .td-info { color: #0d6efd; font-size: 0.75rem; text-transform: uppercase; font-weight: bold; }
-        .badge-grupo { background-color: #333; color: #ffca28; padding: 1px 4px; border-radius: 3px; font-size: 0.65rem; margin-left: 5px; }
-        
+        .td-nome { font-weight: bold; color: #fff; display: block; font-size: 0.95rem; }
+        .td-detalhes { font-size: 0.7rem; color: #aaa; text-transform: uppercase; margin-top: 2px; }
+        .badge-grupo-rel { color: #ffca28; font-weight: bold; margin-right: 5px; }
+
         .dia-tag { 
             display: inline-flex; 
             background: #2a2a2a; 
@@ -29,42 +40,28 @@
             border-radius: 4px; 
             margin: 2px; 
             font-size: 0.75rem; 
-            white-space: nowrap;
         }
 
+        select.form-select { background-color: #1a1a1a !important; color: white !important; border: 1px solid #444 !important; }
         .navbar-custom { border-bottom: 2px solid #0d6efd; background-color: #000 !important; }
-        .print-only { display: none; }
-
+        
         @media print {
-            @page { size: portrait; margin: 1cm; }
+            .navbar, .card-relatorio, .btn-print-hide { display: none !important; }
             body { background-color: #fff !important; color: #000 !important; }
-            .navbar, .card-relatorio, .btn-print-hide, a.btn { display: none !important; }
-            .print-only { display: block !important; color: #000; text-align: center; }
-            .header-print { border-bottom: 2px solid #000; margin-bottom: 20px; }
             .table { color: #000 !important; border: 1px solid #000 !important; }
-            .table td, .table th { border: 1px solid #000 !important; color: #000 !important; padding: 5px !important; }
-            .td-nome { color: #000 !important; font-size: 0.85rem; }
-            .td-info { color: #333 !important; }
-            .badge-grupo { border: 1px solid #000; color: #000; background: none; }
+            .td-nome { color: #000 !important; }
+            .td-detalhes { color: #333 !important; }
             .dia-tag { border: 1px solid #000; background: none; color: #000; }
-            .text-blue, .text-red, .text-yellow { font-weight: bold; color: #000 !important; }
-            .sig-box { display: flex; justify-content: space-around; margin-top: 50px; }
-            .sig-line { border-top: 1px solid #000; width: 40%; text-align: center; font-size: 0.7rem; }
         }
     </style>
 </head>
 <body>
 
-<div class="print-only header-print">
-    <h2 style="margin:0;">RELATÓRIO DE FREQUÊNCIA - MARANATA</h2>
-    <p id="info-referencia" style="margin:5px 0;"></p>
-</div>
-
 <nav class="navbar navbar-dark bg-black sticky-top navbar-custom p-3 shadow">
     <div class="container-fluid">
         <span class="navbar-brand fw-bold"><i class="bi bi-file-earmark-bar-graph text-primary me-2"></i>RELATÓRIOS</span>
         <div>
-            <button onclick="gerarPDF()" class="btn btn-success btn-sm me-2 btn-print-hide"><i class="bi bi-download"></i> PDF</button>
+            <button onclick="window.print()" class="btn btn-success btn-sm me-2 btn-print-hide"><i class="bi bi-printer"></i> IMPRIMIR</button>
             <a href="index.html" class="btn btn-outline-light btn-sm">Voltar</a>
         </div>
     </div>
@@ -74,12 +71,14 @@
     <div class="card card-relatorio p-3 mb-4 shadow">
         <div class="row g-2">
             <div class="col-12 mb-2">
-                <select id="selectMembro" class="form-select bg-dark text-white border-secondary">
-                    <option value="">RELATÓRIO GERAL (Membros com Função)</option>
+                <label class="small text-white-50 ms-1">Membro:</label>
+                <select id="selectMembro" class="form-select">
+                    <option value="GERAL">RELATÓRIO GERAL (Membros com Função)</option>
                 </select>
             </div>
             <div class="col-6">
-                <select id="selectMes" class="form-select bg-dark text-white border-secondary">
+                <label class="small text-white-50 ms-1">Mês:</label>
+                <select id="selectMes" class="form-select">
                     <option value="01">Jan</option><option value="02" selected>Fev</option>
                     <option value="03">Mar</option><option value="04">Abr</option>
                     <option value="05">Mai</option><option value="06">Jun</option>
@@ -89,14 +88,14 @@
                 </select>
             </div>
             <div class="col-6">
-                <select id="selectAno" class="form-select bg-dark text-white border-secondary">
+                <label class="small text-white-50 ms-1">Ano:</label>
+                <select id="selectAno" class="form-select">
                     <option value="2025">2025</option><option value="2026" selected>2026</option>
                 </select>
             </div>
         </div>
         <div class="d-flex gap-2 mt-3">
-            <button id="btnIndividual" class="btn btn-primary flex-grow-1 fw-bold">INDIVIDUAL</button>
-            <button id="btnGeral" class="btn btn-warning flex-grow-1 text-dark fw-bold">GERAL</button>
+            <button id="btnBuscar" class="btn btn-primary flex-grow-1 fw-bold">GERAR RELATÓRIO</button>
         </div>
     </div>
 
@@ -105,18 +104,11 @@
             <p class="text-center text-white-50 p-5">Aguardando geração do relatório...</p>
         </div>
     </div>
-
-    <div class="print-only" style="margin-top: 50px;">
-        <div class="sig-box">
-            <div class="sig-line">Responsável</div>
-            <div class="sig-line">Pastor / Coordenador</div>
-        </div>
-    </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, query, where, getDocs, orderBy, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCEMfA8_6LAbvanYwXE_6KcO0WQWoI5nSQ",
@@ -134,112 +126,75 @@
         const q = query(collection(db, "membros"), orderBy("nome", "asc"));
         const snap = await getDocs(q);
         const select = document.getElementById('selectMembro');
-        snap.forEach(doc => { select.innerHTML += `<option value="${doc.id}">${doc.id}</option>`; });
+        snap.forEach(docSnap => {
+            const m = docSnap.data();
+            if(m.funcoes && m.funcoes.length > 0) {
+                select.innerHTML += `<option value="${m.nome}">${m.nome}</option>`;
+            }
+        });
     }
 
-    window.gerarPDF = () => {
-        const mesText = document.getElementById('selectMes').options[document.getElementById('selectMes').selectedIndex].text;
-        document.getElementById('info-referencia').innerText = `Mês: ${mesText} / ${document.getElementById('selectAno').value}`;
-        window.print();
-    };
-
-    document.getElementById('btnIndividual').onclick = async () => {
-        const nome = document.getElementById('selectMembro').value;
-        const mes = document.getElementById('selectMes').value;
-        const ano = document.getElementById('selectAno').value;
-        if (!nome) return alert("Selecione um membro!");
-
-        const listaDiv = document.getElementById('listaHistorico');
-        listaDiv.innerHTML = 'Processando...';
-
-        const mDoc = await getDoc(doc(db, "membros", nome));
-        const m = mDoc.data();
-        const funs = m.funcoes ? m.funcoes.join(" • ") : "GERAL";
-        const grupo = m.grupo || "SEM GRUPO";
-
-        const q = query(collection(db, "chamada_diaria"), where("nome", "==", nome));
-        const snap = await getDocs(q);
-
-        let regs = [];
-        snap.forEach(d => {
-            const p = d.data();
-            const [pAno, pMes] = p.data.split('-');
-            if (pMes === mes && pAno === ano) regs.push(p);
-        });
-
-        if (regs.length === 0) {
-            listaDiv.innerHTML = `<p class="text-center text-white-50 p-5">Nenhum registro encontrado para este membro no período selecionado.</p>`;
-            return;
-        }
-
-        regs.sort((a,b) => b.data.localeCompare(a.data));
-
-        let html = `<div class="mb-2"><span class="td-nome">${nome}</span><span class="td-info">${funs}</span> <span class="badge-grupo">${grupo}</span></div>`;
-        html += `<table class="table table-dark table-bordered"><thead><tr><th>Data</th><th>Status</th></tr></thead><tbody>`;
-        regs.forEach(p => {
-            let cor = 'text-white';
-            if(p.status === 'Presente') cor = 'text-blue';
-            if(p.status === 'Ausente') cor = 'text-red';
-            if(p.status === 'Justificada') cor = 'text-yellow';
-            html += `<tr><td>${p.data.split('-').reverse().join('/')}</td><td class="${cor} fw-bold">${p.status.toUpperCase()}</td></tr>`;
-        });
-        listaDiv.innerHTML = html + "</tbody></table>";
-    };
-
-    document.getElementById('btnGeral').onclick = async () => {
+    document.getElementById('btnBuscar').onclick = async () => {
+        const tipoBusca = document.getElementById('selectMembro').value;
         const mes = document.getElementById('selectMes').value;
         const ano = document.getElementById('selectAno').value;
         const listaDiv = document.getElementById('listaHistorico');
-        listaDiv.innerHTML = 'Gerando relatório...';
 
-        const qP = await getDocs(collection(db, "chamada_diaria"));
-        const qM = await getDocs(query(collection(db, "membros"), orderBy("nome", "asc")));
+        listaDiv.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>';
+
+        const qP = query(collection(db, "chamada_diaria"), orderBy("data", "asc"));
+        const snapP = await getDocs(qP);
+
+        const qM = query(collection(db, "membros"), orderBy("nome", "asc"));
+        const snapM = await getDocs(qM);
 
         let registros = {};
-        qP.forEach(docSnap => {
-            const p = docSnap.data();
-            const [pAno, pMes] = p.data.split('-');
-            if (pMes === mes && pAno === ano) {
-                if (!registros[p.nome]) registros[p.nome] = [];
-                registros[p.nome].push({ dia: p.data.split('-')[2], status: p.status });
+        snapP.forEach(docSnap => {
+            const d = docSnap.data();
+            const [dAno, dMes, dDia] = d.data.split('-');
+            if (dMes === mes && dAno === ano) {
+                if (!registros[d.nome]) registros[d.nome] = [];
+                registros[d.nome].push({ dia: dDia, status: d.status });
             }
         });
 
-        let html = `<table class="table table-dark table-bordered"><thead><tr><th>Membro / Grupo / Função</th><th>Histórico</th></tr></thead><tbody>`;
+        let html = `<table class="table table-dark table-bordered">
+                    <thead><tr><th>Membro / Grupo / Funções</th><th>Histórico</th></tr></thead><tbody>`;
         let count = 0;
 
-        qM.forEach(mDoc => {
+        snapM.forEach(mDoc => {
             const m = mDoc.data();
-            const lista = registros[m.nome] || [];
+            if ((tipoBusca === "GERAL" || m.nome === tipoBusca) && m.funcoes && m.funcoes.length > 0) {
+                const lista = registros[m.nome] || [];
+                if (lista.length > 0) {
+                    count++;
+                    let tags = "";
+                    lista.forEach(reg => {
+                        let cor = 'text-white';
+                        let abrev = reg.status[0];
+                        if(reg.status === 'Presente') cor = 'text-blue';
+                        if(reg.status === 'Ausente') { cor = 'text-red'; abrev = 'F'; }
+                        if(reg.status === 'Justificada') { cor = 'text-yellow'; abrev = 'FJ'; }
+                        tags += `<span class="dia-tag"><b class="${cor}">${abrev}</b> ${reg.dia}</span>`;
+                    });
 
-            // REGRAS DE EXIBIÇÃO:
-            // 1. Deve ter função cadastrada
-            // 2. Deve ter registro no mês (Não aparece se estiver limpo)
-            if (m.funcoes && m.funcoes.length > 0 && lista.length > 0) {
-                count++;
-                lista.sort((a,b) => a.dia - b.dia);
-                let tags = "";
-                lista.forEach(d => {
-                    let cor = 'text-white';
-                    let abrev = 'P';
-                    if(d.status === 'Presente') { cor = 'text-blue'; abrev = 'P'; }
-                    if(d.status === 'Ausente') { cor = 'text-red'; abrev = 'F'; }
-                    if(d.status === 'Justificada') { cor = 'text-yellow'; abrev = 'FJ'; }
-                    
-                    tags += `<span class="dia-tag"><b class="${cor}">${abrev}</b> ${d.dia}</span>`;
-                });
-                html += `<tr>
-                    <td>
-                        <span class="td-nome">${m.nome}</span>
-                        <div class="td-info">${m.funcoes.join(', ')} <span class="badge-grupo">${m.grupo || ''}</span></div>
-                    </td>
-                    <td>${tags}</td>
-                </tr>`;
+                    // Monta a célula com Nome, Grupo e Funções
+                    html += `<tr>
+                                <td class="text-start">
+                                    <span class="td-nome">${m.nome}</span>
+                                    <div class="td-detalhes">
+                                        <span class="badge-grupo-rel">${m.grupo || 'SEM GRUPO'}</span>
+                                        <span class="text-white-50">• ${m.funcoes.join(', ')}</span>
+                                    </div>
+                                </td>
+                                <td class="text-start">${tags}</td>
+                            </tr>`;
+                }
             }
         });
 
         if (count === 0) {
-            listaDiv.innerHTML = `<p class="text-center text-white-50 p-5">Nenhum membro com função possui registros para este mês.</p>`;
+            listaDiv.innerHTML = '<p class="text-center p-5 text-white-50">Nenhum registro encontrado para este filtro.</p>';
         } else {
             listaDiv.innerHTML = html + "</tbody></table>";
         }

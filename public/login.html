@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Maranata</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #000; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; color: white; }
+        .login-card { background-color: #1e1e1e; padding: 35px; border-radius: 20px; border: 2px solid #0d6efd; width: 90%; max-width: 400px; box-shadow: 0 0 20px rgba(13, 110, 253, 0.3); }
+        
+        /* Estilo para o campo de senha com ícone */
+        .password-container { position: relative; }
+        .form-control { background-color: #2d2d2d !important; border: 1px solid #444 !important; color: white !important; margin-bottom: 15px; padding: 12px; padding-right: 45px; }
+        
+        .toggle-password { 
+            position: absolute; 
+            right: 15px; 
+            top: 12px; 
+            cursor: pointer; 
+            color: #888; 
+            font-size: 1.2rem;
+            z-index: 10;
+        }
+        
+        .btn-login { background-color: #0d6efd; font-weight: bold; border: none; padding: 12px; width: 100%; color: white; text-transform: uppercase; transition: 0.3s; }
+        .btn-login:hover { background-color: #0b5ed7; transform: scale(1.02); }
+        .text-warning { color: #ffca28 !important; }
+    </style>
+</head>
+<body>
+<div class="login-card text-center">
+    <h4 class="mb-4 text-warning">SISTEMA MARANATA</h4>
+    
+    <div class="password-container">
+        <input type="password" id="senhaAcesso" class="form-control" placeholder="Senha de Acesso">
+        <i class="bi bi-eye-slash toggle-password" id="toggleIcon"></i>
+    </div>
+
+    <button id="btnEntrar" class="btn btn-login">ENTRAR</button>
+    <p class="mt-3 small text-white-50">Acesso para Administradores e Diáconos.</p>
+</div>
+
+<script>
+    // Lógica para Mostrar/Esconder Senha
+    const senhaInput = document.getElementById('senhaAcesso');
+    const toggleIcon = document.getElementById('toggleIcon');
+
+    toggleIcon.onclick = function() {
+        if (senhaInput.type === "password") {
+            senhaInput.type = "text";
+            toggleIcon.classList.remove('bi-eye-slash');
+            toggleIcon.classList.add('bi-eye');
+        } else {
+            senhaInput.type = "password";
+            toggleIcon.classList.remove('bi-eye');
+            toggleIcon.classList.add('bi-eye-slash');
+        }
+    };
+
+    // Lógica de Login
+    document.getElementById('btnEntrar').onclick = function() {
+        const senha = senhaInput.value;
+        
+        if(senha === "admin123") {
+            sessionStorage.setItem('logado_maranata', 'true');
+            sessionStorage.setItem('perfil_maranata', 'admin');
+            window.location.href = "index.html";
+        } 
+        else if(senha === "diacono123") {
+            sessionStorage.setItem('logado_maranata', 'true');
+            sessionStorage.setItem('perfil_maranata', 'diacono');
+            window.location.href = "index.html";
+        } 
+        else {
+            alert("Senha incorreta! Verifique se o Caps Lock está ativado.");
+            senhaInput.value = "";
+        }
+    };
+
+    // Atalho Tecla ENTER
+    senhaInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            document.getElementById('btnEntrar').click();
+        }
+    });
+</script>
+</body>
+</html>

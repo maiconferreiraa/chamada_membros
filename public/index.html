@@ -4,58 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chamada Maranata</title>
+
+    <script>
+    if (sessionStorage.getItem('logado_maranata') !== 'true') {
+        window.location.href = "login.html";
+    }
+    </script>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         :root {
             --bg-dark: #000000;
             --card-bg: #121212;
-            --modal-claro: #2c2c2c;
+            --modal-claro: #1c1c1c;
             --primary-blue: #0d6efd;
             --danger-red: #ff4444;
             --warning-yellow: #ffca28;
             --text-white: #ffffff;
-            --input-bg: #3d3d3d; /* Cinza claro para os campos de digitação */
+            --input-bg: #3d3d3d;
         }
 
-        body { background-color: var(--bg-dark); color: var(--text-white); padding-bottom: 90px; font-family: sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-white); padding-bottom: 150px; font-family: sans-serif; }
         
+        .user-logged-info { background: var(--primary-blue); color: white; font-size: 0.75rem; text-align: center; padding: 4px; font-weight: bold; text-transform: uppercase; }
         .header-data { background: #1a1a1a; padding: 15px; border-bottom: 2px solid var(--primary-blue); text-align: center; }
         .data-texto { font-size: 1.1rem; font-weight: bold; color: var(--warning-yellow); margin: 0; }
-
-        #avisoChamadaFeita { display: none; }
-        .alert-custom { background: rgba(255, 202, 40, 0.1); color: var(--warning-yellow); border: 1px solid var(--warning-yellow); font-size: 0.85rem; border-radius: 8px; }
 
         .nav-tabs { border-bottom: 1px solid #333; justify-content: center; background: #000; }
         .nav-link { color: #888 !important; border: none !important; font-weight: bold; text-transform: uppercase; font-size: 0.75rem; padding: 12px 15px; }
         .nav-link.active { color: var(--primary-blue) !important; background: transparent !important; border-bottom: 3px solid var(--primary-blue) !important; }
-
-        /* --- ESTILO DOS MODAIS E INPUTS --- */
-        .modal-content { 
-            background-color: var(--modal-claro) !important; 
-            border: 2px solid var(--primary-blue) !important; 
-            border-radius: 15px !important; 
-        }
-        
-        /* Forçando a cor cinza em todos os inputs de texto dentro dos modais */
-        .modal-body input.form-control, 
-        .form-control-custom { 
-            color: #ffffff !important; 
-            background-color: var(--input-bg) !important; 
-            border: 1px solid #555 !important; 
-            font-weight: normal;
-        }
-
-        .modal-body input.form-control:focus,
-        .form-control-custom:focus {
-            background-color: #4a4a4a !important;
-            border-color: var(--primary-blue) !important;
-            box-shadow: none !important;
-            color: #fff !important;
-        }
-
-        /* Placeholder mais visível no fundo escuro */
-        ::placeholder { color: #aaa !important; opacity: 1; }
 
         .member-card { background-color: var(--card-bg); border: 1px solid #333; margin: 8px 12px; border-radius: 10px; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
         .member-info { flex: 1; margin-right: 5px; overflow: hidden; min-width: 0; }
@@ -75,22 +53,29 @@
         .btn-fj.active { background-color: var(--warning-yellow) !important; color: black !important; }
 
         .btn-edit { color: #555; border: none; background: transparent; font-size: 1.1rem; margin-right: 5px; cursor: pointer; }
-        .btn-float { position: fixed; bottom: 85px; right: 20px; width: 55px; height: 55px; border-radius: 50%; background: var(--primary-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: none; z-index: 1000; }
+        .btn-float { position: fixed; bottom: 100px; right: 20px; width: 55px; height: 55px; border-radius: 50%; background: var(--primary-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: none; z-index: 1000; }
+        
         .navbar-custom { background-color: #000 !important; border-top: 1px solid #222; }
+        .admin-only { display: none; }
+
+        /* PAINEL INFERIOR DE SALVAMENTO */
+        .bottom-save-bar { position: fixed; bottom: 65px; left: 0; width: 100%; padding: 10px; background: #1a1a1a; border-top: 1px solid #333; z-index: 1050; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+
+        .modal-content { background-color: var(--modal-claro) !important; border: 2px solid var(--primary-blue) !important; border-radius: 15px !important; color: var(--text-white) !important; }
+        .modal-header { border-bottom: 1px solid #333 !important; }
+        .modal-title { color: var(--warning-yellow) !important; }
+        .modal-body input.form-control { color: #ffffff !important; background-color: var(--input-bg) !important; border: 1px solid #555 !important; }
     </style>
 </head>
 <body>
 
-<div class="header-data">
-    <p id="exibirData" class="data-texto"></p>
-    <p class="small text-white-50 m-0">LISTA DE PRESENÇA - MEMBROS COM FUNÇÃO</p>
+<div class="user-logged-info">
+    <i class="bi bi-person-fill"></i> <span id="labelPerfilUser"></span> | <i class="bi bi-calendar3"></i> <span id="dataTopo"></span>
 </div>
 
-<div id="avisoChamadaFeita" class="container mt-2">
-    <div class="alert alert-custom text-center shadow-sm">
-        <i class="bi bi-info-circle-fill me-2"></i>
-        A chamada de hoje já foi iniciada por <span id="nomeQuemIniciou" class="fw-bold text-white">...</span>
-    </div>
+<div class="header-data">
+    <p id="exibirData" class="data-texto"></p>
+    <p class="small text-white-50 m-0">CHAMADA - MEMBROS COM FUNÇÃO</p>
 </div>
 
 <ul class="nav nav-tabs sticky-top">
@@ -103,61 +88,41 @@
     <div class="tab-pane fade" id="semFuncao"><div id="listaSemFuncao" class="mt-2"></div></div>
 </div>
 
-<button class="btn-float shadow" data-bs-toggle="modal" data-bs-target="#modalNovoMembro"><i class="bi bi-person-plus-fill"></i></button>
-
-<div class="modal fade" id="modalIdentificacao" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title text-warning">Identificação para Inciar a Chamada.</h5>
-            </div>
-            <div class="modal-body text-center">
-                <p class="small text-white-50">Identifique-se com seu nome!</p>
-                <input type="text" id="nomeOperador" class="form-control mb-3" placeholder="Seu Nome">
-                <button id="btnSalvarIdentificacao" class="btn btn-primary w-100 mt-2 fw-bold">INICIAR CHAMADA</button>
-            </div>
-        </div>
-    </div>
+<div class="bottom-save-bar">
+    <button id="btnFinalizarChamada" class="btn btn-success w-75 fw-bold shadow">
+        <i class="bi bi-check-circle-fill"></i> FINALIZAR CHAMADA (FUNÇÕES)
+    </button>
+    <button id="btnLimparTudoHoje" class="btn btn-outline-danger btn-sm w-50 admin-only" style="font-size: 0.7rem;">
+        <i class="bi bi-trash3-fill"></i> LIMPAR TODA A CHAMADA DE HOJE
+    </button>
 </div>
 
-<div class="modal fade" id="modalNovoMembro" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title text-warning">Novo Membro</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <input type="text" id="novoNomeMembro" class="form-control mb-3" placeholder="Nome Completo">
-                <input type="text" id="novoGrupoMembro" class="form-control mb-3" placeholder="Grupo (Ex: GRUPO 1)">
-                <button id="btnSalvarNovoMembro" class="btn btn-primary w-100 fw-bold">SALVAR NO BANCO</button>
-            </div>
-        </div>
-    </div>
-</div>
+<button class="btn-float shadow admin-only" data-bs-toggle="modal" data-bs-target="#modalNovoMembro"><i class="bi bi-person-plus-fill"></i></button>
 
 <div class="modal fade" id="modalEditarMembro" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title text-warning" id="editNomeMembro">Gerenciar Registro</h5>
+            <div class="modal-header">
+                <h5 class="modal-title" id="editNomeMembro">Gerenciar Registro</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <label class="text-white-50 small mb-1">Mudar Grupo:</label>
-                <div class="input-group mb-3">
-                    <input type="text" id="inputMudarGrupo" class="form-control" placeholder="Ex: GRUPO 2">
-                    <button id="btnSalvarGrupo" class="btn btn-success btn-sm">SALVAR</button>
+                <div class="admin-only">
+                    <label class="small mb-1">Mudar Grupo:</label>
+                    <div class="input-group mb-3">
+                        <input type="text" id="inputMudarGrupo" class="form-control">
+                        <button id="btnSalvarGrupo" class="btn btn-success btn-sm">SALVAR</button>
+                    </div>
+                    <label class="small mb-1">Adicionar Nova Função:</label>
+                    <div class="input-group mb-2">
+                        <input type="text" id="inputNovaFuncao" class="form-control">
+                        <button id="btnAddFuncao" class="btn btn-primary btn-sm">ADD</button>
+                    </div>
+                    <div id="containerTagsFuncao" class="d-flex flex-wrap gap-1 mb-3"></div>
+                    <hr class="border-secondary">
                 </div>
-                <label class="text-white-50 small mb-1">Adicionar Função:</label>
-                <div class="input-group mb-3">
-                    <input type="text" id="inputNovaFuncao" class="form-control" placeholder="EX: SOM, OBREIRO...">
-                    <button id="btnAddFuncao" class="btn btn-primary">ADD</button>
-                </div>
-                <div id="containerTagsFuncao" class="mb-3 d-flex flex-wrap"></div>
-                <hr class="border-secondary">
-                <button id="btnLimparChamadaDia" class="btn btn-outline-warning btn-sm w-100 mb-2">LIMPAR CHAMADA DE HOJE</button>
-                <button id="btnExcluirMembro" class="btn btn-outline-danger btn-sm w-100">EXCLUIR DEFINITIVAMENTE</button>
+                <button id="btnLimparChamadaDia" class="btn btn-outline-warning btn-sm w-100 mb-2">LIMPAR CHAMADA DESTE MEMBRO</button>
+                <button id="btnExcluirMembro" class="btn btn-outline-danger btn-sm w-100 admin-only">EXCLUIR DEFINITIVAMENTE</button>
             </div>
         </div>
     </div>
@@ -166,7 +131,8 @@
 <nav class="navbar fixed-bottom navbar-custom py-2">
     <div class="container d-flex justify-content-around">
         <a href="index.html" class="text-primary text-center text-decoration-none"><i class="bi bi-people-fill fs-4 d-block"></i><span style="font-size: 0.7rem;">Chamada</span></a>
-        <a href="relatorio.html" class="text-white-50 text-center text-decoration-none"><i class="bi bi-file-bar-graph fs-4 d-block"></i><span style="font-size: 0.7rem;">Relatórios</span></a>
+        <a href="relatorio.html" class="text-white-50 text-center text-decoration-none admin-only"><i class="bi bi-file-bar-graph fs-4 d-block"></i><span style="font-size: 0.7rem;">Relatórios</span></a>
+        <a href="#" onclick="sessionStorage.clear(); window.location.href='login.html';" class="text-danger text-center text-decoration-none"><i class="bi bi-box-arrow-right fs-4 d-block"></i><span style="font-size: 0.7rem;">Sair</span></a>
     </div>
 </nav>
 
@@ -189,11 +155,50 @@
     const db = getFirestore(app);
 
     const hojeISO = new Date().toISOString().split('T')[0];
-    const diasSemanas = ["Dom", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
-    document.getElementById('exibirData').innerText = new Date().toLocaleDateString('pt-BR') + " - " + diasSemanas[new Date().getDay()];
+    const perfil = sessionStorage.getItem('perfil_maranata');
+    const meuNome = localStorage.getItem('usuario_maranata') || "OPERADOR";
+    let nomesComFuncao = []; 
 
-    let meuNome = localStorage.getItem('usuario_maranata');
-    let membroSendoEditado = "";
+    document.getElementById('labelPerfilUser').innerText = perfil === 'admin' ? "ADMINISTRADOR" : "DIÁCONO";
+    document.getElementById('dataTopo').innerText = new Date().toLocaleDateString('pt-BR');
+
+    if (perfil === 'admin') {
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+    }
+
+    // --- FUNÇÃO LIMPAR TUDO (SOMENTE ADMIN) ---
+    document.getElementById('btnLimparTudoHoje').onclick = async () => {
+        if(confirm("ATENÇÃO: Isso apagará TODOS os registros de presença de HOJE. Deseja continuar?")) {
+            const q = query(collection(db, "chamada_diaria"), where("data", "==", hojeISO));
+            const snap = await getDocs(q);
+            
+            // Deleta um por um
+            const promessas = snap.docs.map(d => deleteDoc(doc(db, "chamada_diaria", d.id)));
+            await Promise.all(promessas);
+            
+            // Remove a trava de finalização se existir
+            await deleteDoc(doc(db, "status_sistema", hojeISO));
+            
+            alert("Toda a chamada de hoje foi limpa!");
+            colorirBotoes();
+        }
+    };
+
+    document.getElementById('btnFinalizarChamada').onclick = async () => {
+        const q = query(collection(db, "chamada_diaria"), where("data", "==", hojeISO));
+        const snap = await getDocs(q);
+        const chamadasFeitasComFuncao = snap.docs.filter(d => nomesComFuncao.includes(d.data().nome)).length;
+
+        if (chamadasFeitasComFuncao < nomesComFuncao.length) {
+            alert(`FALTA FAZER A CHAMADA DE ${nomesComFuncao.length - chamadasFeitasComFuncao} MEMBRO(S) COM FUNÇÃO!`);
+        } else {
+            if(confirm("Deseja FINALIZAR e TRANCAR a chamada de hoje?")) {
+                await setDoc(doc(db, "status_sistema", hojeISO), { status: "FINALIZADO", operador: meuNome, data: hojeISO });
+                alert("CHAMADA TRANCADA COM SUCESSO!");
+                document.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
+            }
+        }
+    };
 
     async function colorirBotoes() {
         const q = query(collection(db, "chamada_diaria"), where("data", "==", hojeISO));
@@ -201,7 +206,7 @@
         document.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
         snap.forEach(dDoc => {
             const d = dDoc.data();
-            const container = document.getElementById(`group-${d.nome}`);
+            const container = document.getElementById(`group-${d.nome.replace(/\s+/g, '')}`);
             if (container) {
                 if (d.status === "Presente") container.querySelector('.btn-p').classList.add('active');
                 if (d.status === "Ausente") container.querySelector('.btn-f').classList.add('active');
@@ -210,41 +215,19 @@
         });
     }
 
-    onSnapshot(query(collection(db, "chamada_diaria"), where("data", "==", hojeISO)), (snap) => {
-        const avisoDiv = document.getElementById('avisoChamadaFeita');
-        const spanOperador = document.getElementById('nomeQuemIniciou');
-        if (!snap.empty) {
-            spanOperador.innerText = snap.docs[0].data().operador || "OUTRA PESSOA";
-            avisoDiv.style.display = 'block';
-            const inst = bootstrap.Modal.getInstance(document.getElementById('modalIdentificacao'));
-            if(inst) inst.hide();
-        } else {
-            avisoDiv.style.display = 'none';
-            if (!meuNome) {
-                const m = new bootstrap.Modal(document.getElementById('modalIdentificacao'));
-                m.show();
-            }
-        }
-        colorirBotoes();
-    });
-
-    document.getElementById('btnSalvarIdentificacao').onclick = () => {
-        const nomeInput = document.getElementById('nomeOperador').value.trim().toUpperCase();
-        if (nomeInput.length < 3) return alert("Digite seu nome.");
-        localStorage.setItem('usuario_maranata', nomeInput);
-        meuNome = nomeInput;
-        bootstrap.Modal.getInstance(document.getElementById('modalIdentificacao')).hide();
-    };
-
     onSnapshot(query(collection(db, "membros"), orderBy("nome", "asc")), (membroSnapshot) => {
         const listaCom = document.getElementById('listaComFuncao');
         const listaSem = document.getElementById('listaSemFuncao');
         listaCom.innerHTML = ""; listaSem.innerHTML = "";
+        nomesComFuncao = []; 
         membroSnapshot.forEach(docSnap => {
             const m = docSnap.data();
+            const temFuncao = m.funcoes && m.funcoes.length > 0;
+            if(temFuncao) nomesComFuncao.push(m.nome);
+            const btnEditHtml = `<button class="btn-edit" onclick="abrirEditor('${m.nome}')"><i class="bi ${perfil === 'admin' ? 'bi-pencil-square' : 'bi-info-circle'}"></i></button>`;
             const html = `
                 <div class="member-card">
-                    <button class="btn-edit" onclick="abrirEditor('${m.nome}')"><i class="bi bi-pencil-square"></i></button>
+                    ${btnEditHtml}
                     <div class="member-info">
                         <span class="member-name">${m.nome}</span>
                         <div class="tag-container">
@@ -252,54 +235,80 @@
                             ${m.funcoes ? m.funcoes.map(f => `<span class="badge-funcao">${f}</span>`).join('') : ''}
                         </div>
                     </div>
-                    <div class="d-flex" id="group-${m.nome}">
+                    <div class="d-flex" id="group-${m.nome.replace(/\s+/g, '')}">
                         <button onclick="fazerChamada('${m.nome}', 'P')" class="btn-call btn-p">P</button>
                         <button onclick="fazerChamada('${m.nome}', 'F')" class="btn-call btn-f">F</button>
                         <button onclick="fazerChamada('${m.nome}', 'FJ')" class="btn-call btn-fj">FJ</button>
                     </div>
                 </div>`;
-            if(m.funcoes && m.funcoes.length > 0) listaCom.innerHTML += html;
+            if(temFuncao) listaCom.innerHTML += html;
             else listaSem.innerHTML += html;
         });
         colorirBotoes();
     });
 
     window.fazerChamada = async (nome, statusAbv) => {
-        if (!meuNome) return;
+        const statusSnap = await getDoc(doc(db, "status_sistema", hojeISO));
+        if (perfil !== 'admin' && statusSnap.exists() && statusSnap.data().status === "FINALIZADO") {
+            alert("Atenção: A chamada de hoje já foi FINALIZADA e está TRANCADA.");
+            return; 
+        }
         let statusFinal = statusAbv === 'P' ? "Presente" : (statusAbv === 'F' ? "Ausente" : "Justificada");
-        await setDoc(doc(db, "chamada_diaria", `${hojeISO}_${nome}`), { 
-            nome, data: hojeISO, status: statusFinal, operador: meuNome 
-        });
+        await setDoc(doc(db, "chamada_diaria", `${hojeISO}_${nome}`), { nome, data: hojeISO, status: statusFinal, operador: meuNome });
+        colorirBotoes();
     };
 
     window.abrirEditor = async (nome) => {
-        membroSendoEditado = nome;
+        window.membroSendoEditado = nome;
         document.getElementById('editNomeMembro').innerText = nome;
         const mSnap = await getDoc(doc(db, "membros", nome));
-        if(mSnap.exists()) document.getElementById('inputMudarGrupo').value = mSnap.data().grupo || "";
-        const tagsDiv = document.getElementById('containerTagsFuncao');
-        tagsDiv.innerHTML = "";
-        (mSnap.data().funcoes || []).forEach(f => {
-            tagsDiv.innerHTML += `<span class="badge-funcao m-1">${f} <i class="bi bi-x-circle text-danger ms-1" style="cursor:pointer" onclick="removerFuncao('${f}')"></i></span>`;
-        });
+        if(mSnap.exists()) {
+            const m = mSnap.data();
+            document.getElementById('inputMudarGrupo').value = m.grupo || "";
+            const containerTags = document.getElementById('containerTagsFuncao');
+            containerTags.innerHTML = "";
+            if(m.funcoes && m.funcoes.length > 0) {
+                m.funcoes.forEach(f => {
+                    containerTags.innerHTML += `<span class="badge-funcao d-flex align-items-center">${f} <i class="bi bi-x-circle-fill text-danger ms-2" style="cursor:pointer" onclick="removerFuncao('${f}')"></i></span>`;
+                });
+            }
+        }
         new bootstrap.Modal(document.getElementById('modalEditarMembro')).show();
     };
 
-    document.getElementById('btnLimparChamadaDia').onclick = async () => {
-        if(confirm(`Limpar chamada de hoje?`)) {
-            await deleteDoc(doc(db, "chamada_diaria", `${hojeISO}_${membroSendoEditado}`));
-            const snap = await getDocs(query(collection(db, "chamada_diaria"), where("data", "==", hojeISO)));
-            if(snap.empty) { localStorage.removeItem('usuario_maranata'); meuNome = null; }
-            bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
+    document.getElementById('btnSalvarGrupo').onclick = async () => {
+        await updateDoc(doc(db, "membros", window.membroSendoEditado), { grupo: document.getElementById('inputMudarGrupo').value.toUpperCase() });
+        alert("Grupo atualizado!");
+    };
+
+    document.getElementById('btnAddFuncao').onclick = async () => {
+        const novaF = document.getElementById('inputNovaFuncao').value.toUpperCase();
+        if(novaF) {
+            await updateDoc(doc(db, "membros", window.membroSendoEditado), { funcoes: arrayUnion(novaF) });
+            document.getElementById('inputNovaFuncao').value = "";
+            abrirEditor(window.membroSendoEditado);
         }
     };
 
-    document.getElementById('btnSalvarGrupo').onclick = async () => { await updateDoc(doc(db, "membros", membroSendoEditado), { grupo: document.getElementById('inputMudarGrupo').value.toUpperCase() }); };
-    document.getElementById('btnAddFuncao').onclick = async () => { const f = document.getElementById('inputNovaFuncao').value.toUpperCase(); if(f) await updateDoc(doc(db, "membros", membroSendoEditado), { funcoes: arrayUnion(f) }); document.getElementById('inputNovaFuncao').value = ""; };
-    window.removerFuncao = async (f) => { await updateDoc(doc(db, "membros", membroSendoEditado), { funcoes: arrayRemove(f) }); };
-    document.getElementById('btnSalvarNovoMembro').onclick = async () => { const n = document.getElementById('novoNomeMembro').value.toUpperCase(); const g = document.getElementById('novoGrupoMembro').value.toUpperCase(); if(n) await setDoc(doc(db, "membros", n), { nome: n, grupo: g, funcoes: [] }); bootstrap.Modal.getInstance(document.getElementById('modalNovoMembro')).hide(); };
-    document.getElementById('btnExcluirMembro').onclick = async () => { if(confirm("Excluir?")) { await deleteDoc(doc(db, "membros", membroSendoEditado)); bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide(); } };
+    window.removerFuncao = async (funcao) => {
+        if(confirm(`Remover ${funcao}?`)) {
+            await updateDoc(doc(db, "membros", window.membroSendoEditado), { funcoes: arrayRemove(funcao) });
+            abrirEditor(window.membroSendoEditado);
+        }
+    };
 
+    document.getElementById('btnLimparChamadaDia').onclick = async () => {
+        const statusSnap = await getDoc(doc(db, "status_sistema", hojeISO));
+        if (perfil !== 'admin' && statusSnap.exists() && statusSnap.data().status === "FINALIZADO") {
+            alert("Apenas o Administrador pode limpar registros agora.");
+            return;
+        }
+        if(confirm("Apagar marcação deste membro?")) {
+            await deleteDoc(doc(db, "chamada_diaria", `${hojeISO}_${window.membroSendoEditado}`));
+            colorirBotoes();
+            bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
+        }
+    };
 </script>
 </body>
 </html>

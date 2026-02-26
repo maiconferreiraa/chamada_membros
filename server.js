@@ -10,11 +10,19 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // Inicialização do Firebase
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+/// Substitua as linhas 13 a 17 por estas:
+const serviceAccount = require("./firebase-key.json"); // Importa o arquivo direto
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 const db = admin.firestore();
+
+// --- ROTA PRINCIPAL (Login) ---
+// Adicionada para garantir que a primeira página aberta seja o login
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
 
 // --- FUNÇÃO DE IMPORTAÇÃO AUTOMÁTICA ---
 async function importarMembrosAutomatico() {
@@ -39,7 +47,7 @@ async function importarMembrosAutomatico() {
                 const categoria = partes[2].trim();
 
                 const ref = db.collection('membros').doc(nome);
-                // O merge: true é vital para não apagar as funções que tu já add manualmente
+                // O merge: true é vital para não apagar as funções que você já adicionou manualmente
                 batch.set(ref, { 
                     nome, 
                     grupo, 
