@@ -40,6 +40,7 @@
             border-radius: 4px; 
             margin: 2px; 
             font-size: 0.75rem; 
+            align-items: center;
         }
 
         select.form-select { background-color: #1a1a1a !important; color: white !important; border: 1px solid #444 !important; }
@@ -79,8 +80,8 @@
             <div class="col-6">
                 <label class="small text-white-50 ms-1">Mês:</label>
                 <select id="selectMes" class="form-select">
-                    <option value="01">Jan</option><option value="02" selected>Fev</option>
-                    <option value="03">Mar</option><option value="04">Abr</option>
+                    <option value="01">Jan</option><option value="02">Fev</option>
+                    <option value="03" selected>Mar</option><option value="04">Abr</option>
                     <option value="05">Mai</option><option value="06">Jun</option>
                     <option value="07">Jul</option><option value="08">Ago</option>
                     <option value="09">Set</option><option value="10">Out</option>
@@ -142,21 +143,45 @@
 
         listaDiv.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>';
 
-        const qP = query(collection(db, "chamada_diaria"), orderBy("data", "asc"));
-        const snapP = await getDocs(qP);
+        const colecoes = ["chamada_diaria", "chamada_EBD", "chamada_NOITE"];
+        let registrosPorMembro = {};
+
+        for (const colName of colecoes) {
+            const snapP = await getDocs(collection(db, colName));
+
+            snapP.forEach(docSnap => {
+                const d = docSnap.data();
+                if (!d.data) return;
+
+                const [dAno, dMes, dDia] = d.data.split('-');
+                
+                if (dMes === mes && dAno === ano) {
+                    if (!registrosPorMembro[d.nome]) registrosPorMembro[d.nome] = {};
+                    
+                    let sufixo = "";
+                    let ordemPeriodo = "0"; 
+
+                    if(colName === "chamada_EBD") { sufixo = " (EBD)"; ordemPeriodo = "1"; }
+                    if(colName === "chamada_NOITE") { sufixo = " (NOITE)"; ordemPeriodo = "2"; }
+
+                    // UNIFICAÇÃO: Se for dia de domingo (01 hoje), e já existir registro EBD/NOITE, 
+                    // ignora o registro da 'chamada_diaria' para não duplicar.
+                    if (colName === "chamada_diaria" && dDia === "01") return;
+
+                    const chaveUnica = dDia + sufixo;
+
+                    registrosPorMembro[d.nome][chaveUnica] = {
+                        dia: dDia,
+                        periodo: sufixo,
+                        status: d.status,
+                        sortKey: dDia + ordemPeriodo
+                    };
+                }
+            });
+        }
 
         const qM = query(collection(db, "membros"), orderBy("nome", "asc"));
         const snapM = await getDocs(qM);
-
-        let registros = {};
-        snapP.forEach(docSnap => {
-            const d = docSnap.data();
-            const [dAno, dMes, dDia] = d.data.split('-');
-            if (dMes === mes && dAno === ano) {
-                if (!registros[d.nome]) registros[d.nome] = [];
-                registros[d.nome].push({ dia: dDia, status: d.status });
-            }
-        });
 
         let html = `<table class="table table-dark table-bordered">
                     <thead><tr><th>Membro / Grupo / Funções</th><th>Histórico</th></tr></thead><tbody>`;
@@ -165,20 +190,26 @@
         snapM.forEach(mDoc => {
             const m = mDoc.data();
             if ((tipoBusca === "GERAL" || m.nome === tipoBusca) && m.funcoes && m.funcoes.length > 0) {
-                const lista = registros[m.nome] || [];
-                if (lista.length > 0) {
+                const historicoDict = registrosPorMembro[m.nome] || {};
+                const historicoMembro = Object.values(historicoDict);
+
+                if (historicoMembro.length > 0) {
                     count++;
                     let tags = "";
-                    lista.forEach(reg => {
+                    
+                    historicoMembro.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+
+                    historicoMembro.forEach(reg => {
                         let cor = 'text-white';
-                        let abrev = reg.status[0];
+                        let abrev = reg.status ? reg.status[0] : "?";
+                        
                         if(reg.status === 'Presente') cor = 'text-blue';
                         if(reg.status === 'Ausente') { cor = 'text-red'; abrev = 'F'; }
                         if(reg.status === 'Justificada') { cor = 'text-yellow'; abrev = 'FJ'; }
-                        tags += `<span class="dia-tag"><b class="${cor}">${abrev}</b> ${reg.dia}</span>`;
+                        
+                        tags += `<span class="dia-tag"><b class="${cor}">${abrev}</b> ${reg.dia}${reg.periodo}</span>`;
                     });
 
-                    // Monta a célula com Nome, Grupo e Funções
                     html += `<tr>
                                 <td class="text-start">
                                     <span class="td-nome">${m.nome}</span>
@@ -194,7 +225,7 @@
         });
 
         if (count === 0) {
-            listaDiv.innerHTML = '<p class="text-center p-5 text-white-50">Nenhum registro encontrado para este filtro.</p>';
+            listaDiv.innerHTML = '<p class="text-center p-5 text-white-50">Nenhum registro encontrado.</p>';
         } else {
             listaDiv.innerHTML = html + "</tbody></table>";
         }
