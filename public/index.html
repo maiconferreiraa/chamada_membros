@@ -211,14 +211,25 @@
     }
 
     async function colorirBotoes() {
-        const idColecao = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
+        // Reinicia controles
         document.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.btn-update-inline').forEach(btn => btn.style.display = 'none');
+        registrosNoBanco = {};
+        registrosTemporarios = {};
 
-        const q = query(collection(db, idColecao), where("data", "==", hojeISO));
-        const snap = await getDocs(q);
+        // Define coleção principal baseada no turno
+        const idColecao = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
         
-        registrosNoBanco = {}; 
+        // Tenta buscar no turno específico
+        const q = query(collection(db, idColecao), where("data", "==", hojeISO));
+        let snap = await getDocs(q);
+
+        // COMPATIBILIDADE: Se for Domingo e não achou nada no turno, tenta buscar na geral (caso tenha salvado errado antes)
+        if (ehDomingo && snap.empty) {
+            const qGeral = query(collection(db, "chamada_diaria"), where("data", "==", hojeISO));
+            snap = await getDocs(qGeral);
+        }
+        
         snap.forEach(docSnap => {
             const d = docSnap.data();
             const idMembro = d.nome.replace(/\s+/g, '');
@@ -240,9 +251,10 @@
         colorirBotoes(); 
     };
 
+    // Configura inicialização do Domingo
     if (ehDomingo) {
         document.getElementById('seletorDomingo').style.display = 'flex';
-        window.mudarPeriodo("EBD"); 
+        document.getElementById('btnEBD').classList.add('active');
     }
 
     if (perfil === 'admin') {
@@ -285,6 +297,7 @@
             if(temFuncao) listaCom.innerHTML += html;
             else listaSem.innerHTML += html;
         });
+        // Sincroniza cores após renderizar a lista
         colorirBotoes();
     });
 
@@ -337,48 +350,17 @@
         }
     };
 
-    // --- FUNÇÃO DE LIMPEZA GERAL DO PERÍODO ---
-    
     document.getElementById('btnLimparTudoHoje').onclick = async () => {
         const idColecao = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
-        const msg = periodoAtual ? `da ${periodoAtual}` : "da chamada diária";
-        
-        if(confirm(`ATENÇÃO: Deseja apagar TODA a chamada de hoje ${msg}?`)) {
+        if(confirm(`Limpar toda a chamada de hoje?`)) {
             const q = query(collection(db, idColecao), where("data", "==", hojeISO));
             const snap = await getDocs(q);
-            
             const batch = writeBatch(db);
-            snap.forEach(docSnap => {
-                batch.delete(docSnap.ref);
-            });
-
+            snap.forEach(d => batch.delete(d.ref));
             await batch.commit();
-            
-            // Também remove o status de finalizado se houver
-            await deleteDoc(doc(db, "status_sistema", `${hojeISO}_${periodoAtual}`));
-            
-            alert("CHAMADA LIMPA COM SUCESSO!");
+            alert("LIMPO!");
             colorirBotoes();
         }
-    };
-
-    document.getElementById('btnLimparChamadaDia').onclick = async () => {
-        const nomeMembro = window.membroSendoEditado;
-        const idColecao = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
-        const idMembroCss = nomeMembro.replace(/\s+/g, '');
-        
-        await deleteDoc(doc(db, idColecao, `${hojeISO}_${nomeMembro}`));
-        delete registrosNoBanco[nomeMembro];
-        delete registrosTemporarios[nomeMembro];
-
-        const container = document.getElementById(`group-${idMembroCss}`);
-        if (container) {
-            container.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
-        }
-        document.getElementById(`btnUp-${idMembroCss}`).style.display = 'none';
-
-        alert(`REGISTRO DE ${nomeMembro} REMOVIDO!`);
-        bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
     };
 
     window.abrirEditor = async (nome) => {
@@ -388,16 +370,31 @@
         if(mSnap.exists()) {
             const m = mSnap.data();
             document.getElementById('inputMudarGrupo').value = m.grupo || "";
-            const containerTags = document.getElementById('containerTagsFuncao');
-            containerTags.innerHTML = (m.funcoes || []).map(f => `<span class="badge-funcao d-flex align-items-center">${f} <i class="bi bi-x-circle-fill text-danger ms-2" style="cursor:pointer" onclick="removerFuncao('${f}')"></i></span>`).join('');
+            renderizarTagsFuncao(m.funcoes || []);
         }
         new bootstrap.Modal(document.getElementById('modalEditarMembro')).show();
     };
 
+    function renderizarTagsFuncao(funcoes) {
+        const container = document.getElementById('containerTagsFuncao');
+        container.innerHTML = funcoes.map(f => `
+            <span class="badge-funcao d-flex align-items-center mb-1 me-1">
+                ${f} <i class="bi bi-x-circle-fill text-danger ms-2" style="cursor:pointer" onclick="removerFuncao('${f}')"></i>
+            </span>`).join('');
+    }
+
+    window.removerFuncao = async (funcao) => {
+        if(confirm(`Remover ${funcao}?`)) {
+            await updateDoc(doc(db, "membros", window.membroSendoEditado), { funcoes: arrayRemove(funcao) });
+            const mSnap = await getDoc(doc(db, "membros", window.membroSendoEditado));
+            renderizarTagsFuncao(mSnap.data().funcoes || []);
+        }
+    };
+
     document.getElementById('btnSalvarGrupo').onclick = async () => {
-        await updateDoc(doc(db, "membros", window.membroSendoEditado), { grupo: document.getElementById('inputMudarGrupo').value.toUpperCase() });
-        alert("ATUALIZADO!");
-        await abrirEditor(window.membroSendoEditado);
+        const g = document.getElementById('inputMudarGrupo').value.toUpperCase();
+        await updateDoc(doc(db, "membros", window.membroSendoEditado), { grupo: g });
+        alert("GRUPO ATUALIZADO!");
     };
 
     document.getElementById('btnAddFuncao').onclick = async () => {
@@ -405,9 +402,18 @@
         if(f) {
             await updateDoc(doc(db, "membros", window.membroSendoEditado), { funcoes: arrayUnion(f) });
             document.getElementById('inputNovaFuncao').value = "";
-            alert("ATUALIZADO!");
-            await abrirEditor(window.membroSendoEditado);
+            const mSnap = await getDoc(doc(db, "membros", window.membroSendoEditado));
+            renderizarTagsFuncao(mSnap.data().funcoes || []);
+            alert("FUNÇÃO ADICIONADA!");
         }
+    };
+
+    document.getElementById('btnLimparChamadaDia').onclick = async () => {
+        const idColecao = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
+        await deleteDoc(doc(db, idColecao, `${hojeISO}_${window.membroSendoEditado}`));
+        alert("LIMPO!");
+        colorirBotoes();
+        bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
     };
 
     document.getElementById('btnSalvarNovoMembro').onclick = async () => {
@@ -415,7 +421,7 @@
         const g = document.getElementById('novoGrupoMembro').value.toUpperCase();
         if(n) {
             await setDoc(doc(db, "membros", n), { nome: n, grupo: g, funcoes: [] });
-            alert("Membro adicionado!");
+            alert("ADICIONADO!");
             bootstrap.Modal.getInstance(document.getElementById('modalNovoMembro')).hide();
         }
     };
