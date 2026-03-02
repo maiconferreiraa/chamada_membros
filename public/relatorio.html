@@ -18,91 +18,145 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
-        body { background-color: #000000; color: #ffffff; padding-bottom: 50px; font-family: sans-serif; }
-        .card-relatorio { background: #121212; border: 1px solid #333; border-radius: 12px; }
-        
-        .text-yellow { color: #ffca28 !important; }
-        .text-blue { color: #0d6efd !important; }
-        .text-red { color: #ff4444 !important; }
+        :root {
+            --neon-blue: #00d2ff;
+            --neon-red: #ff3131;
+            --neon-yellow: #ffde59;
+            --bg-card: #161616;
+            --bg-print-gray: #1a1a1a;
+            --border-color: #2c2c2c;
+        }
 
-        .table { color: #ffffff !important; border-color: #444; vertical-align: middle; width: 100%; font-size: 0.85rem; }
-        .table-dark { --bs-table-bg: #121212; }
+        body { 
+            background-color: #000000; 
+            color: #ffffff; 
+            padding-bottom: 50px; 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
         
-        .td-nome { font-weight: bold; color: #fff; display: block; font-size: 0.95rem; }
-        .td-detalhes { font-size: 0.7rem; color: #aaa; text-transform: uppercase; margin-top: 2px; }
-        .badge-grupo-rel { color: #ffca28; font-weight: bold; margin-right: 5px; }
+        .navbar-custom { 
+            border-bottom: 3px solid var(--neon-blue); 
+            background-color: #000 !important;
+            box-shadow: 0 4px 20px rgba(0, 210, 255, 0.2);
+        }
+
+        .card-relatorio { 
+            background: var(--bg-card); 
+            border: 1px solid var(--border-color); 
+            border-radius: 15px;
+        }
+
+        .text-yellow { color: var(--neon-yellow) !important; }
+        .text-blue { color: var(--neon-blue) !important; }
+        .text-red { color: var(--neon-red) !important; }
+
+        .table { color: #ffffff !important; vertical-align: middle; border-collapse: separate; border-spacing: 0 5px; }
+        .table thead th { border: none; color: var(--neon-blue) !important; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
+        
+        tbody tr { background-color: var(--bg-card); }
+        tbody td { border: none !important; padding: 8px !important; }
+        tbody td:first-child { border-radius: 8px 0 0 8px; border-left: 4px solid var(--neon-blue) !important; }
+        tbody td:last-child { border-radius: 0 8px 8px 0; }
+        
+        .td-nome { font-weight: 800; color: #ffffff !important; display: block; font-size: 0.95rem; }
+        .td-detalhes { font-size: 0.7rem; color: #888 !important; text-transform: uppercase; }
+        .badge-grupo-rel { color: var(--neon-yellow) !important; font-weight: bold; margin-right: 8px; }
 
         .dia-tag { 
             display: inline-flex; 
-            background: #2a2a2a; 
-            border: 1px solid #444; 
-            padding: 2px 6px; 
-            border-radius: 4px; 
+            background: #000 !important; 
+            border: 1px solid #333 !important; 
+            padding: 2px 8px; 
+            border-radius: 15px; 
             margin: 2px; 
-            font-size: 0.75rem; 
+            font-size: 0.7rem; 
             align-items: center;
+            font-weight: 600;
         }
 
-        select.form-select { background-color: #1a1a1a !important; color: white !important; border: 1px solid #444 !important; }
-        .navbar-custom { border-bottom: 2px solid #0d6efd; background-color: #000 !important; }
-        
+        .tag-p { border-color: var(--neon-blue) !important; }
+        .tag-f { border-color: var(--neon-red) !important; }
+        .tag-fj { border-color: var(--neon-yellow) !important; }
+
+        select.form-select { background-color: #000 !important; color: white !important; border: 1px solid #444 !important; }
+
+        /* --- CONFIGURAÇÃO DE IMPRESSÃO EM CINZA GRAFITE --- */
         @media print {
+            @page { size: portrait; margin: 0.5cm; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            
+            body { 
+                background-color: var(--bg-print-gray) !important; 
+                color: #ffffff !important; 
+            }
+            
             .navbar, .card-relatorio, .btn-print-hide { display: none !important; }
-            body { background-color: #fff !important; color: #000 !important; }
-            .table { color: #000 !important; border: 1px solid #000 !important; }
-            .td-nome { color: #000 !important; }
-            .td-detalhes { color: #333 !important; }
-            .dia-tag { border: 1px solid #000; background: none; color: #000; }
+            
+            .table { width: 100% !important; border-spacing: 0 3px !important; }
+            
+            /* Ajuste de contraste para o fundo cinza */
+            tbody tr { background-color: #252525 !important; }
+            .td-nome { font-size: 0.85rem !important; color: #fff !important; }
+            .td-detalhes { color: #aaa !important; }
+            
+            .dia-tag { 
+                background-color: #111 !important; 
+                border: 1px solid #444 !important; 
+                margin: 1px !important; 
+                padding: 1px 6px !important; 
+            }
         }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-dark bg-black sticky-top navbar-custom p-3 shadow">
+<nav class="navbar navbar-dark bg-black sticky-top navbar-custom p-3 shadow btn-print-hide">
     <div class="container-fluid">
-        <span class="navbar-brand fw-bold"><i class="bi bi-file-earmark-bar-graph text-primary me-2"></i>RELATÓRIOS</span>
+        <span class="navbar-brand fw-bold"><i class="bi bi-file-earmark-bar-graph-fill text-info me-2"></i>RELATÓRIO DE CHAMADA</span>
         <div>
-            <button onclick="window.print()" class="btn btn-success btn-sm me-2 btn-print-hide"><i class="bi bi-printer"></i> IMPRIMIR</button>
-            <a href="index.html" class="btn btn-outline-light btn-sm">Voltar</a>
+            <button onclick="window.print()" class="btn btn-success btn-sm me-2 fw-bold"><i class="bi bi-printer-fill"></i> IMPRIMIR</button>
+            <a href="index.html" class="btn btn-outline-light btn-sm fw-bold">VOLTAR</a>
         </div>
     </div>
 </nav>
 
-<div class="container mt-3">
-    <div class="card card-relatorio p-3 mb-4 shadow">
-        <div class="row g-2">
-            <div class="col-12 mb-2">
-                <label class="small text-white-50 ms-1">Membro:</label>
+<div class="container mt-4">
+    <div class="card card-relatorio p-4 mb-4 btn-print-hide">
+        <div class="row g-3">
+            <div class="col-12">
+                <label class="small text-info fw-bold mb-1"><i class="bi bi-person-circle"></i> FILTRAR MEMBRO:</label>
                 <select id="selectMembro" class="form-select">
                     <option value="GERAL">RELATÓRIO GERAL (Membros com Função)</option>
                 </select>
             </div>
             <div class="col-6">
-                <label class="small text-white-50 ms-1">Mês:</label>
+                <label class="small text-info fw-bold mb-1"><i class="bi bi-calendar-event"></i> MÊS:</label>
                 <select id="selectMes" class="form-select">
-                    <option value="01">Jan</option><option value="02">Fev</option>
-                    <option value="03" selected>Mar</option><option value="04">Abr</option>
-                    <option value="05">Mai</option><option value="06">Jun</option>
-                    <option value="07">Jul</option><option value="08">Ago</option>
-                    <option value="09">Set</option><option value="10">Out</option>
-                    <option value="11">Nov</option><option value="12">Dez</option>
+                    <option value="01">Janeiro</option><option value="02">Fevereiro</option>
+                    <option value="03" selected>Março</option><option value="04">Abril</option>
+                    <option value="05">Maio</option><option value="06">Junho</option>
+                    <option value="07">Julho</option><option value="08">Agosto</option>
+                    <option value="09">Setembro</option><option value="10">Outubro</option>
+                    <option value="11">Novembro</option><option value="12">Dezembro</option>
                 </select>
             </div>
             <div class="col-6">
-                <label class="small text-white-50 ms-1">Ano:</label>
+                <label class="small text-info fw-bold mb-1"><i class="bi bi-calendar-check"></i> ANO:</label>
                 <select id="selectAno" class="form-select">
                     <option value="2025">2025</option><option value="2026" selected>2026</option>
                 </select>
             </div>
         </div>
-        <div class="d-flex gap-2 mt-3">
-            <button id="btnBuscar" class="btn btn-primary flex-grow-1 fw-bold">GERAR RELATÓRIO</button>
+        <div class="mt-4">
+            <button id="btnBuscar" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
+                <i class="bi bi-search me-2"></i> GERAR RELATÓRIO AGORA
+            </button>
         </div>
     </div>
 
     <div id="resultadoRelatorio">
         <div id="listaHistorico" class="table-responsive">
-            <p class="text-center text-white-50 p-5">Aguardando geração do relatório...</p>
+            <p class="text-center text-white-50 p-5 btn-print-hide"><i class="bi bi-info-circle me-2"></i>Selecione os filtros e clique em gerar.</p>
         </div>
     </div>
 </div>
@@ -141,7 +195,7 @@
         const ano = document.getElementById('selectAno').value;
         const listaDiv = document.getElementById('listaHistorico');
 
-        listaDiv.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>';
+        listaDiv.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-info"></div><p class="mt-2 text-info">Processando registros...</p></div>';
 
         const colecoes = ["chamada_diaria", "chamada_EBD", "chamada_NOITE"];
         let registrosPorMembro = {};
@@ -157,19 +211,12 @@
                 
                 if (dMes === mes && dAno === ano) {
                     if (!registrosPorMembro[d.nome]) registrosPorMembro[d.nome] = {};
-                    
                     let sufixo = "";
                     let ordemPeriodo = "0"; 
-
                     if(colName === "chamada_EBD") { sufixo = " (EBD)"; ordemPeriodo = "1"; }
                     if(colName === "chamada_NOITE") { sufixo = " (NOITE)"; ordemPeriodo = "2"; }
-
-                    // UNIFICAÇÃO: Se for dia de domingo (01 hoje), e já existir registro EBD/NOITE, 
-                    // ignora o registro da 'chamada_diaria' para não duplicar.
                     if (colName === "chamada_diaria" && dDia === "01") return;
-
                     const chaveUnica = dDia + sufixo;
-
                     registrosPorMembro[d.nome][chaveUnica] = {
                         dia: dDia,
                         periodo: sufixo,
@@ -183,8 +230,8 @@
         const qM = query(collection(db, "membros"), orderBy("nome", "asc"));
         const snapM = await getDocs(qM);
 
-        let html = `<table class="table table-dark table-bordered">
-                    <thead><tr><th>Membro / Grupo / Funções</th><th>Histórico</th></tr></thead><tbody>`;
+        let html = `<table class="table table-dark">
+                    <thead><tr><th style="width: 30%;">MEMBRO / FUNÇÕES</th><th style="width: 70%;">HISTÓRICO</th></tr></thead><tbody>`;
         let count = 0;
 
         snapM.forEach(mDoc => {
@@ -192,33 +239,28 @@
             if ((tipoBusca === "GERAL" || m.nome === tipoBusca) && m.funcoes && m.funcoes.length > 0) {
                 const historicoDict = registrosPorMembro[m.nome] || {};
                 const historicoMembro = Object.values(historicoDict);
-
                 if (historicoMembro.length > 0) {
                     count++;
                     let tags = "";
-                    
                     historicoMembro.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
-
                     historicoMembro.forEach(reg => {
-                        let cor = 'text-white';
+                        let corClasse = 'text-white';
+                        let tagClasse = '';
                         let abrev = reg.status ? reg.status[0] : "?";
-                        
-                        if(reg.status === 'Presente') cor = 'text-blue';
-                        if(reg.status === 'Ausente') { cor = 'text-red'; abrev = 'F'; }
-                        if(reg.status === 'Justificada') { cor = 'text-yellow'; abrev = 'FJ'; }
-                        
-                        tags += `<span class="dia-tag"><b class="${cor}">${abrev}</b> ${reg.dia}${reg.periodo}</span>`;
+                        if(reg.status === 'Presente') { corClasse = 'text-blue'; tagClasse = 'tag-p'; }
+                        if(reg.status === 'Ausente') { corClasse = 'text-red'; tagClasse = 'tag-f'; abrev = 'F'; }
+                        if(reg.status === 'Justificada') { corClasse = 'text-yellow'; tagClasse = 'tag-fj'; abrev = 'FJ'; }
+                        tags += `<span class="dia-tag ${tagClasse}"><b class="${corClasse}">${abrev}</b>&nbsp;${reg.dia}${reg.periodo}</span>`;
                     });
-
                     html += `<tr>
-                                <td class="text-start">
+                                <td>
                                     <span class="td-nome">${m.nome}</span>
                                     <div class="td-detalhes">
-                                        <span class="badge-grupo-rel">${m.grupo || 'SEM GRUPO'}</span>
-                                        <span class="text-white-50">• ${m.funcoes.join(', ')}</span>
+                                        <span class="badge-grupo-rel">${m.grupo || 'SEM'}</span>
+                                        <span>• ${m.funcoes.join(', ')}</span>
                                     </div>
                                 </td>
-                                <td class="text-start">${tags}</td>
+                                <td>${tags}</td>
                             </tr>`;
                 }
             }
@@ -230,7 +272,6 @@
             listaDiv.innerHTML = html + "</tbody></table>";
         }
     };
-
     carregarMembros();
 </script>
 </body>
