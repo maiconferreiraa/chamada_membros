@@ -211,25 +211,19 @@
     }
 
     async function colorirBotoes() {
-        // Reinicia controles
-        document.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.btn-update-inline').forEach(btn => btn.style.display = 'none');
-        registrosNoBanco = {};
-        registrosTemporarios = {};
-
-        // Define coleção principal baseada no turno
         const idColecao = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
-        
-        // Tenta buscar no turno específico
         const q = query(collection(db, idColecao), where("data", "==", hojeISO));
         let snap = await getDocs(q);
 
-        // COMPATIBILIDADE: Se for Domingo e não achou nada no turno, tenta buscar na geral (caso tenha salvado errado antes)
         if (ehDomingo && snap.empty) {
             const qGeral = query(collection(db, "chamada_diaria"), where("data", "==", hojeISO));
             snap = await getDocs(qGeral);
         }
         
+        // Antes de colorir, resetamos apenas os botões da tela
+        document.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.btn-update-inline').forEach(btn => btn.style.display = 'none');
+
         snap.forEach(docSnap => {
             const d = docSnap.data();
             const idMembro = d.nome.replace(/\s+/g, '');
@@ -251,7 +245,6 @@
         colorirBotoes(); 
     };
 
-    // Configura inicialização do Domingo
     if (ehDomingo) {
         document.getElementById('seletorDomingo').style.display = 'flex';
         document.getElementById('btnEBD').classList.add('active');
@@ -297,7 +290,6 @@
             if(temFuncao) listaCom.innerHTML += html;
             else listaSem.innerHTML += html;
         });
-        // Sincroniza cores após renderizar a lista
         colorirBotoes();
     });
 
@@ -410,10 +402,32 @@
 
     document.getElementById('btnLimparChamadaDia').onclick = async () => {
         const idColecao = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
-        await deleteDoc(doc(db, idColecao, `${hojeISO}_${window.membroSendoEditado}`));
-        alert("LIMPO!");
-        colorirBotoes();
+        const nomeMembro = window.membroSendoEditado;
+        const idDoc = `${hojeISO}_${nomeMembro}`;
+        
+        await deleteDoc(doc(db, idColecao, idDoc));
+        
+        // CORREÇÃO: Removemos dos objetos locais para não voltar a colorir
+        delete registrosNoBanco[nomeMembro];
+        delete registrosTemporarios[nomeMembro];
+
+        // CORREÇÃO: Limpamos visualmente o card do membro
+        const idMembroHTML = nomeMembro.replace(/\s+/g, '');
+        const container = document.getElementById(`group-${idMembroHTML}`);
+        if(container) {
+            container.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
+        }
+        
+        alert("CHAMADA DO MEMBRO FOI LIMPA!");
         bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
+    };
+
+    document.getElementById('btnExcluirMembro').onclick = async () => {
+        if(confirm(`Excluir ${window.membroSendoEditado} do sistema?`)) {
+            await deleteDoc(doc(db, "membros", window.membroSendoEditado));
+            alert("MEMBRO REMOVIDO!");
+            bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
+        }
     };
 
     document.getElementById('btnSalvarNovoMembro').onclick = async () => {
