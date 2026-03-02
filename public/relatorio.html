@@ -21,9 +21,8 @@
         :root {
             --neon-blue: #00d2ff;
             --neon-red: #ff3131;
-            --neon-yellow: #ffde59;
+            --neon-yellow: #ffca28;
             --bg-card: #161616;
-            --bg-print-gray: #1a1a1a;
             --border-color: #2c2c2c;
         }
 
@@ -31,32 +30,20 @@
             background-color: #000000; 
             color: #ffffff; 
             padding-bottom: 50px; 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, sans-serif;
         }
         
-        .navbar-custom { 
-            border-bottom: 3px solid var(--neon-blue); 
-            background-color: #000 !important;
-            box-shadow: 0 4px 20px rgba(0, 210, 255, 0.2);
-        }
-
-        .card-relatorio { 
-            background: var(--bg-card); 
-            border: 1px solid var(--border-color); 
-            border-radius: 15px;
-        }
-
+        .navbar-custom { border-bottom: 3px solid var(--neon-blue); background-color: #000 !important; }
+        .card-relatorio { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 15px; }
         .text-yellow { color: var(--neon-yellow) !important; }
         .text-blue { color: var(--neon-blue) !important; }
         .text-red { color: var(--neon-red) !important; }
 
         .table { color: #ffffff !important; vertical-align: middle; border-collapse: separate; border-spacing: 0 5px; }
-        .table thead th { border: none; color: var(--neon-blue) !important; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
-        
+        .table-dark { --bs-table-bg: transparent; }
         tbody tr { background-color: var(--bg-card); }
         tbody td { border: none !important; padding: 8px !important; }
         tbody td:first-child { border-radius: 8px 0 0 8px; border-left: 4px solid var(--neon-blue) !important; }
-        tbody td:last-child { border-radius: 0 8px 8px 0; }
         
         .td-nome { font-weight: 800; color: #ffffff !important; display: block; font-size: 0.95rem; }
         .td-detalhes { font-size: 0.7rem; color: #888 !important; text-transform: uppercase; }
@@ -65,7 +52,7 @@
         .dia-tag { 
             display: inline-flex; 
             background: #000 !important; 
-            border: 1px solid #333 !important; 
+            border: 1.5px solid #333 !important; 
             padding: 2px 8px; 
             border-radius: 15px; 
             margin: 2px; 
@@ -73,48 +60,81 @@
             align-items: center;
             font-weight: 600;
         }
-
         .tag-p { border-color: var(--neon-blue) !important; }
         .tag-f { border-color: var(--neon-red) !important; }
         .tag-fj { border-color: var(--neon-yellow) !important; }
 
-        select.form-select { background-color: #000 !important; color: white !important; border: 1px solid #444 !important; }
+        .print-only-header { display: none; }
 
-        /* --- CONFIGURAÇÃO DE IMPRESSÃO EM CINZA GRAFITE --- */
+        /* --- CONFIGURAÇÃO DA FOLHA A4 IMPRESSA --- */
         @media print {
-            @page { size: portrait; margin: 0.5cm; }
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            @page { size: portrait; margin: 0.8cm; }
             
-            body { 
-                background-color: var(--bg-print-gray) !important; 
-                color: #ffffff !important; 
+            /* Força a impressão das cores e bordas */
+            * { 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+                color-adjust: exact !important;
             }
-            
+
+            body { background-color: #ffffff !important; color: #000000 !important; padding: 0 !important; }
+            .print-only-header { display: block !important; text-align: center; border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px; }
+            .print-only-header h4 { font-weight: bold; margin: 0; color: #000; }
+            .print-only-header p { font-size: 0.8rem; margin: 5px 0 0 0; color: #333; }
             .navbar, .card-relatorio, .btn-print-hide { display: none !important; }
-            
-            .table { width: 100% !important; border-spacing: 0 3px !important; }
-            
-            /* Ajuste de contraste para o fundo cinza */
-            tbody tr { background-color: #252525 !important; }
-            .td-nome { font-size: 0.85rem !important; color: #fff !important; }
-            .td-detalhes { color: #aaa !important; }
-            
-            .dia-tag { 
-                background-color: #111 !important; 
-                border: 1px solid #444 !important; 
-                margin: 1px !important; 
-                padding: 1px 6px !important; 
+
+            /* Quadrantes: Grade de separação entre membros */
+            .table { 
+                width: 100% !important; 
+                border-collapse: collapse !important; 
+                border: 1px solid #000 !important; 
+                color: #000 !important; 
             }
+            .table thead th { background-color: #f0f0f0 !important; color: #000 !important; border: 1px solid #000 !important; font-size: 0.85rem; padding: 10px !important;}
+            tbody tr { background-color: #fff !important; }
+            
+            /* Separação visual por quadrantes em cada membro */
+            tbody td { 
+                padding: 12px 8px !important; 
+                border: 1px solid #444 !important; 
+                color: #000 !important; 
+            }
+            
+            .td-nome { color: #000 !important; font-size: 0.95rem !important; font-weight: bold !important; }
+            .td-detalhes { color: #333 !important; }
+            .badge-grupo-rel { color: #000 !important; border: 1.5px solid #000; padding: 0 4px; border-radius: 4px; }
+
+            /* Cores Neon nos Status na Impressão */
+            .dia-tag { 
+                background-color: #fff !important; 
+                border-width: 2px !important; 
+                border-style: solid !important;
+                margin: 2px !important; 
+                padding: 3px 8px !important; 
+                font-size: 0.7rem !important; 
+            }
+            .tag-p { border-color: var(--neon-blue) !important; }
+            .tag-f { border-color: var(--neon-red) !important; }
+            .tag-fj { border-color: var(--neon-yellow) !important; }
+
+            .text-blue { color: #007bff !important; font-weight: bold !important; }
+            .text-red { color: #dc3545 !important; font-weight: bold !important; }
+            .text-yellow { color: #856404 !important; font-weight: bold !important; }
         }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-dark bg-black sticky-top navbar-custom p-3 shadow btn-print-hide">
+<div class="print-only-header">
+    <h4>IGREJA CRISTÃ MARANATA - RELATÓRIO MENSAL / DIÁRIO</h4>
+    <p>Data de Emissão: <span id="dataRelatorioPrint"></span></p>
+</div>
+
+<nav class="navbar navbar-dark bg-black sticky-top navbar-custom p-3 btn-print-hide">
     <div class="container-fluid">
-        <span class="navbar-brand fw-bold"><i class="bi bi-file-earmark-bar-graph-fill text-info me-2"></i>RELATÓRIO DE CHAMADA</span>
+        <span class="navbar-brand fw-bold"><i class="bi bi-file-earmark-bar-graph-fill text-info me-2"></i>RELATÓRIO</span>
         <div>
-            <button onclick="window.print()" class="btn btn-success btn-sm me-2 fw-bold"><i class="bi bi-printer-fill"></i> IMPRIMIR</button>
+            <button onclick="prepararPrint()" class="btn btn-success btn-sm me-2 fw-bold"><i class="bi bi-printer-fill"></i> IMPRIMIR</button>
             <a href="index.html" class="btn btn-outline-light btn-sm fw-bold">VOLTAR</a>
         </div>
     </div>
@@ -124,13 +144,19 @@
     <div class="card card-relatorio p-4 mb-4 btn-print-hide">
         <div class="row g-3">
             <div class="col-12">
-                <label class="small text-info fw-bold mb-1"><i class="bi bi-person-circle"></i> FILTRAR MEMBRO:</label>
+                <label class="small text-info fw-bold mb-1">MEMBRO:</label>
                 <select id="selectMembro" class="form-select">
                     <option value="GERAL">RELATÓRIO GERAL (Membros com Função)</option>
                 </select>
             </div>
-            <div class="col-6">
-                <label class="small text-info fw-bold mb-1"><i class="bi bi-calendar-event"></i> MÊS:</label>
+            <div class="col-4">
+                <label class="small text-info fw-bold mb-1">DIA:</label>
+                <select id="selectDia" class="form-select">
+                    <option value="TODOS">TODOS</option>
+                    </select>
+            </div>
+            <div class="col-4">
+                <label class="small text-info fw-bold mb-1">MÊS:</label>
                 <select id="selectMes" class="form-select">
                     <option value="01">Janeiro</option><option value="02">Fevereiro</option>
                     <option value="03" selected>Março</option><option value="04">Abril</option>
@@ -140,23 +166,21 @@
                     <option value="11">Novembro</option><option value="12">Dezembro</option>
                 </select>
             </div>
-            <div class="col-6">
-                <label class="small text-info fw-bold mb-1"><i class="bi bi-calendar-check"></i> ANO:</label>
+            <div class="col-4">
+                <label class="small text-info fw-bold mb-1">ANO:</label>
                 <select id="selectAno" class="form-select">
                     <option value="2025">2025</option><option value="2026" selected>2026</option>
                 </select>
             </div>
         </div>
         <div class="mt-4">
-            <button id="btnBuscar" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
-                <i class="bi bi-search me-2"></i> GERAR RELATÓRIO AGORA
-            </button>
+            <button id="btnBuscar" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">GERAR RELATÓRIO</button>
         </div>
     </div>
 
     <div id="resultadoRelatorio">
         <div id="listaHistorico" class="table-responsive">
-            <p class="text-center text-white-50 p-5 btn-print-hide"><i class="bi bi-info-circle me-2"></i>Selecione os filtros e clique em gerar.</p>
+            <p class="text-center text-white-50 p-5">Selecione os filtros e gere o relatório.</p>
         </div>
     </div>
 </div>
@@ -177,6 +201,17 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    const selectDia = document.getElementById('selectDia');
+    for(let i=1; i<=31; i++) {
+        let diaStr = i < 10 ? '0' + i : i;
+        selectDia.innerHTML += `<option value="${diaStr}">${diaStr}</option>`;
+    }
+
+    window.prepararPrint = () => {
+        document.getElementById('dataRelatorioPrint').innerText = new Date().toLocaleString('pt-BR');
+        window.print();
+    };
+
     async function carregarMembros() {
         const q = query(collection(db, "membros"), orderBy("nome", "asc"));
         const snap = await getDocs(q);
@@ -191,25 +226,24 @@
 
     document.getElementById('btnBuscar').onclick = async () => {
         const tipoBusca = document.getElementById('selectMembro').value;
+        const diaFiltro = document.getElementById('selectDia').value;
         const mes = document.getElementById('selectMes').value;
         const ano = document.getElementById('selectAno').value;
         const listaDiv = document.getElementById('listaHistorico');
 
-        listaDiv.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-info"></div><p class="mt-2 text-info">Processando registros...</p></div>';
+        listaDiv.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-info"></div></div>';
 
         const colecoes = ["chamada_diaria", "chamada_EBD", "chamada_NOITE"];
         let registrosPorMembro = {};
 
         for (const colName of colecoes) {
             const snapP = await getDocs(collection(db, colName));
-
             snapP.forEach(docSnap => {
                 const d = docSnap.data();
                 if (!d.data) return;
-
                 const [dAno, dMes, dDia] = d.data.split('-');
                 
-                if (dMes === mes && dAno === ano) {
+                if (dMes === mes && dAno === ano && (diaFiltro === "TODOS" || dDia === diaFiltro)) {
                     if (!registrosPorMembro[d.nome]) registrosPorMembro[d.nome] = {};
                     let sufixo = "";
                     let ordemPeriodo = "0"; 
@@ -218,10 +252,7 @@
                     if (colName === "chamada_diaria" && dDia === "01") return;
                     const chaveUnica = dDia + sufixo;
                     registrosPorMembro[d.nome][chaveUnica] = {
-                        dia: dDia,
-                        periodo: sufixo,
-                        status: d.status,
-                        sortKey: dDia + ordemPeriodo
+                        dia: dDia, periodo: sufixo, status: d.status, sortKey: dDia + ordemPeriodo
                     };
                 }
             });
@@ -267,7 +298,7 @@
         });
 
         if (count === 0) {
-            listaDiv.innerHTML = '<p class="text-center p-5 text-white-50">Nenhum registro encontrado.</p>';
+            listaDiv.innerHTML = '<p class="text-center p-5">Nenhum registro encontrado para este filtro.</p>';
         } else {
             listaDiv.innerHTML = html + "</tbody></table>";
         }
