@@ -31,7 +31,6 @@
         .header-data { background: #1a1a1a; padding: 15px; border-bottom: 2px solid var(--primary-blue); text-align: center; }
         .data-texto { font-size: 1.1rem; font-weight: bold; color: var(--warning-yellow); margin: 0; }
 
-        /* Estilo para o seletor de data retroativa */
         .retroativo-container { background: #111; padding: 8px; border-bottom: 1px solid #333; display: none; align-items: center; justify-content: center; gap: 10px; }
         .input-retroativo { background: #333; color: white; border: 1px solid var(--primary-blue); border-radius: 5px; padding: 2px 8px; font-size: 0.85rem; }
 
@@ -200,9 +199,7 @@
     const db = getFirestore(app);
 
     const dataHoje = new Date();
-    // Variável que armazena a data selecionada (Padrão hoje)
     let dataSelecionadaISO = dataHoje.toISOString().split('T')[0];
-    
     const perfil = sessionStorage.getItem('perfil_maranata');
     const meuNome = localStorage.getItem('usuario_maranata') || "OPERADOR";
     
@@ -214,13 +211,17 @@
     document.getElementById('labelPerfilUser').innerText = perfil === 'admin' ? "ADMINISTRADOR" : "DIÁCONO";
     document.getElementById('inputDataChamada').value = dataSelecionadaISO;
 
-    // Função para atualizar os textos de data na tela
+    function verificarTravaData() {
+        // Libera o seletor apenas se não houver nada temporário na tela
+        const temPendencias = Object.keys(registrosTemporarios).length > 0;
+        document.getElementById('inputDataChamada').disabled = temPendencias;
+    }
+
     function atualizarLabelsData(dataISO) {
-        const d = new Date(dataISO + 'T12:00:00'); // Força meio-dia para evitar erro de timezone
+        const d = new Date(dataISO + 'T12:00:00');
         document.getElementById('dataTopo').innerText = d.toLocaleDateString('pt-BR');
         document.getElementById('exibirData').innerText = d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase();
         
-        // Verifica se a data selecionada é um domingo
         const ehDomingo = d.getDay() === 0;
         const seletor = document.getElementById('seletorDomingo');
         
@@ -233,14 +234,7 @@
         }
     }
 
-    // Listener para o input de data retroativa
     document.getElementById('inputDataChamada').onchange = (e) => {
-        if(Object.keys(registrosTemporarios).length > 0) {
-            if(!confirm("Você tem alterações não salvas. Mudar a data irá descartá-las. Continuar?")) {
-                e.target.value = dataSelecionadaISO;
-                return;
-            }
-        }
         dataSelecionadaISO = e.target.value;
         atualizarLabelsData(dataSelecionadaISO);
         colorirBotoes();
@@ -251,7 +245,6 @@
         const q = query(collection(db, idColecao), where("data", "==", dataSelecionadaISO));
         let snap = await getDocs(q);
 
-        // Se for Domingo e não achou no turno, tenta na diária (compatibilidade)
         const d = new Date(dataSelecionadaISO + 'T12:00:00');
         if (d.getDay() === 0 && snap.empty && periodoAtual === 'EBD') {
             const qGeral = query(collection(db, "chamada_diaria"), where("data", "==", dataSelecionadaISO));
@@ -261,7 +254,8 @@
         document.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.btn-update-inline').forEach(btn => btn.style.display = 'none');
         registrosNoBanco = {};
-        registrosTemporarios = {}; // Limpa temporários ao mudar data/periodo
+        registrosTemporarios = {}; 
+        verificarTravaData();
 
         snap.forEach(docSnap => {
             const d = docSnap.data();
@@ -290,7 +284,6 @@
         document.getElementById('containerFiltroData').style.display = 'flex';
     }
 
-    // Inicializa a data de hoje
     atualizarLabelsData(dataSelecionadaISO);
 
     onSnapshot(query(collection(db, "membros"), orderBy("nome", "asc")), (membroSnapshot) => {
@@ -347,21 +340,17 @@
         if (registrosNoBanco[nome]) {
             document.getElementById(`btnUp-${idMembro}`).style.display = 'block';
         }
-        
-        // Bloqueia o seletor de data para não perder o que está marcando
-        document.getElementById('inputDataChamada').disabled = true;
+        verificarTravaData();
     };
 
     window.confirmarAtualizacao = async (nome) => {
         const idColecao = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
         await setDoc(doc(db, idColecao, `${dataSelecionadaISO}_${nome}`), { 
-            nome: nome, 
-            data: dataSelecionadaISO, 
-            status: registrosTemporarios[nome], 
-            operador: meuNome 
+            nome: nome, data: dataSelecionadaISO, status: registrosTemporarios[nome], operador: meuNome 
         });
         alert("CHAMADA ATUALIZADA!");
-        document.getElementById('inputDataChamada').disabled = false;
+        delete registrosTemporarios[nome];
+        verificarTravaData();
         colorirBotoes();
     };
 
@@ -386,7 +375,8 @@
             await batch.commit();
             await setDoc(doc(db, "status_sistema", `${dataSelecionadaISO}_${periodoAtual}`), { status: "FINALIZADO", operador: meuNome, data: dataSelecionadaISO, periodo: periodoAtual });
             alert("CHAMADA FINALIZADA COM SUCESSO!");
-            document.getElementById('inputDataChamada').disabled = false;
+            registrosTemporarios = {};
+            verificarTravaData();
             colorirBotoes();
         }
     };
@@ -400,7 +390,8 @@
             snap.forEach(d => batch.delete(d.ref));
             await batch.commit();
             alert("LIMPO!");
-            document.getElementById('inputDataChamada').disabled = false;
+            registrosTemporarios = {};
+            verificarTravaData();
             colorirBotoes();
         }
     };
@@ -464,8 +455,10 @@
         const container = document.getElementById(`group-${idMembroHTML}`);
         if(container) {
             container.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btnUp-${idMembroHTML}`).style.display = 'none';
         }
         
+        verificarTravaData(); // Libera o calendário se não houver mais nada marcado
         alert("CHAMADA DO MEMBRO FOI LIMPA!");
         bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
     };
