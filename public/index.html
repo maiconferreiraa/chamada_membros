@@ -31,6 +31,10 @@
         .header-data { background: #1a1a1a; padding: 15px; border-bottom: 2px solid var(--primary-blue); text-align: center; }
         .data-texto { font-size: 1.1rem; font-weight: bold; color: var(--warning-yellow); margin: 0; }
 
+        /* Estilo para o seletor de data retroativa */
+        .retroativo-container { background: #111; padding: 8px; border-bottom: 1px solid #333; display: none; align-items: center; justify-content: center; gap: 10px; }
+        .input-retroativo { background: #333; color: white; border: 1px solid var(--primary-blue); border-radius: 5px; padding: 2px 8px; font-size: 0.85rem; }
+
         .periodo-selector { background: #222; padding: 10px; border-bottom: 1px solid #333; display: none; justify-content: center; gap: 10px; }
         .btn-periodo { border: 1px solid var(--primary-blue); color: var(--primary-blue); background: transparent; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
         .btn-periodo.active { background: var(--primary-blue); color: white; }
@@ -86,6 +90,11 @@
     <i class="bi bi-person-fill"></i> <span id="labelPerfilUser"></span> | <i class="bi bi-calendar3"></i> <span id="dataTopo"></span>
 </div>
 
+<div class="retroativo-container admin-only" id="containerFiltroData">
+    <span class="small fw-bold text-info">LANÇAR RETROATIVO:</span>
+    <input type="date" id="inputDataChamada" class="input-retroativo">
+</div>
+
 <div class="header-data">
     <p id="exibirData" class="data-texto"></p>
     <p class="small text-white-50 m-0">CHAMADA - MEMBROS COM FUNÇÃO</p>
@@ -111,7 +120,7 @@
         <i class="bi bi-check-circle-fill"></i> FINALIZAR CHAMADA
     </button>
     <button id="btnLimparTudoHoje" class="btn btn-outline-danger btn-sm w-50 admin-only" style="font-size: 0.7rem;">
-        <i class="bi bi-trash3-fill"></i> LIMPAR TODA A CHAMADA DE HOJE
+        <i class="bi bi-trash3-fill"></i> LIMPAR TODA A CHAMADA DESTA DATA
     </button>
 </div>
 
@@ -190,39 +199,69 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const hojeData = new Date();
-    const hojeISO = hojeData.toISOString().split('T')[0];
-    const ehDomingo = hojeData.getDay() === 0;
+    const dataHoje = new Date();
+    // Variável que armazena a data selecionada (Padrão hoje)
+    let dataSelecionadaISO = dataHoje.toISOString().split('T')[0];
     
-    let periodoAtual = ehDomingo ? "EBD" : "";
     const perfil = sessionStorage.getItem('perfil_maranata');
     const meuNome = localStorage.getItem('usuario_maranata') || "OPERADOR";
     
+    let periodoAtual = "";
     let nomesComFuncao = []; 
     let registrosNoBanco = {};
     let registrosTemporarios = {};
 
     document.getElementById('labelPerfilUser').innerText = perfil === 'admin' ? "ADMINISTRADOR" : "DIÁCONO";
-    document.getElementById('dataTopo').innerText = hojeData.toLocaleDateString('pt-BR');
-    document.getElementById('exibirData').innerText = hojeData.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase();
+    document.getElementById('inputDataChamada').value = dataSelecionadaISO;
 
-    if (perfil !== 'admin') {
-        document.getElementById('linkRelatorioRodape').style.display = 'none';
+    // Função para atualizar os textos de data na tela
+    function atualizarLabelsData(dataISO) {
+        const d = new Date(dataISO + 'T12:00:00'); // Força meio-dia para evitar erro de timezone
+        document.getElementById('dataTopo').innerText = d.toLocaleDateString('pt-BR');
+        document.getElementById('exibirData').innerText = d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase();
+        
+        // Verifica se a data selecionada é um domingo
+        const ehDomingo = d.getDay() === 0;
+        const seletor = document.getElementById('seletorDomingo');
+        
+        if (ehDomingo) {
+            seletor.style.display = 'flex';
+            if(!periodoAtual) mudarPeriodo('EBD');
+        } else {
+            seletor.style.display = 'none';
+            periodoAtual = "";
+        }
     }
+
+    // Listener para o input de data retroativa
+    document.getElementById('inputDataChamada').onchange = (e) => {
+        if(Object.keys(registrosTemporarios).length > 0) {
+            if(!confirm("Você tem alterações não salvas. Mudar a data irá descartá-las. Continuar?")) {
+                e.target.value = dataSelecionadaISO;
+                return;
+            }
+        }
+        dataSelecionadaISO = e.target.value;
+        atualizarLabelsData(dataSelecionadaISO);
+        colorirBotoes();
+    };
 
     async function colorirBotoes() {
         const idColecao = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
-        const q = query(collection(db, idColecao), where("data", "==", hojeISO));
+        const q = query(collection(db, idColecao), where("data", "==", dataSelecionadaISO));
         let snap = await getDocs(q);
 
-        if (ehDomingo && snap.empty) {
-            const qGeral = query(collection(db, "chamada_diaria"), where("data", "==", hojeISO));
+        // Se for Domingo e não achou no turno, tenta na diária (compatibilidade)
+        const d = new Date(dataSelecionadaISO + 'T12:00:00');
+        if (d.getDay() === 0 && snap.empty && periodoAtual === 'EBD') {
+            const qGeral = query(collection(db, "chamada_diaria"), where("data", "==", dataSelecionadaISO));
             snap = await getDocs(qGeral);
         }
         
-        // Antes de colorir, resetamos apenas os botões da tela
         document.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.btn-update-inline').forEach(btn => btn.style.display = 'none');
+        registrosNoBanco = {};
+        registrosTemporarios = {}; // Limpa temporários ao mudar data/periodo
 
         snap.forEach(docSnap => {
             const d = docSnap.data();
@@ -241,18 +280,18 @@
     window.mudarPeriodo = (periodo) => {
         periodoAtual = periodo;
         document.querySelectorAll('.btn-periodo').forEach(b => b.classList.remove('active'));
-        document.getElementById(`btn${periodo}`).classList.add('active');
+        const btn = document.getElementById(`btn${periodo}`);
+        if(btn) btn.classList.add('active');
         colorirBotoes(); 
     };
 
-    if (ehDomingo) {
-        document.getElementById('seletorDomingo').style.display = 'flex';
-        document.getElementById('btnEBD').classList.add('active');
-    }
-
     if (perfil === 'admin') {
         document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+        document.getElementById('containerFiltroData').style.display = 'flex';
     }
+
+    // Inicializa a data de hoje
+    atualizarLabelsData(dataSelecionadaISO);
 
     onSnapshot(query(collection(db, "membros"), orderBy("nome", "asc")), (membroSnapshot) => {
         const listaCom = document.getElementById('listaComFuncao');
@@ -308,12 +347,21 @@
         if (registrosNoBanco[nome]) {
             document.getElementById(`btnUp-${idMembro}`).style.display = 'block';
         }
+        
+        // Bloqueia o seletor de data para não perder o que está marcando
+        document.getElementById('inputDataChamada').disabled = true;
     };
 
     window.confirmarAtualizacao = async (nome) => {
         const idColecao = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
-        await setDoc(doc(db, idColecao, `${hojeISO}_${nome}`), { nome: nome, data: hojeISO, status: registrosTemporarios[nome], operador: meuNome });
+        await setDoc(doc(db, idColecao, `${dataSelecionadaISO}_${nome}`), { 
+            nome: nome, 
+            data: dataSelecionadaISO, 
+            status: registrosTemporarios[nome], 
+            operador: meuNome 
+        });
         alert("CHAMADA ATUALIZADA!");
+        document.getElementById('inputDataChamada').disabled = false;
         colorirBotoes();
     };
 
@@ -329,28 +377,30 @@
         }
 
         const novosParaSalvar = Object.keys(registrosTemporarios);
-        if(confirm(`Deseja salvar e finalizar?`)) {
+        if(confirm(`Deseja salvar e finalizar a chamada de ${dataSelecionadaISO}?`)) {
             const batch = writeBatch(db);
             novosParaSalvar.forEach(nome => {
-                const docRef = doc(db, idColecao, `${hojeISO}_${nome}`);
-                batch.set(docRef, { nome: nome, data: hojeISO, status: registrosTemporarios[nome], operador: meuNome });
+                const docRef = doc(db, idColecao, `${dataSelecionadaISO}_${nome}`);
+                batch.set(docRef, { nome: nome, data: dataSelecionadaISO, status: registrosTemporarios[nome], operador: meuNome });
             });
             await batch.commit();
-            await setDoc(doc(db, "status_sistema", `${hojeISO}_${periodoAtual}`), { status: "FINALIZADO", operador: meuNome, data: hojeISO, periodo: periodoAtual });
+            await setDoc(doc(db, "status_sistema", `${dataSelecionadaISO}_${periodoAtual}`), { status: "FINALIZADO", operador: meuNome, data: dataSelecionadaISO, periodo: periodoAtual });
             alert("CHAMADA FINALIZADA COM SUCESSO!");
+            document.getElementById('inputDataChamada').disabled = false;
             colorirBotoes();
         }
     };
 
     document.getElementById('btnLimparTudoHoje').onclick = async () => {
         const idColecao = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
-        if(confirm(`Limpar toda a chamada de hoje?`)) {
-            const q = query(collection(db, idColecao), where("data", "==", hojeISO));
+        if(confirm(`Limpar toda a chamada da data ${dataSelecionadaISO}?`)) {
+            const q = query(collection(db, idColecao), where("data", "==", dataSelecionadaISO));
             const snap = await getDocs(q);
             const batch = writeBatch(db);
             snap.forEach(d => batch.delete(d.ref));
             await batch.commit();
             alert("LIMPO!");
+            document.getElementById('inputDataChamada').disabled = false;
             colorirBotoes();
         }
     };
@@ -403,15 +453,13 @@
     document.getElementById('btnLimparChamadaDia').onclick = async () => {
         const idColecao = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
         const nomeMembro = window.membroSendoEditado;
-        const idDoc = `${hojeISO}_${nomeMembro}`;
+        const idDoc = `${dataSelecionadaISO}_${nomeMembro}`;
         
         await deleteDoc(doc(db, idColecao, idDoc));
         
-        // CORREÇÃO: Removemos dos objetos locais para não voltar a colorir
         delete registrosNoBanco[nomeMembro];
         delete registrosTemporarios[nomeMembro];
 
-        // CORREÇÃO: Limpamos visualmente o card do membro
         const idMembroHTML = nomeMembro.replace(/\s+/g, '');
         const container = document.getElementById(`group-${idMembroHTML}`);
         if(container) {
