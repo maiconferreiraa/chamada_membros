@@ -43,9 +43,14 @@
         .nav-link.active { color: var(--primary-blue) !important; background: transparent !important; border-bottom: 3px solid var(--primary-blue) !important; }
 
         .member-card { background-color: var(--card-bg); border: 1px solid #333; margin: 8px 12px; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; }
-        .member-main-row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-        .member-info { flex: 1; margin-right: 5px; overflow: hidden; min-width: 0; }
-        .member-name { font-size: 0.95rem; font-weight: bold; color: var(--text-white); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .member-main-row { display: flex; align-items: center; width: 100%; gap: 10px; }
+        
+        .photo-frame { width: 55px; height: 55px; border-radius: 50%; border: 2px solid var(--primary-blue); overflow: hidden; flex-shrink: 0; background: #222; display: flex; align-items: center; justify-content: center; position: relative; }
+        .photo-frame img { width: 100%; height: 100%; object-fit: cover; position: relative; z-index: 2; }
+        .photo-frame i { font-size: 1.8rem; color: #555; position: absolute; z-index: 1; }
+
+        .member-info { flex: 1; min-width: 0; }
+        .member-name { font-size: 0.9rem; font-weight: bold; color: var(--text-white); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
         .tag-container { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 4px; }
         .badge-grupo { background-color: var(--warning-yellow); color: #000; font-size: 0.6rem; font-weight: bold; padding: 2px 5px; border-radius: 4px; text-transform: uppercase; }
@@ -61,22 +66,12 @@
         .btn-fj.active { background-color: var(--warning-yellow) !important; color: black !important; }
 
         .btn-update-inline { display: none; margin-top: 10px; width: 100%; font-size: 0.75rem; font-weight: bold; padding: 4px; border-radius: 6px; }
-        .btn-edit { color: #555; border: none; background: transparent; font-size: 1.1rem; margin-right: 5px; cursor: pointer; }
+        .btn-edit { color: #555; border: none; background: transparent; font-size: 1.1rem; cursor: pointer; }
         
-        .btn-float { 
-            position: fixed; bottom: 180px; right: 15px; width: 55px; height: 55px; border-radius: 50%; 
-            background: var(--primary-blue); color: white; display: flex; align-items: center; justify-content: center; 
-            font-size: 1.6rem; border: 2px solid #000; z-index: 2000; box-shadow: 0 4px 15px rgba(0,0,0,0.8);
-        }
-        
+        .btn-float { position: fixed; bottom: 180px; right: 15px; width: 55px; height: 55px; border-radius: 50%; background: var(--primary-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; border: 2px solid #000; z-index: 2000; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
         .navbar-custom { background-color: #000 !important; border-top: 1px solid #222; z-index: 1100; }
         .admin-only { display: none; }
-
-        .bottom-save-bar { 
-            position: fixed; bottom: 65px; left: 0; width: 100%; padding: 10px; background: #1a1a1a; 
-            border-top: 1px solid #333; z-index: 1050; display: flex; flex-direction: column; gap: 8px; align-items: center; 
-        }
-
+        .bottom-save-bar { position: fixed; bottom: 65px; left: 0; width: 100%; padding: 10px; background: #1a1a1a; border-top: 1px solid #333; z-index: 1050; display: flex; flex-direction: column; gap: 8px; align-items: center; }
         .modal-content { background-color: var(--modal-claro) !important; border: 2px solid var(--primary-blue) !important; border-radius: 15px !important; color: var(--text-white) !important; }
         .modal-header { border-bottom: 1px solid #333 !important; }
         .modal-title { color: var(--warning-yellow) !important; }
@@ -137,6 +132,11 @@
             <div class="modal-body">
                 <input type="text" id="novoNomeMembro" class="form-control mb-3" placeholder="Nome Completo">
                 <input type="text" id="novoGrupoMembro" class="form-control mb-3" placeholder="Grupo (Ex: GRUPO 1)">
+                
+                <label class="small text-white-50">Nome do arquivo da foto na pasta /fotos:</label>
+                <input type="text" id="novaFotoMembro" class="form-control mb-3" placeholder="Ex: foto_membro.jpg">
+                <p class="small text-info">Dica: Se deixar em branco, o sistema tentará buscar pelo nome do membro.</p>
+                
                 <button id="btnSalvarNovoMembro" class="btn btn-primary w-100 fw-bold">SALVAR NO BANCO</button>
             </div>
         </div>
@@ -211,8 +211,45 @@
     document.getElementById('labelPerfilUser').innerText = perfil === 'admin' ? "ADMINISTRADOR" : "DIÁCONO";
     document.getElementById('inputDataChamada').value = dataSelecionadaISO;
 
+    // Normalização para busca de foto
+    function limparParaFoto(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+    }
+
+    // Lógica de tentativas de foto
+    function gerarTentativasDeFoto(nome, fotoCadastrada) {
+        const limpar = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+        const originalLimpo = limpar(nome);
+        const partes = originalLimpo.split(" ");
+        
+        const tentativas = [];
+        if(fotoCadastrada) tentativas.push(fotoCadastrada);
+        
+        tentativas.push(originalLimpo + ".jpg");
+        tentativas.push(partes[0] + " " + partes[partes.length-1] + ".jpg");
+        tentativas.push(partes[0] + ".jpg");
+        
+        if(originalLimpo.includes(".")) {
+            tentativas.push(originalLimpo.replace(/\./g, "") + ".jpg");
+        }
+        
+        return [...new Set(tentativas)];
+    }
+
+    window.proximaTentativaDeFoto = function(img) {
+        const lista = JSON.parse(img.dataset.tentativas || "[]");
+        const atualIdx = parseInt(img.dataset.idx || "0");
+        
+        if (atualIdx < lista.length - 1) {
+            const novoIdx = atualIdx + 1;
+            img.dataset.idx = novoIdx;
+            img.src = `fotos/${lista[novoIdx]}`;
+        } else {
+            img.style.display = 'none';
+        }
+    };
+
     function verificarTravaData() {
-        // Libera o seletor apenas se não houver nada temporário na tela
         const temPendencias = Object.keys(registrosTemporarios).length > 0;
         document.getElementById('inputDataChamada').disabled = temPendencias;
     }
@@ -298,10 +335,23 @@
             if(temFuncao) nomesComFuncao.push(m.nome);
             const idMembro = m.nome.replace(/\s+/g, '');
             
+            const tentativas = gerarTentativasDeFoto(m.nome, m.foto);
+            const fotoInicial = `fotos/${tentativas[0]}`;
+
             const html = `
                 <div class="member-card">
                     <div class="member-main-row">
                         <button class="btn-edit" onclick="abrirEditor('${m.nome}')"><i class="bi bi-pencil-square"></i></button>
+                        
+                        <div class="photo-frame">
+                            <i class="bi bi-person-circle"></i>
+                            <img src="${fotoInicial}" 
+                                 data-tentativas='${JSON.stringify(tentativas)}' 
+                                 data-idx="0"
+                                 onerror="proximaTentativaDeFoto(this)" 
+                                 onload="this.previousElementSibling.style.display='none';">
+                        </div>
+
                         <div class="member-info">
                             <span class="member-name">${m.nome}</span>
                             <div class="tag-container">
@@ -325,6 +375,7 @@
         colorirBotoes();
     });
 
+    // CRUD e Operações
     window.prepararChamada = (nome, statusAbv) => {
         const idMembro = nome.replace(/\s+/g, '');
         const container = document.getElementById(`group-${idMembro}`);
@@ -445,38 +496,37 @@
         const idColecao = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
         const nomeMembro = window.membroSendoEditado;
         const idDoc = `${dataSelecionadaISO}_${nomeMembro}`;
-        
         await deleteDoc(doc(db, idColecao, idDoc));
-        
         delete registrosNoBanco[nomeMembro];
         delete registrosTemporarios[nomeMembro];
-
-        const idMembroHTML = nomeMembro.replace(/\s+/g, '');
-        const container = document.getElementById(`group-${idMembroHTML}`);
-        if(container) {
-            container.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`btnUp-${idMembroHTML}`).style.display = 'none';
-        }
-        
-        verificarTravaData(); // Libera o calendário se não houver mais nada marcado
-        alert("CHAMADA DO MEMBRO FOI LIMPA!");
-        bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
+        colorirBotoes();
+        alert("CHAMADA LIMPA!");
     };
 
     document.getElementById('btnExcluirMembro').onclick = async () => {
-        if(confirm(`Excluir ${window.membroSendoEditado} do sistema?`)) {
+        if(confirm(`Excluir ${window.membroSendoEditado}?`)) {
             await deleteDoc(doc(db, "membros", window.membroSendoEditado));
-            alert("MEMBRO REMOVIDO!");
+            alert("EXCLUÍDO!");
             bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
         }
     };
 
+    // BOTÃO SALVAR NOVO MEMBRO COM OPÇÃO DE FOTO
     document.getElementById('btnSalvarNovoMembro').onclick = async () => {
         const n = document.getElementById('novoNomeMembro').value.toUpperCase();
         const g = document.getElementById('novoGrupoMembro').value.toUpperCase();
+        const f = document.getElementById('novaFotoMembro').value;
         if(n) {
-            await setDoc(doc(db, "membros", n), { nome: n, grupo: g, funcoes: [] });
-            alert("ADICIONADO!");
+            await setDoc(doc(db, "membros", n), { 
+                nome: n, 
+                grupo: g, 
+                funcoes: [],
+                foto: f || "" 
+            });
+            alert("MEMBRO ADICIONADO!");
+            document.getElementById('novoNomeMembro').value = "";
+            document.getElementById('novoGrupoMembro').value = "";
+            document.getElementById('novaFotoMembro').value = "";
             bootstrap.Modal.getInstance(document.getElementById('modalNovoMembro')).hide();
         }
     };
