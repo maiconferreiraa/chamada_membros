@@ -23,6 +23,8 @@
             --warning-yellow: #ffca28;
             --text-white: #ffffff;
             --input-bg: #3d3d3d;
+            --success-green: #28a745;
+            --info-cyan: #17a2b8;
         }
 
         body { background-color: var(--bg-dark); color: var(--text-white); padding-bottom: 220px; font-family: sans-serif; }
@@ -55,6 +57,10 @@
         .tag-container { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 4px; }
         .badge-grupo { background-color: var(--warning-yellow); color: #000; font-size: 0.6rem; font-weight: bold; padding: 2px 5px; border-radius: 4px; text-transform: uppercase; }
         .badge-funcao { font-size: 0.6rem; color: var(--primary-blue); text-transform: uppercase; border: 1px solid var(--primary-blue); padding: 1px 4px; border-radius: 4px; font-weight: bold; }
+        .badge-dizimista { font-size: 0.55rem; background-color: var(--success-green); color: white; padding: 1px 4px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
+        .badge-pendente { font-size: 0.55rem; background-color: var(--danger-red); color: white; padding: 1px 4px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
+        .badge-semrenda { font-size: 0.55rem; background-color: var(--info-cyan); color: white; padding: 1px 4px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
+        .badge-seminario { font-size: 0.55rem; border: 1px solid var(--warning-yellow); color: var(--warning-yellow); padding: 0px 4px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
 
         .btn-call { width: 40px; height: 38px; border: 1px solid #444; background: transparent; font-weight: bold; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
         .btn-p { color: var(--primary-blue); border-color: var(--primary-blue); border-radius: 6px 0 0 6px; }
@@ -76,6 +82,23 @@
         .modal-header { border-bottom: 1px solid #333 !important; }
         .modal-title { color: var(--warning-yellow) !important; }
         .modal-body input.form-control { color: #ffffff !important; background-color: var(--input-bg) !important; border: 1px solid #555 !important; }
+        .form-check-input:checked { background-color: var(--success-green); border-color: var(--success-green); }
+
+        /* Estilos Gestão */
+        .gestao-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; margin: 10px; padding: 12px; }
+        .gestao-label { font-size: 0.65rem; color: #888; text-transform: uppercase; font-weight: bold; margin-bottom: 5px; display: block; }
+        .gestao-input { background: #222; border: 1px solid #444; color: white; font-size: 0.8rem; padding: 5px; border-radius: 5px; width: 100%; }
+        .btn-toggle-gestao { padding: 6px 8px; font-size: 0.7rem; font-weight: bold; border-radius: 5px; width: 100%; margin-top: 5px; border: none; transition: 0.2s; }
+        .btn-toggle-ok { background-color: var(--success-green); color: white; }
+        .btn-toggle-pendente { background-color: var(--danger-red); color: white; }
+        .btn-toggle-semrenda { background-color: var(--info-cyan); color: white; }
+        .btn-toggle-off { background-color: #333; color: #888; }
+        .seminario-item { background: #252525; padding: 5px 8px; border-radius: 6px; margin-bottom: 5px; font-size: 0.75rem; border-left: 3px solid var(--warning-yellow); display: flex; justify-content: space-between; align-items: center; }
+        .seminario-local { font-weight: bold; color: var(--primary-blue); }
+        .report-table { font-size: 0.75rem; color: white; width: 100%; }
+        .report-table th { color: var(--warning-yellow); border-bottom: 1px solid #444; padding: 5px; }
+        .report-table td { padding: 5px; border-bottom: 1px solid #222; }
+        .info-estatica { background: #222; color: var(--warning-yellow); border: 1px solid #444; padding: 8px; border-radius: 6px; font-weight: bold; font-size: 0.8rem; display: block; }
     </style>
 </head>
 <body>
@@ -102,11 +125,34 @@
 <ul class="nav nav-tabs sticky-top">
     <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#comFuncao">Com Função</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#semFuncao">Geral</button></li>
+    <li class="nav-item admin-only"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#gestaoTab">Gestão</button></li>
 </ul>
 
 <div class="tab-content">
     <div class="tab-pane fade show active" id="comFuncao"><div id="listaComFuncao" class="mt-2"></div></div>
     <div class="tab-pane fade" id="semFuncao"><div id="listaSemFuncao" class="mt-2"></div></div>
+    
+    <div class="tab-pane fade" id="gestaoTab">
+        <div class="p-3 text-center">
+            <h6 class="text-warning small fw-bold mb-3">CONTROLE DE DÍZIMOS E SEMINÁRIOS</h6>
+            <div class="d-flex gap-2 justify-content-center mb-3">
+                <select id="filtroMesDizimo" class="gestao-input" style="width: 120px;">
+                    <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03">Março</option>
+                    <option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option>
+                    <option value="07">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
+                    <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+                </select>
+                <select id="filtroAnoDizimo" class="gestao-input" style="width: 80px;">
+                    <option value="2024">2024</option><option value="2025" selected>2025</option><option value="2026">2026</option>
+                </select>
+                <button class="btn btn-primary btn-sm" onclick="window.recarregarGestao()">FILTRAR</button>
+            </div>
+            <button class="btn btn-warning btn-sm fw-bold w-100 mb-2" onclick="window.abrirRelatorioGestao()">
+                <i class="bi bi-file-earmark-spreadsheet-fill"></i> GERAR RELATÓRIO DE GESTÃO
+            </button>
+        </div>
+        <div id="listaGestao"></div>
+    </div>
 </div>
 
 <div class="bottom-save-bar">
@@ -122,6 +168,62 @@
     <i class="bi bi-person-plus-fill"></i>
 </button>
 
+<div class="modal fade" id="modalSeminario" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Seminário: <span id="nomeMembroSem" class="text-info"></span></h5>
+                <button type="button" class="btn-close btn-close-white" onclick="fecharModalSeminario()"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="indexSemEdit">
+                <label class="small text-white-50">Local:</label>
+                <select id="localSem" class="form-control mb-3">
+                    <option value="BH">BELO HORIZONTE (BH)</option>
+                    <option value="DV">DIVINÓPOLIS (DV)</option>
+                    <option value="OUTRO">OUTRO LOCAL</option>
+                </select>
+                <label class="small text-white-50">Nome do Seminário:</label>
+                <input type="text" id="tituloSem" class="form-control mb-3" placeholder="Ex: Intermediário I">
+                <label class="small text-white-50">Data:</label>
+                <input type="date" id="dataSem" class="form-control mb-3">
+                <button id="btnSalvarSeminario" class="btn btn-warning w-100 fw-bold text-dark">SALVAR NO HISTÓRICO</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalRelatorioGestao" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-warning">Relatório de Gestão Administrativa</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="tituloRelatorioGestao" class="fw-bold text-info mb-3"></p>
+                <div class="table-responsive">
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Membro</th>
+                                <th>Função</th>
+                                <th>Grupo</th>
+                                <th>Dízimo</th>
+                                <th>Seminários Realizados</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoRelatorioGestao"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">FECHAR</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="modalNovoMembro" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -132,11 +234,7 @@
             <div class="modal-body">
                 <input type="text" id="novoNomeMembro" class="form-control mb-3" placeholder="Nome Completo">
                 <input type="text" id="novoGrupoMembro" class="form-control mb-3" placeholder="Grupo (Ex: GRUPO 1)">
-                
-                <label class="small text-white-50">Nome do arquivo da foto na pasta /fotos:</label>
                 <input type="text" id="novaFotoMembro" class="form-control mb-3" placeholder="Ex: foto_membro.jpg">
-                <p class="small text-info">Dica: Se deixar em branco, o sistema tentará buscar pelo nome do membro.</p>
-                
                 <button id="btnSalvarNovoMembro" class="btn btn-primary w-100 fw-bold">SALVAR NO BANCO</button>
             </div>
         </div>
@@ -163,6 +261,32 @@
                         <button id="btnAddFuncao" class="btn btn-primary btn-sm">ADD</button>
                     </div>
                     <div id="containerTagsFuncao" class="d-flex flex-wrap gap-1 mb-3"></div>
+                    
+                    <hr class="border-secondary">
+                    
+                    <div class="p-2 border border-secondary rounded mb-3" style="background: #111;">
+                        <h6 class="text-info small fw-bold mb-2">DADOS DE GESTÃO (APENAS ADMIN)</h6>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="checkDizimista">
+                            <label class="form-check-label small fw-bold" for="checkDizimista">MEMBRO DIZIMISTA</label>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="gestao-label">ÚLTIMO SEMINÁRIO REGISTRADO:</label>
+                            <span id="labelUltimoSeminario" class="info-estatica">SEM SEMINÁRIOS</span>
+                        </div>
+
+                        <div class="mb-3">
+                           <label class="gestao-label">Histórico Completo de Seminários:</label>
+                           <button class="btn btn-sm btn-outline-warning w-100 mb-2" onclick="abrirSeminarioPeloModal()">
+                               <i class="bi bi-plus-circle"></i> ADICIONAR AO HISTÓRICO
+                           </button>
+                           <div id="listaSeminariosNoModal" style="max-height: 150px; overflow-y: auto;"></div>
+                        </div>
+
+                        <button id="btnSalvarInfoExtra" class="btn btn-info btn-sm w-100 fw-bold text-dark">SALVAR PREFERÊNCIAS</button>
+                    </div>
+                    
                     <hr class="border-secondary">
                 </div>
                 <button id="btnLimparChamadaDia" class="btn btn-outline-warning btn-sm w-100 mb-2">LIMPAR CHAMADA DESTE MEMBRO</button>
@@ -207,16 +331,15 @@
     let nomesComFuncao = []; 
     let registrosNoBanco = {};
     let registrosTemporarios = {};
+    let cacheMembros = [];
 
     document.getElementById('labelPerfilUser').innerText = perfil === 'admin' ? "ADMINISTRADOR" : "DIÁCONO";
     document.getElementById('inputDataChamada').value = dataSelecionadaISO;
 
-    // Normalização para busca de foto
     function limparParaFoto(str) {
         return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
     }
 
-    // Lógica de tentativas de foto
     function gerarTentativasDeFoto(nome, fotoCadastrada) {
         const limpar = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
         const originalLimpo = limpar(nome);
@@ -251,7 +374,8 @@
 
     function verificarTravaData() {
         const temPendencias = Object.keys(registrosTemporarios).length > 0;
-        document.getElementById('inputDataChamada').disabled = temPendencias;
+        const input = document.getElementById('inputDataChamada');
+        if(input) input.disabled = temPendencias;
     }
 
     function atualizarLabelsData(dataISO) {
@@ -318,7 +442,8 @@
 
     if (perfil === 'admin') {
         document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
-        document.getElementById('containerFiltroData').style.display = 'flex';
+        const filtro = document.getElementById('containerFiltroData');
+        if(filtro) filtro.style.display = 'flex';
     }
 
     atualizarLabelsData(dataSelecionadaISO);
@@ -326,79 +451,264 @@
     onSnapshot(query(collection(db, "membros"), orderBy("nome", "asc")), (membroSnapshot) => {
         const listaCom = document.getElementById('listaComFuncao');
         const listaSem = document.getElementById('listaSemFuncao');
-        listaCom.innerHTML = ""; listaSem.innerHTML = "";
+        const listaGestao = document.getElementById('listaGestao');
+        
+        listaCom.innerHTML = ""; listaSem.innerHTML = ""; listaGestao.innerHTML = "";
         nomesComFuncao = []; 
+        cacheMembros = [];
+
+        const mesFiltro = document.getElementById('filtroMesDizimo').value;
+        const anoFiltro = document.getElementById('filtroAnoDizimo').value;
+        const chaveDizimo = `${mesFiltro}_${anoFiltro}`;
 
         membroSnapshot.forEach(docSnap => {
             const m = docSnap.data();
+            cacheMembros.push(m);
             const temFuncao = m.funcoes && m.funcoes.length > 0;
             if(temFuncao) nomesComFuncao.push(m.nome);
             const idMembro = m.nome.replace(/\s+/g, '');
             
-            const tentativas = gerarTentativasDeFoto(m.nome, m.foto);
-            const fotoInicial = `fotos/${tentativas[0]}`;
+            const htmlChamada = renderCardChamada(m, idMembro, temFuncao);
+            if(temFuncao) listaCom.innerHTML += htmlChamada;
+            else listaSem.innerHTML += htmlChamada;
 
-            const html = `
-                <div class="member-card">
-                    <div class="member-main-row">
-                        <button class="btn-edit" onclick="abrirEditor('${m.nome}')"><i class="bi bi-pencil-square"></i></button>
-                        
-                        <div class="photo-frame">
-                            <i class="bi bi-person-circle"></i>
-                            <img src="${fotoInicial}" 
-                                 data-tentativas='${JSON.stringify(tentativas)}' 
-                                 data-idx="0"
-                                 onerror="proximaTentativaDeFoto(this)" 
-                                 onload="this.previousElementSibling.style.display='none';">
-                        </div>
+            if(perfil === 'admin') {
+                const statusDizimo = m.historicoDizimos ? m.historicoDizimos[chaveDizimo] : null;
+                const numSeminarios = m.historicoSeminarios ? m.historicoSeminarios.length : 0;
+                
+                let btnClass = "btn-toggle-off";
+                let btnText = "PENDENTE / MARCAR";
+                if(statusDizimo === "OK") { btnClass = "btn-toggle-ok"; btnText = "DÍZIMO OK"; }
+                if(statusDizimo === "PENDENTE") { btnClass = "btn-toggle-pendente"; btnText = "NÃO OFERTADO"; }
+                if(statusDizimo === "SEM_RENDA") { btnClass = "btn-toggle-semrenda"; btnText = "NÃO TEM RENDA"; }
 
-                        <div class="member-info">
-                            <span class="member-name">${m.nome}</span>
-                            <div class="tag-container">
-                                ${m.grupo ? `<span class="badge-grupo">${m.grupo}</span>` : ''}
-                                ${m.funcoes ? m.funcoes.map(f => `<span class="badge-funcao">${f}</span>`).join('') : ''}
+                listaGestao.innerHTML += `
+                    <div class="gestao-card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1 fw-bold">${m.nome}</h6>
+                                <span class="badge bg-secondary mb-2" style="font-size: 0.6rem;">${m.grupo || 'SEM GRUPO'}</span>
+                            </div>
+                            <div class="text-end">
+                                <button class="btn btn-sm btn-outline-warning" onclick="window.abrirEditor('${m.nome}')">
+                                    <i class="bi bi-pencil-square"></i> EDITAR
+                                </button>
                             </div>
                         </div>
-                        <div class="d-flex" id="group-${idMembro}">
-                            <button onclick="prepararChamada('${m.nome}', 'P')" class="btn-call btn-p">P</button>
-                            <button onclick="prepararChamada('${m.nome}', 'F')" class="btn-call btn-f">F</button>
-                            <button onclick="prepararChamada('${m.nome}', 'FJ')" class="btn-call btn-fj">FJ</button>
+                        <div class="row g-2 mt-1">
+                            <div class="col-6">
+                                <span class="gestao-label">Controle Dízimo (${mesFiltro}/${anoFiltro})</span>
+                                <button class="btn-toggle-gestao ${btnClass}" 
+                                        onclick="window.proximoStatusDizimo('${m.nome}', '${chaveDizimo}', '${statusDizimo}')">
+                                    ${btnText}
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <span class="gestao-label">Seminários (${numSeminarios})</span>
+                                <div style="max-height: 120px; overflow-y: auto;">
+                                    ${renderSeminarios(m.nome, m.historicoSeminarios)}
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <button id="btnUp-${idMembro}" class="btn btn-warning btn-update-inline" onclick="confirmarAtualizacao('${m.nome}')">
-                        <i class="bi bi-arrow-repeat"></i> ATUALIZAR CHAMADA DESTE MEMBRO
-                    </button>
-                </div>`;
-            if(temFuncao) listaCom.innerHTML += html;
-            else listaSem.innerHTML += html;
+                    </div>`;
+            }
         });
+
+        if (window.membroSendoEditado) {
+           const mEdit = cacheMembros.find(x => x.nome === window.membroSendoEditado);
+           if (mEdit) {
+               renderizarSeminariosNoModal(mEdit.historicoSeminarios || []);
+               const txt = mEdit.ultimoSeminario;
+               document.getElementById('labelUltimoSeminario').innerText = (txt && txt.trim() !== "") ? txt : "SEM SEMINÁRIOS";
+           }
+        }
+
         colorirBotoes();
     });
 
-    // CRUD e Operações
+    function renderCardChamada(m, idMembro, temFuncao) {
+        const tentativas = gerarTentativasDeFoto(m.nome, m.foto);
+        const fotoInicial = `fotos/${tentativas[0]}`;
+        const dizimoAtualChave = `${(dataHoje.getMonth()+1).toString().padStart(2,'0')}_${dataHoje.getFullYear()}`;
+        const statusDizimo = m.historicoDizimos ? m.historicoDizimos[dizimoAtualChave] : null;
+        const numSem = m.historicoSeminarios ? m.historicoSeminarios.length : 0;
+
+        let badgeDizimo = "";
+        if(statusDizimo === "OK") badgeDizimo = `<span class="badge-dizimista">DÍZIMO OK</span>`;
+        else if(statusDizimo === "PENDENTE") badgeDizimo = `<span class="badge-pendente">NÃO OFERTADO</span>`;
+        else if(statusDizimo === "SEM_RENDA") badgeDizimo = `<span class="badge-semrenda">NÃO TEM RENDA</span>`;
+
+        return `
+            <div class="member-card">
+                <div class="member-main-row">
+                    <button class="btn-edit" onclick="abrirEditor('${m.nome}')"><i class="bi bi-pencil-square"></i></button>
+                    <div class="photo-frame">
+                        <i class="bi bi-person-circle"></i>
+                        <img src="${fotoInicial}" 
+                             data-tentativas='${JSON.stringify(tentativas)}' 
+                             data-idx="0"
+                             onerror="proximaTentativaDeFoto(this)" 
+                             onload="this.previousElementSibling.style.display='none';">
+                    </div>
+                    <div class="member-info">
+                        <span class="member-name">${m.nome}</span>
+                        <div class="tag-container">
+                            ${m.grupo ? `<span class="badge-grupo">${m.grupo}</span>` : ''}
+                            ${m.funcoes ? m.funcoes.map(f => `<span class="badge-funcao">${f}</span>`).join('') : ''}
+                            ${perfil === 'admin' && numSem > 0 ? `<span class="badge-seminario">${numSem} SEM.</span>` : ''}
+                            ${perfil === 'admin' ? badgeDizimo : ''}
+                        </div>
+                    </div>
+                    <div class="d-flex" id="group-${idMembro}">
+                        <button onclick="prepararChamada('${m.nome}', 'P')" class="btn-call btn-p">P</button>
+                        <button onclick="prepararChamada('${m.nome}', 'F')" class="btn-call btn-f">F</button>
+                        <button onclick="prepararChamada('${m.nome}', 'FJ')" class="btn-call btn-fj">FJ</button>
+                    </div>
+                </div>
+                <button id="btnUp-${idMembro}" class="btn btn-warning btn-update-inline" onclick="confirmarAtualizacao('${m.nome}')">
+                    <i class="bi bi-arrow-repeat"></i> ATUALIZAR CHAMADA DESTE MEMBRO
+                </button>
+            </div>`;
+    }
+
+    function renderSeminarios(nomeMembro, lista) {
+        if(!lista || lista.length === 0) return '<p class="m-0 text-white-50" style="font-size: 0.6rem;">Nenhum registro</p>';
+        return lista.map((s, index) => `
+            <div class="seminario-item">
+                <div>
+                    <span class="seminario-local">[${s.local}]</span> ${s.titulo}
+                    <div class="text-white-50" style="font-size: 0.6rem;">${s.data.split('-').reverse().join('/')}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    window.recarregarGestao = () => { colorirBotoes(); };
+
+    window.proximoStatusDizimo = async (nome, chave, statusAtual) => {
+        let novoStatus = "OK";
+        if(statusAtual === "OK") novoStatus = "PENDENTE";
+        else if(statusAtual === "PENDENTE") novoStatus = "SEM_RENDA";
+        else if(statusAtual === "SEM_RENDA") novoStatus = null;
+
+        await updateDoc(doc(db, "membros", nome), {
+            [`historicoDizimos.${chave}`]: novoStatus
+        });
+    };
+
+    window.abrirRelatorioGestao = () => {
+        const mes = document.getElementById('filtroMesDizimo').value;
+        const ano = document.getElementById('filtroAnoDizimo').value;
+        const chave = `${mes}_${ano}`;
+        
+        document.getElementById('tituloRelatorioGestao').innerText = `Período: ${mes}/${ano}`;
+        const corpo = document.getElementById('corpoRelatorioGestao');
+        corpo.innerHTML = "";
+
+        cacheMembros.forEach(m => {
+            const statusDizimo = m.historicoDizimos ? m.historicoDizimos[chave] : "-";
+            const listaSem = m.historicoSeminarios ? m.historicoSeminarios.map(s => `${s.titulo} (${s.local})`).join(', ') : "-";
+            const listaFuncoes = m.funcoes ? m.funcoes.join(' | ') : "-";
+            
+            let statusHTML = `<span class="text-white-50">Não Info.</span>`;
+            if(statusDizimo === "OK") statusHTML = `<span class="text-success fw-bold">Dízimo OK</span>`;
+            if(statusDizimo === "PENDENTE") statusHTML = `<span class="text-danger fw-bold">Não Ofertado</span>`;
+            if(statusDizimo === "SEM_RENDA") statusHTML = `<span class="text-info fw-bold">Sem Renda</span>`;
+
+            corpo.innerHTML += `
+                <tr>
+                    <td class="fw-bold">${m.nome}</td>
+                    <td><span class="text-info">${listaFuncoes}</span></td>
+                    <td>${m.grupo || '-'}</td>
+                    <td>${statusHTML}</td>
+                    <td style="max-width: 250px; font-size: 0.7rem;">${listaSem}</td>
+                </tr>`;
+        });
+
+        new bootstrap.Modal(document.getElementById('modalRelatorioGestao')).show();
+    };
+
+    window.abrirSeminarioPeloModal = () => {
+        const modalEdicao = bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro'));
+        if(modalEdicao) modalEdicao.hide();
+        window.abrirModalSeminario(window.membroSendoEditado);
+    };
+
+    window.abrirModalSeminario = (nome) => {
+        window.membroSeminarioAtual = nome;
+        document.getElementById('nomeMembroSem').innerText = nome;
+        document.getElementById('indexSemEdit').value = ""; 
+        document.getElementById('tituloSem').value = "";
+        document.getElementById('dataSem').value = "";
+        new bootstrap.Modal(document.getElementById('modalSeminario')).show();
+    };
+
+    window.fecharModalSeminario = () => {
+        const modalSem = bootstrap.Modal.getInstance(document.getElementById('modalSeminario'));
+        if(modalSem) modalSem.hide();
+        if (window.membroSendoEditado) {
+            new bootstrap.Modal(document.getElementById('modalEditarMembro')).show();
+        }
+    };
+
+    async function sincronizarUltimoSeminario(nomeMembro, listaSeminarios) {
+        let ultimoTexto = "SEM SEMINÁRIOS"; 
+        if (listaSeminarios && listaSeminarios.length > 0) {
+            const ordenados = [...listaSeminarios].sort((a, b) => new Date(b.data) - new Date(a.data));
+            ultimoTexto = ordenados[0].titulo.toUpperCase();
+        }
+        await updateDoc(doc(db, "membros", nomeMembro), { ultimoSeminario: ultimoTexto });
+        const label = document.getElementById('labelUltimoSeminario');
+        if (label && window.membroSendoEditado === nomeMembro) {
+            label.innerText = ultimoTexto;
+        }
+    }
+
+    window.excluirSeminario = async (nome, index) => {
+        if(confirm("Deseja realmente apagar este seminário?")) {
+            const m = cacheMembros.find(x => x.nome === nome);
+            if (!m) return;
+            const novaLista = [...m.historicoSeminarios];
+            novaLista.splice(index, 1);
+            await updateDoc(doc(db, "membros", nome), { historicoSeminarios: novaLista });
+            await sincronizarUltimoSeminario(nome, novaLista);
+        }
+    };
+
+    document.getElementById('btnSalvarSeminario').onclick = async () => {
+        const local = document.getElementById('localSem').value;
+        const titulo = document.getElementById('tituloSem').value;
+        const data = document.getElementById('dataSem').value;
+        const indexEdit = document.getElementById('indexSemEdit').value;
+        if(!titulo || !data) { alert("Preencha título e data!"); return; }
+        const m = cacheMembros.find(x => x.nome === window.membroSendoEditado);
+        let novaLista = m.historicoSeminarios ? [...m.historicoSeminarios] : [];
+        if(indexEdit === "") { novaLista.push({local, titulo, data}); }
+        else { novaLista[indexEdit] = {local, titulo, data}; }
+        await updateDoc(doc(db, "membros", window.membroSendoEditado), { historicoSeminarios: novaLista });
+        await sincronizarUltimoSeminario(window.membroSendoEditado, novaLista);
+        fecharModalSeminario();
+    };
+
     window.prepararChamada = (nome, statusAbv) => {
         const idMembro = nome.replace(/\s+/g, '');
         const container = document.getElementById(`group-${idMembro}`);
         const statusTexto = statusAbv === 'P' ? "Presente" : (statusAbv === 'F' ? "Ausente" : "Justificada");
-        
         container.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
         if(statusAbv === 'P') container.querySelector('.btn-p').classList.add('active');
         if(statusAbv === 'F') container.querySelector('.btn-f').classList.add('active');
         if(statusAbv === 'FJ') container.querySelector('.btn-fj').classList.add('active');
-
         registrosTemporarios[nome] = statusTexto;
-
         if (registrosNoBanco[nome]) {
-            document.getElementById(`btnUp-${idMembro}`).style.display = 'block';
+            const upBtn = document.getElementById(`btnUp-${idMembro}`);
+            if(upBtn) upBtn.style.display = 'block';
         }
         verificarTravaData();
     };
 
     window.confirmarAtualizacao = async (nome) => {
         const idColecao = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
-        await setDoc(doc(db, idColecao, `${dataSelecionadaISO}_${nome}`), { 
-            nome: nome, data: dataSelecionadaISO, status: registrosTemporarios[nome], operador: meuNome 
-        });
+        await setDoc(doc(db, idColecao, `${dataSelecionadaISO}_${nome}`), { nome, data: dataSelecionadaISO, status: registrosTemporarios[nome], operador: meuNome });
         alert("CHAMADA ATUALIZADA!");
         delete registrosTemporarios[nome];
         verificarTravaData();
@@ -409,38 +719,17 @@
         const idColecao = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
         const totalMarcadosNaTela = { ...registrosNoBanco, ...registrosTemporarios };
         const chamadasFeitasComFuncao = nomesComFuncao.filter(nome => totalMarcadosNaTela[nome]);
-
         if (chamadasFeitasComFuncao.length < nomesComFuncao.length) {
-            const faltantes = nomesComFuncao.length - chamadasFeitasComFuncao.length;
-            alert(`BLOQUEADO: FALTA FAZER A CHAMADA DE ${faltantes} MEMBRO(S) COM FUNÇÃO!`);
+            alert(`BLOQUEADO: FALTA FAZER A CHAMADA DE ${nomesComFuncao.length - chamadasFeitasComFuncao.length} MEMBRO(S) COM FUNÇÃO!`);
             return;
         }
-
-        const novosParaSalvar = Object.keys(registrosTemporarios);
-        if(confirm(`Deseja salvar e finalizar a chamada de ${dataSelecionadaISO}?`)) {
+        if(confirm(`Salvar chamada de ${dataSelecionadaISO}?`)) {
             const batch = writeBatch(db);
-            novosParaSalvar.forEach(nome => {
-                const docRef = doc(db, idColecao, `${dataSelecionadaISO}_${nome}`);
-                batch.set(docRef, { nome: nome, data: dataSelecionadaISO, status: registrosTemporarios[nome], operador: meuNome });
+            Object.keys(registrosTemporarios).forEach(nome => {
+                batch.set(doc(db, idColecao, `${dataSelecionadaISO}_${nome}`), { nome, data: dataSelecionadaISO, status: registrosTemporarios[nome], operador: meuNome });
             });
             await batch.commit();
-            await setDoc(doc(db, "status_sistema", `${dataSelecionadaISO}_${periodoAtual}`), { status: "FINALIZADO", operador: meuNome, data: dataSelecionadaISO, periodo: periodoAtual });
-            alert("CHAMADA FINALIZADA COM SUCESSO!");
-            registrosTemporarios = {};
-            verificarTravaData();
-            colorirBotoes();
-        }
-    };
-
-    document.getElementById('btnLimparTudoHoje').onclick = async () => {
-        const idColecao = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
-        if(confirm(`Limpar toda a chamada da data ${dataSelecionadaISO}?`)) {
-            const q = query(collection(db, idColecao), where("data", "==", dataSelecionadaISO));
-            const snap = await getDocs(q);
-            const batch = writeBatch(db);
-            snap.forEach(d => batch.delete(d.ref));
-            await batch.commit();
-            alert("LIMPO!");
+            alert("SUCESSO!");
             registrosTemporarios = {};
             verificarTravaData();
             colorirBotoes();
@@ -450,86 +739,82 @@
     window.abrirEditor = async (nome) => {
         window.membroSendoEditado = nome;
         document.getElementById('editNomeMembro').innerText = nome;
-        const mSnap = await getDoc(doc(db, "membros", nome));
-        if(mSnap.exists()) {
-            const m = mSnap.data();
+        const m = cacheMembros.find(x => x.nome === nome);
+        if(m) {
             document.getElementById('inputMudarGrupo').value = m.grupo || "";
+            document.getElementById('checkDizimista').checked = m.dizimista || false;
+            document.getElementById('labelUltimoSeminario').innerText = m.ultimoSeminario || "SEM SEMINÁRIOS";
             renderizarTagsFuncao(m.funcoes || []);
+            renderizarSeminariosNoModal(m.historicoSeminarios || []);
         }
         new bootstrap.Modal(document.getElementById('modalEditarMembro')).show();
     };
 
-    function renderizarTagsFuncao(funcoes) {
-        const container = document.getElementById('containerTagsFuncao');
-        container.innerHTML = funcoes.map(f => `
-            <span class="badge-funcao d-flex align-items-center mb-1 me-1">
-                ${f} <i class="bi bi-x-circle-fill text-danger ms-2" style="cursor:pointer" onclick="removerFuncao('${f}')"></i>
-            </span>`).join('');
+    function renderizarSeminariosNoModal(lista) {
+        const container = document.getElementById('listaSeminariosNoModal');
+        if (!lista || lista.length === 0) {
+            container.innerHTML = '<p class="text-white-50 small">Nenhum</p>';
+            return;
+        }
+        container.innerHTML = lista.map((s, index) => `
+            <div class="seminario-item">
+                <div>[${s.local}] ${s.titulo}</div>
+                <div class="d-flex gap-2">
+                    <i class="bi bi-trash-fill text-danger" style="cursor:pointer" onclick="window.excluirSeminario(window.membroSendoEditado, ${index})"></i>
+                </div>
+            </div>`).join('');
     }
 
-    window.removerFuncao = async (funcao) => {
-        if(confirm(`Remover ${funcao}?`)) {
-            await updateDoc(doc(db, "membros", window.membroSendoEditado), { funcoes: arrayRemove(funcao) });
-            const mSnap = await getDoc(doc(db, "membros", window.membroSendoEditado));
-            renderizarTagsFuncao(mSnap.data().funcoes || []);
-        }
-    };
+    function renderizarTagsFuncao(fs) {
+        document.getElementById('containerTagsFuncao').innerHTML = fs.map(f => `<span class="badge-funcao">${f} <i class="bi bi-x-circle-fill text-danger ms-2" onclick="removerFuncao('${f}')"></i></span>`).join('');
+    }
 
-    document.getElementById('btnSalvarGrupo').onclick = async () => {
-        const g = document.getElementById('inputMudarGrupo').value.toUpperCase();
-        await updateDoc(doc(db, "membros", window.membroSendoEditado), { grupo: g });
-        alert("GRUPO ATUALIZADO!");
-    };
+    window.removerFuncao = async (f) => { if(confirm(`Remover ${f}?`)) await updateDoc(doc(db, "membros", window.membroSendoEditado), { funcoes: arrayRemove(f) }); };
+    document.getElementById('btnSalvarGrupo').onclick = async () => { await updateDoc(doc(db, "membros", window.membroSendoEditado), { grupo: document.getElementById('inputMudarGrupo').value.toUpperCase() }); alert("OK!"); };
+    document.getElementById('btnAddFuncao').onclick = async () => { const f = document.getElementById('inputNovaFuncao').value.toUpperCase(); if(f) await updateDoc(doc(db, "membros", window.membroSendoEditado), { funcoes: arrayUnion(f) }); };
+    document.getElementById('btnSalvarInfoExtra').onclick = async () => { await updateDoc(doc(db, "membros", window.membroSendoEditado), { dizimista: document.getElementById('checkDizimista').checked }); alert("SALVO!"); };
 
-    document.getElementById('btnAddFuncao').onclick = async () => {
-        const f = document.getElementById('inputNovaFuncao').value.toUpperCase();
-        if(f) {
-            await updateDoc(doc(db, "membros", window.membroSendoEditado), { funcoes: arrayUnion(f) });
-            document.getElementById('inputNovaFuncao').value = "";
-            const mSnap = await getDoc(doc(db, "membros", window.membroSendoEditado));
-            renderizarTagsFuncao(mSnap.data().funcoes || []);
-            alert("FUNÇÃO ADICIONADA!");
-        }
-    };
-
+    // --- CONCERTO NA LIMPEZA INDIVIDUAL ---
     document.getElementById('btnLimparChamadaDia').onclick = async () => {
-        const idColecao = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
-        const nomeMembro = window.membroSendoEditado;
-        const idDoc = `${dataSelecionadaISO}_${nomeMembro}`;
-        await deleteDoc(doc(db, idColecao, idDoc));
-        delete registrosNoBanco[nomeMembro];
-        delete registrosTemporarios[nomeMembro];
-        colorirBotoes();
-        alert("CHAMADA LIMPA!");
+        if(confirm(`Limpar chamada de ${window.membroSendoEditado}?`)) {
+            // ID correto do documento: Data_Nome
+            const idDoc = `${dataSelecionadaISO}_${window.membroSendoEditado}`;
+            // Identifica se a coleção é diária ou de algum período de domingo
+            const idCol = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
+            
+            try { 
+                await deleteDoc(doc(db, idCol, idDoc)); 
+                alert("CHAMADA DO MEMBRO LIMPA!"); 
+                bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide(); 
+                colorirBotoes(); 
+            } catch(e) { 
+                console.error(e);
+                alert("Erro ao limpar chamada."); 
+            }
+        }
     };
 
     document.getElementById('btnExcluirMembro').onclick = async () => {
         if(confirm(`Excluir ${window.membroSendoEditado}?`)) {
             await deleteDoc(doc(db, "membros", window.membroSendoEditado));
-            alert("EXCLUÍDO!");
             bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
         }
     };
 
-    // BOTÃO SALVAR NOVO MEMBRO COM OPÇÃO DE FOTO
     document.getElementById('btnSalvarNovoMembro').onclick = async () => {
         const n = document.getElementById('novoNomeMembro').value.toUpperCase();
-        const g = document.getElementById('novoGrupoMembro').value.toUpperCase();
-        const f = document.getElementById('novaFotoMembro').value;
         if(n) {
             await setDoc(doc(db, "membros", n), { 
-                nome: n, 
-                grupo: g, 
-                funcoes: [],
-                foto: f || "" 
+                nome: n, grupo: document.getElementById('novoGrupoMembro').value.toUpperCase(), 
+                funcoes: [], foto: document.getElementById('novaFotoMembro').value || "",
+                historicoDizimos: {}, historicoSeminarios: [], ultimoSeminario: "SEM SEMINÁRIOS"
             });
-            alert("MEMBRO ADICIONADO!");
-            document.getElementById('novoNomeMembro').value = "";
-            document.getElementById('novoGrupoMembro').value = "";
-            document.getElementById('novaFotoMembro').value = "";
+            alert("ADICIONADO!");
             bootstrap.Modal.getInstance(document.getElementById('modalNovoMembro')).hide();
         }
     };
+
+    colorirBotoes();
 </script>
 </body>
 </html>
