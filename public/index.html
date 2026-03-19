@@ -49,7 +49,7 @@
         .member-main-row { display: flex; align-items: center; width: 100%; gap: 10px; }
         .photo-frame { width: 55px; height: 55px; border-radius: 50%; border: 2px solid var(--primary-blue); overflow: hidden; flex-shrink: 0; background: #222; display: flex; align-items: center; justify-content: center; position: relative; }
         .photo-frame i { font-size: 1.8rem; color: #555; position: absolute; z-index: 1; }
-        .photo-frame img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2; display: none; }
+        .photo-frame img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2; display: none; border-radius: 50%; }
         
         .member-info { flex: 1; min-width: 0; }
         .member-name { font-size: 0.9rem; font-weight: bold; color: var(--text-white); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -68,7 +68,7 @@
         
         .navbar-custom { background-color: #000 !important; border-top: 1px solid #222; z-index: 1100; }
         .admin-only { display: none; }
-        .bottom-save-bar { position: fixed; bottom: 65px; left: 0; width: 100%; padding: 10px; background: #1a1a1a; border-top: 1px solid #333; z-index: 1050; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+        .bottom-save-bar { position: fixed; bottom: 75px; left: 0; width: 100%; padding: 10px; background: #1a1a1a; border-top: 1px solid #333; z-index: 1050; display: flex; flex-direction: column; gap: 8px; align-items: center; }
         .modal-content { background-color: var(--modal-claro) !important; border: 2px solid var(--primary-blue) !important; border-radius: 15px !important; color: var(--text-white) !important; }
 
         .gestao-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; margin: 10px; padding: 15px; }
@@ -201,6 +201,7 @@
 <nav class="navbar fixed-bottom navbar-custom py-2">
     <div class="container d-flex justify-content-around">
         <a href="index.html" class="text-primary text-center text-decoration-none"><i class="bi bi-people-fill fs-4 d-block"></i><span style="font-size: 0.7rem;">Chamada</span></a>
+        <a href="relatorio.html" class="text-white-50 text-center text-decoration-none"><i class="bi bi-file-bar-graph fs-4 d-block"></i><span style="font-size: 0.7rem;">Relatorios</span></a>
         <a href="#" onclick="sessionStorage.clear(); window.location.href='login.html';" class="text-danger text-center text-decoration-none"><i class="bi bi-box-arrow-right fs-4 d-block"></i><span style="font-size: 0.7rem;">Sair</span></a>
     </div>
 </nav>
@@ -224,7 +225,7 @@
     const db = getFirestore(app);
 
     const dataHoje = new Date();
-    let dataSelecionadaISO = dataHoje.toISOString().split('T')[0];
+    let dataSelecionadaISO = dataHoje.toLocaleDateString('en-CA'); 
     const perfil = sessionStorage.getItem('perfil_maranata');
     let periodoAtual = "";
     let cacheMembros = [];
@@ -237,6 +238,7 @@
         if (idx < lista.length - 1) {
             idx++;
             img.dataset.idx = idx;
+            img.src = "";
             img.src = `fotos/${lista[idx]}`;
         } else { img.style.display = 'none'; }
     };
@@ -259,6 +261,24 @@
         const ehDom = d.getDay() === 0;
         document.getElementById('seletorDomingo').style.display = ehDom ? 'flex' : 'none';
         if(ehDom && !periodoAtual) mudarPeriodo('EBD');
+        colorirBotoes();
+    }
+
+    async function colorirBotoes() {
+        const idCol = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
+        const q = query(collection(db, idCol), where("data", "==", dataSelecionadaISO));
+        let snap = await getDocs(q);
+        document.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
+        snap.forEach(docSnap => {
+            const d = docSnap.data();
+            const idM = d.nome.replace(/\s+/g, '');
+            const container = document.getElementById(`group-${idM}`);
+            if (container) {
+                if (d.status === "Presente") container.querySelector('.btn-p').classList.add('active');
+                if (d.status === "Ausente") container.querySelector('.btn-f').classList.add('active');
+                if (d.status === "Justificada") container.querySelector('.btn-fj').classList.add('active');
+            }
+        });
     }
 
     onSnapshot(query(collection(db, "membros"), orderBy("nome", "asc")), (snap) => {
@@ -298,16 +318,25 @@
         });
     });
 
+    // BOTAO EXCLUIR DEFINITIVAMENTE (FIX)
+    document.getElementById('btnExcluirMembro').onclick = async () => {
+        if(confirm(`ATENCAO: Excluir ${window.membroSendoEditado} definitivamente? Esta acao nao pode ser desfeita.`)){
+            try {
+                await deleteDoc(doc(db, "membros", window.membroSendoEditado));
+                alert("Membro removido com sucesso!");
+                bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
+                window.membroSendoEditado = null;
+            } catch(e) { console.error("Erro ao excluir:", e); }
+        }
+    };
+
     window.setDizimo = async (n, c, v, btn) => {
         const parent = btn.parentElement;
         const estaAtivo = btn.classList.contains('active-ok') || btn.classList.contains('active-no') || btn.classList.contains('active-sr');
-
         if (estaAtivo) {
-            // DESMARCAR: Se ja estava marcado e clicou de novo
             parent.querySelectorAll('.btn-dz').forEach(b => b.classList.remove('active-ok', 'active-no', 'active-sr'));
             await updateDoc(doc(db, "membros", n), { [`historicoDizimos.${c}`]: deleteField() });
         } else {
-            // MARCAR: Comportamento normal
             parent.querySelectorAll('.btn-dz').forEach(b => b.classList.remove('active-ok', 'active-no', 'active-sr'));
             if(v === 'OK') btn.classList.add('active-ok');
             if(v === 'PENDENTE') btn.classList.add('active-no');
@@ -326,6 +355,8 @@
         });
         document.getElementById(`in-sem-${id}`).value = "";
     };
+
+    window.delSem = async (n, i) => { if(confirm("Excluir seminario?")){ const m = cacheMembros.find(x => x.nome === n); const nova = [...m.historicoSeminarios]; nova.splice(i, 1); await updateDoc(doc(db, "membros", n), { historicoSeminarios: nova }); } };
 
     window.abrirRelatorioGestao = () => {
         const m = document.getElementById('filtroMesDizimo').value, a = document.getElementById('filtroAnoDizimo').value, c = `${m}_${a}`;
@@ -357,14 +388,6 @@
                 else if(statusBanco === "SEM_RENDA") statusTexto = "SEM RENDA";
                 return [limparTexto(mem.nome), mem.funcoes?.map(f=>limparTexto(f)).join(', ') || '-', `${statusTexto} (${m}/${a})`, mem.historicoSeminarios?.map(s => `${limparTexto(s.titulo)} (${s.mesAno})`).join(', ') || '-'];
             }),
-            didParseCell: function(data) {
-                if(data.column.index === 2) {
-                    if(data.cell.text[0].includes('OFERTADO') && !data.cell.text[0].includes('NAO')) data.cell.styles.textColor = [40, 167, 69];
-                    else if(data.cell.text[0].includes('NAO OFERTADO')) data.cell.styles.textColor = [255, 68, 68];
-                    else if(data.cell.text[0].includes('SEM RENDA')) data.cell.styles.textColor = [23, 162, 184];
-                    else data.cell.styles.textColor = [120, 120, 120];
-                }
-            },
             startY: 20
         });
         docPDF.save(`Gestao_Maranata_${m}_${a}.pdf`);
@@ -381,22 +404,27 @@
         new bootstrap.Modal(document.getElementById('modalEditarMembro')).show();
     };
 
+    document.getElementById('modalEditarMembro').addEventListener('hidden.bs.modal', () => { window.membroSendoEditado = null; });
+
     window.removerFuncao = async (f) => { if(confirm(`Remover ${f}?`)) await updateDoc(doc(db, "membros", window.membroSendoEditado), { funcoes: arrayRemove(f) }); };
     document.getElementById('btnSalvarGrupo').onclick = async () => { await updateDoc(doc(db, "membros", window.membroSendoEditado), { grupo: document.getElementById('inputMudarGrupo').value.toUpperCase() }); alert("SALVO!"); };
     document.getElementById('btnAddFuncao').onclick = async () => { const f = limparTexto(document.getElementById('inputNovaFuncao').value); if(f) await updateDoc(doc(db, "membros", window.membroSendoEditado), { funcoes: arrayUnion(f) }); document.getElementById('inputNovaFuncao').value = ""; };
     
-    window.prepararChamada = (nome, s) => {
-        const id = nome.replace(/\s+/g, '');
-        const container = document.getElementById(`group-${id}`);
-        container.querySelectorAll('.btn-call').forEach(b => b.classList.remove('active'));
-        if(s==='P') container.querySelector('.btn-p').classList.add('active');
-        if(s==='F') container.querySelector('.btn-f').classList.add('active');
-        if(s==='FJ') container.querySelector('.btn-fj').classList.add('active');
+    window.prepararChamada = async (nome, s) => {
+        const idCol = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
+        const idDoc = `${dataSelecionadaISO}_${nome}`;
+        const st = (s==='P')?"Presente":(s==='F')?"Ausente":"Justificada";
+        await setDoc(doc(db, idCol, idDoc), { nome, status: st, data: dataSelecionadaISO, data_formatada: document.getElementById('dataTopo').innerText, operador: "DIACONO" });
+        colorirBotoes();
     };
 
-    window.mudarPeriodo = (p) => { periodoAtual = p; };
+    window.mudarPeriodo = (p) => { periodoAtual = p; colorirBotoes(); };
     window.recarregarGestao = () => { window.location.reload(); };
-    document.getElementById('inputDataChamada').onchange = (e) => { dataSelecionadaISO = e.target.value; atualizarLabelsData(dataSelecionadaISO); };
+    
+    const inputData = document.getElementById('inputDataChamada');
+    inputData.value = dataSelecionadaISO;
+    inputData.onchange = (e) => { dataSelecionadaISO = e.target.value; atualizarLabelsData(dataSelecionadaISO); };
+    
     if (perfil === 'admin') document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
     atualizarLabelsData(dataSelecionadaISO);
 </script>
