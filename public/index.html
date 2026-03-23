@@ -35,11 +35,12 @@
         .user-logged-info { background: var(--primary-blue); color: white; font-size: 0.75rem; text-align: center; padding: 4px; font-weight: bold; text-transform: uppercase; }
         .header-data { background: #1a1a1a; padding: 15px; border-bottom: 2px solid var(--primary-blue); text-align: center; }
         .data-texto { font-size: 1.1rem; font-weight: bold; color: var(--warning-yellow); margin: 0; }
-        .retroativo-container { background: #111; padding: 8px; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .retroativo-container { background: #111; padding: 8px; border-bottom: 1px solid #333; display: none; align-items: center; justify-content: center; gap: 10px; }
         .input-retroativo { background: #333; color: white; border: 1px solid var(--primary-blue); border-radius: 5px; padding: 2px 8px; font-size: 0.85rem; }
+        
         .periodo-selector { background: #222; padding: 10px; border-bottom: 1px solid #333; display: none; justify-content: center; gap: 10px; }
-        .btn-periodo { border: 1px solid var(--primary-blue); color: var(--primary-blue); background: transparent; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
-        .btn-periodo.active { background: var(--primary-blue); color: white; }
+        .btn-periodo { border: 1px solid var(--primary-blue); color: var(--primary-blue); background: transparent; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; transition: 0.3s; }
+        .btn-periodo.active { background: var(--primary-blue) !important; color: white !important; }
         
         .nav-tabs { border-bottom: 1px solid #333; justify-content: center; background: #000; }
         .nav-link { color: #888 !important; border: none !important; font-weight: bold; text-transform: uppercase; font-size: 0.75rem; padding: 12px 15px; }
@@ -48,7 +49,8 @@
         .member-card { background-color: var(--card-bg); border: 1px solid #333; margin: 8px 12px; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; }
         .member-main-row { display: flex; align-items: center; width: 100%; gap: 10px; }
         .photo-frame { width: 55px; height: 55px; border-radius: 50%; border: 2px solid var(--primary-blue); overflow: hidden; flex-shrink: 0; background: #222; display: flex; align-items: center; justify-content: center; position: relative; }
-        .photo-frame img { width: 100%; height: 100%; object-fit: cover; }
+        .photo-frame i { font-size: 1.8rem; color: #555; position: absolute; z-index: 1; }
+        .photo-frame img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2; display: none; border-radius: 50%; }
         
         .member-info { flex: 1; min-width: 0; }
         .member-name { font-size: 0.9rem; font-weight: bold; color: var(--text-white); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -65,19 +67,17 @@
         .btn-fj.active { background-color: var(--warning-yellow) !important; color: black !important; }
         .btn-edit { color: #555; border: none; background: transparent; font-size: 1.1rem; cursor: pointer; }
         
-        .navbar-custom { background-color: #000 !important; border-top: 1px solid #222; z-index: 1100; }
-        .admin-only { display: none; }
-        .bottom-save-bar { position: fixed; bottom: 75px; left: 0; width: 100%; padding: 10px; background: #1a1a1a; border-top: 1px solid #333; z-index: 1050; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+        .navbar-custom { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #000 !important; border-top: 1px solid #222; z-index: 1100; height: 70px; }
+        .bottom-save-bar { position: fixed; bottom: 70px; left: 0; width: 100%; padding: 10px; background: #1a1a1a; border-top: 1px solid #333; z-index: 1050; display: flex; flex-direction: column; gap: 8px; align-items: center; }
         .modal-content { background-color: var(--modal-claro) !important; border: 2px solid var(--primary-blue) !important; border-radius: 15px !important; color: var(--text-white) !important; }
 
-        .status-ok { color: var(--success-green) !important; font-weight: bold; }
-        .status-no { color: var(--danger-red) !important; font-weight: bold; }
-        .status-sr { color: var(--info-cyan) !important; font-weight: bold; }
-        .status-null { color: #666 !important; font-style: italic; }
-
-        .report-table { font-size: 0.75rem; color: white; width: 100%; border-collapse: collapse; }
-        .report-table th { color: var(--warning-yellow); border-bottom: 1px solid #444; padding: 5px; }
-        .report-table td { padding: 5px; border-bottom: 1px solid #222; }
+        .gestao-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; margin: 10px; padding: 15px; }
+        .gestao-nome { color: var(--warning-yellow); font-weight: bold; font-size: 1rem; margin-bottom: 5px; display: block; }
+        .btn-dz { flex: 1; font-size: 0.6rem; font-weight: bold; padding: 8px 2px; border-radius: 6px; border: 1px solid #444; background: #222; color: #777; transition: 0.2s; }
+        .btn-dz.active-ok { background: var(--success-green); color: white; border-color: var(--success-green); }
+        .btn-dz.active-no { background: var(--danger-red); color: white; border-color: var(--danger-red); }
+        .btn-dz.active-sr { background: var(--info-cyan); color: white; border-color: var(--info-cyan); }
+        .sem-item-gestao { background: #000; border: 1px solid #333; padding: 4px 8px; border-radius: 4px; margin-bottom: 4px; font-size: 0.7rem; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
@@ -86,7 +86,7 @@
     <i class="bi bi-person-fill"></i> <span id="labelPerfilUser"></span> | <i class="bi bi-calendar3"></i> <span id="dataTopo"></span>
 </div>
 
-<div class="retroativo-container admin-only" id="containerFiltroData">
+<div class="retroativo-container admin-only" id="containerFiltroData" style="display: flex;">
     <span class="small fw-bold text-info">LANCAR RETROATIVO:</span>
     <input type="date" id="inputDataChamada" class="input-retroativo">
 </div>
@@ -112,6 +112,24 @@
     <div class="tab-pane fade" id="semFuncao" role="tabpanel"><div id="listaSemFuncao" class="mt-2"></div></div>
     
     <div class="tab-pane fade" id="gestaoTab" role="tabpanel">
+        <div class="p-3 text-center">
+            <h6 class="text-warning small fw-bold mb-3">CONTROLE DE DIZIMOS E SEMINARIOS</h6>
+            <div class="d-flex gap-2 justify-content-center mb-3">
+                <select id="filtroMesDizimo" class="form-select form-select-sm bg-dark text-white border-secondary" style="width: 120px;">
+                    <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03" selected>Marco</option>
+                    <option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option>
+                    <option value="07">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
+                    <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+                </select>
+                <select id="filtroAnoDizimo" class="form-select form-select-sm bg-dark text-white border-secondary" style="width: 90px;">
+                    <option value="2025">2025</option><option value="2026" selected>2026</option>
+                </select>
+                <button class="btn btn-primary btn-sm" onclick="window.recarregarGestao()">OK</button>
+            </div>
+            <button class="btn btn-warning btn-sm fw-bold w-100 mb-2" onclick="window.abrirRelatorioGestao()">
+                <i class="bi bi-file-earmark-pdf"></i> GERAR RELATORIO PDF
+            </button>
+        </div>
         <div id="listaGestao"></div>
     </div>
 </div>
@@ -120,9 +138,37 @@
     <button id="btnFinalizarChamada" class="btn btn-success w-75 fw-bold shadow mb-2">
         <i class="bi bi-check-circle-fill"></i> FINALIZAR CHAMADA
     </button>
-    <button id="btnLimparTudo" class="btn btn-outline-danger btn-sm w-75 fw-bold admin-only" onclick="window.limparTodaChamadaDia()">
+    <button class="btn btn-outline-danger btn-sm w-75 fw-bold admin-only" onclick="window.limparTodaChamadaDia()">
         <i class="bi bi-trash3-fill"></i> LIMPAR TODA CHAMADA DO DIA
     </button>
+</div>
+
+<div class="modal fade" id="modalEditarMembro" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editNomeMembro">Gerenciar Registro</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="admin-only">
+                    <label class="small mb-1">Grupo:</label>
+                    <div class="input-group mb-3">
+                        <input type="text" id="inputMudarGrupo" class="form-control">
+                        <button id="btnSalvarGrupo" class="btn btn-success btn-sm">SALVAR</button>
+                    </div>
+                    <label class="small mb-1">Adicionar Funcao:</label>
+                    <div class="input-group mb-2">
+                        <input type="text" id="inputNovaFuncao" class="form-control">
+                        <button id="btnAddFuncao" class="btn btn-primary btn-sm">ADD</button>
+                    </div>
+                    <div id="containerTagsFuncao" class="d-flex flex-wrap gap-1 mb-3"></div>
+                </div>
+                <button id="btnLimparMembroDia" class="btn btn-outline-warning btn-sm w-100 mb-2">LIMPAR CHAMADA DESTE DIA</button>
+                <button id="btnExcluirMembro" class="btn btn-outline-danger btn-sm w-100 admin-only">EXCLUIR DEFINITIVAMENTE</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="modal fade" id="modalRelatorioGestao" tabindex="-1">
@@ -133,8 +179,9 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                <button class="btn btn-danger btn-sm mb-3 fw-bold" onclick="window.baixarRelatorioPDF()">BAIXAR PDF</button>
                 <div class="table-responsive">
-                    <table class="report-table">
+                    <table class="report-table" id="tabelaGestaoPDF">
                         <thead><tr><th>Membro</th><th>Funcao</th><th>Dizimo</th><th>Seminarios</th></tr></thead>
                         <tbody id="corpoRelatorioGestao"></tbody>
                     </table>
@@ -156,7 +203,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, doc, setDoc, updateDoc, deleteDoc, query, orderBy, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, doc, setDoc, updateDoc, deleteDoc, arrayUnion, arrayRemove, query, orderBy, getDocs, where, deleteField } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCEMfA8_6LAbvanYwXE_6KcO0WQWoI5nSQ",
@@ -170,20 +217,41 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const dataHoje = new Date();
-    let dataSelecionadaISO = dataHoje.getFullYear() + '-' + String(dataHoje.getMonth() + 1).padStart(2, '0') + '-' + String(dataHoje.getDate()).padStart(2, '0');
+    const hj = new Date();
+    let dataSelecionadaISO = hj.getFullYear() + '-' + String(hj.getMonth() + 1).padStart(2, '0') + '-' + String(hj.getDate()).padStart(2, '0');
     const perfil = sessionStorage.getItem('perfil_maranata');
     let periodoAtual = "";
     let cacheMembros = [];
 
     const limparTexto = (s) => s ? s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\./g, "").toUpperCase() : "";
 
-    // LÓGICA DE CORES RESTAURADA DO SEU ÚLTIMO CÓDIGO FUNCIONAL
+    window.proximaTentativaDeFoto = function(img) {
+        const lista = JSON.parse(img.dataset.tentativas || "[]");
+        let idx = parseInt(img.dataset.idx || "0");
+        if (idx < lista.length - 1) {
+            idx++; img.dataset.idx = idx;
+            img.src = `fotos/${lista[idx]}`;
+        } else { img.style.display = 'none'; }
+    };
+
+    function gerarTentativasDeFoto(nome, fotoNoBanco) {
+        const t = []; if(fotoNoBanco) t.push(limparTexto(fotoNoBanco));
+        const limpo = limparTexto(nome); const partes = limpo.split(" ");
+        t.push(limpo + ".jpg");
+        if(partes.length > 1) t.push(partes[0] + " " + partes[partes.length-1] + ".jpg");
+        t.push(partes[0] + ".jpg");
+        return [...new Set(t)];
+    }
+
+    // FUNÇÃO QUE COLORE OS BOTÕES (CHAMADA SEMPRE QUE MUDA DATA OU PERÍODO)
     window.colorirBotoes = async function() {
+        // Limpa visual antes de buscar
+        document.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
+        
         const idCol = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
         const q = query(collection(db, idCol), where("data", "==", dataSelecionadaISO));
         let snap = await getDocs(q);
-        document.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
+        
         snap.forEach(docSnap => {
             const d = docSnap.data();
             const idM = d.nome.replace(/\s+/g, '');
@@ -199,36 +267,116 @@
     onSnapshot(query(collection(db, "membros"), orderBy("nome", "asc")), (snap) => {
         const listaCom = document.getElementById('listaComFuncao');
         const listaSem = document.getElementById('listaSemFuncao');
-        listaCom.innerHTML = ""; listaSem.innerHTML = "";
+        const listaGestao = document.getElementById('listaGestao');
+        listaCom.innerHTML = ""; listaSem.innerHTML = ""; listaGestao.innerHTML = "";
+        
+        const mes = document.getElementById('filtroMesDizimo')?.value || "03";
+        const ano = document.getElementById('filtroAnoDizimo')?.value || "2026";
+        const cDiz = `${mes}_${ano}`;
+        
         cacheMembros = [];
-
         snap.forEach(docSnap => {
             const m = docSnap.data(); cacheMembros.push(m);
             const idM = m.nome.replace(/\s+/g, '');
-            const card = `<div class="member-card"><div class="member-main-row"><button class="btn-edit"><i class="bi bi-pencil-square"></i></button><div class="photo-frame"><i class="bi bi-person-circle"></i></div><div class="member-info"><span class="member-name">${limparTexto(m.nome)}</span><div class="tag-container">${m.grupo?`<span class="badge-grupo">${limparTexto(m.grupo)}</span>`:''}${m.funcoes?m.funcoes.map(f=>`<span class="badge-funcao">${limparTexto(f)}</span>`).join(''):''}</div></div><div class="d-flex" id="group-${idM}"><button onclick="prepararChamada('${m.nome}','P')" class="btn-call btn-p">P</button><button onclick="prepararChamada('${m.nome}','F')" class="btn-call btn-f">F</button><button onclick="prepararChamada('${m.nome}','FJ')" class="btn-call btn-fj">FJ</button></div></div></div>`;
+            const t = gerarTentativasDeFoto(m.nome, m.foto);
+            
+            const card = `<div class="member-card"><div class="member-main-row"><button class="btn-edit" onclick="window.abrirEditor('${m.nome}')"><i class="bi bi-pencil-square"></i></button><div class="photo-frame"><i class="bi bi-person-circle"></i><img src="fotos/${t[0]}" data-tentativas='${JSON.stringify(t)}' data-idx="0" onerror="window.proximaTentativaDeFoto(this)" onload="this.style.display='block';"></div><div class="member-info"><span class="member-name">${limparTexto(m.nome)}</span><div class="tag-container">${m.funcoes?m.funcoes.map(f=>`<span class="badge-funcao">${limparTexto(f)}</span>`).join(''):''}</div></div><div class="d-flex" id="group-${idM}"><button onclick="prepararChamada('${m.nome}','P')" class="btn-call btn-p">P</button><button onclick="prepararChamada('${m.nome}','F')" class="btn-call btn-f">F</button><button onclick="prepararChamada('${m.nome}','FJ')" class="btn-call btn-fj">FJ</button></div></div></div>`;
+            
             if(m.funcoes?.length > 0) listaCom.innerHTML += card; else listaSem.innerHTML += card;
+
+            if(perfil==='admin'){
+                const s = m.historicoDizimos ? m.historicoDizimos[cDiz] : null;
+                listaGestao.innerHTML += `<div class="gestao-card"><span class="gestao-nome">${limparTexto(m.nome)}</span><div class="btn-group-dizimo">
+                    <button onclick="window.setDizimo('${m.nome}','${cDiz}','OK', this)" class="btn-dz ${s==='OK'?'active-ok':''}">OFERTADO</button>
+                    <button onclick="window.setDizimo('${m.nome}','${cDiz}','PENDENTE', this)" class="btn-dz ${s==='PENDENTE'?'active-no':''}">NAO OFERTADO</button>
+                    <button onclick="window.setDizimo('${m.nome}','${cDiz}','SEM_RENDA', this)" class="btn-dz ${s==='SEM_RENDA'?'active-sr':''}">SEM RENDA</button>
+                </div><div id="sems-${idM}">${m.historicoSeminarios?.map((sem, i)=>`<div class="sem-item-gestao"><span>${limparTexto(sem.titulo)}</span> <i class="bi bi-trash text-danger" onclick="window.delSem('${m.nome}',${i})"></i></div>`).join('')||''}</div><div class="input-group input-group-sm mt-2"><input type="text" id="in-sem-${idM}" class="form-control bg-dark text-white border-secondary" placeholder="Curso"><button class="btn btn-warning" onclick="window.addSem('${m.nome}')">+</button></div></div>`;
+            }
         });
         window.colorirBotoes();
     });
 
+    window.mudarPeriodo = (p) => { 
+        periodoAtual = p;
+        document.querySelectorAll('.btn-periodo').forEach(btn => btn.classList.remove('active'));
+        if(p === 'EBD') document.getElementById('btnEBD').classList.add('active');
+        if(p === 'NOITE') document.getElementById('btnNOITE').classList.add('active');
+        window.colorirBotoes();
+    };
+
     window.prepararChamada = async (nome, s) => {
         const idCol = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
         const idDoc = `${dataSelecionadaISO}_${nome}`;
-        const st = (s==='P')?"Presente":(s==='F')?"Ausente":"Justificada";
-        await setDoc(doc(db, idCol, idDoc), { nome, status: st, data: dataSelecionadaISO });
+        await setDoc(doc(db, idCol, idDoc), { nome, status: s === 'P' ? 'Presente' : s === 'F' ? 'Ausente' : 'Justificada', data: dataSelecionadaISO });
         window.colorirBotoes();
     };
 
     window.limparTodaChamadaDia = async () => {
-        if(confirm("Deseja apagar TODOS os registros desta data? Isso resolvera o problema de registros fantasmas.")) {
+        if(confirm(`Limpar todos os registros do dia ${dataSelecionadaISO}?`)) {
             const idCol = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
             const q = query(collection(db, idCol), where("data", "==", dataSelecionadaISO));
             const snap = await getDocs(q);
-            const promises = snap.docs.map(d => deleteDoc(d.ref));
-            await Promise.all(promises);
+            const promessas = snap.docs.map(d => deleteDoc(d.ref));
+            await Promise.all(promessas);
             window.colorirBotoes();
-            alert("Chamada limpa!");
+            alert("Dia limpo!");
         }
+    };
+
+    document.getElementById('btnLimparMembroDia').onclick = async () => {
+        if(!window.membroSendoEditado) return;
+        const idCol = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
+        const q = query(collection(db, idCol), where("data", "==", dataSelecionadaISO), where("nome", "==", window.membroSendoEditado));
+        const snap = await getDocs(q);
+        const promessas = snap.docs.map(d => deleteDoc(d.ref));
+        await Promise.all(promessas);
+        bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
+        window.colorirBotoes();
+    };
+
+    window.setDizimo = async (n, c, v, btn) => {
+        if (btn.classList.contains('active-ok') || btn.classList.contains('active-no') || btn.classList.contains('active-sr')) {
+            await updateDoc(doc(db, "membros", n), { [`historicoDizimos.${c}`]: deleteField() });
+        } else {
+            await updateDoc(doc(db, "membros", n), { [`historicoDizimos.${c}`]: v });
+        }
+    };
+
+    window.addSem = async (n) => {
+        const id = n.replace(/\s+/g, '');
+        const val = document.getElementById(`in-sem-${id}`).value;
+        if(val) {
+            await updateDoc(doc(db, "membros", n), { historicoSeminarios: arrayUnion({ titulo: val, mesAno: "03/2026", data: new Date().toISOString() }) });
+            document.getElementById(`in-sem-${id}`).value = "";
+        }
+    };
+
+    window.delSem = async (n, i) => { if(confirm("Excluir?")){ const m = cacheMembros.find(x => x.nome === n); const nV = [...m.historicoSeminarios]; nV.splice(i, 1); await updateDoc(doc(db, "membros", n), { historicoSeminarios: nV }); } };
+
+    window.abrirRelatorioGestao = () => {
+        const m = document.getElementById('filtroMesDizimo').value, a = document.getElementById('filtroAnoDizimo').value, c = `${m}_${a}`;
+        const corpo = document.getElementById('corpoRelatorioGestao'); corpo.innerHTML = "";
+        cacheMembros.forEach(mem => {
+            const sB = mem.historicoDizimos?.[c];
+            let sT = "NAO INFORMADO", cS = "status-null";
+            if(sB === "OK") { sT = "OFERTADO"; cS = "status-ok"; }
+            else if(sB === "PENDENTE") { sT = "NAO OFERTADO"; cS = "status-no"; }
+            else if(sB === "SEM_RENDA") { sT = "SEM RENDA"; cS = "status-sr"; }
+            corpo.innerHTML += `<tr><td>${limparTexto(mem.nome)}</td><td>${mem.funcoes?.join(', ') || '-'}</td><td><span class="${cS}">${sT}</span></td><td>${mem.historicoSeminarios?.length || 0}</td></tr>`;
+        });
+        new bootstrap.Modal(document.getElementById('modalRelatorioGestao')).show();
+    };
+
+    window.baixarRelatorioPDF = () => {
+        const m = document.getElementById('filtroMesDizimo').value, a = document.getElementById('filtroAnoDizimo').value;
+        const { jsPDF } = window.jspdf; const docPDF = new jsPDF();
+        docPDF.text(`Relatorio de Gestao - ${m}/${a}`, 14, 15);
+        docPDF.autoTable({ 
+            head: [['Membro', 'Funcoes', 'Dizimo', 'Seminarios']], 
+            body: cacheMembros.map(mem => [limparTexto(mem.nome), mem.funcoes?.join(', ') || '-', mem.historicoDizimos?.[`${m}_${a}`] || 'NAO INF.', mem.historicoSeminarios?.map(s => s.titulo).join(', ') || '-']),
+            startY: 20
+        });
+        docPDF.save(`Gestao_${m}_${a}.pdf`);
     };
 
     document.getElementById('btnFinalizarChamada').onclick = async () => {
@@ -236,36 +384,54 @@
         const membrosComFuncao = cacheMembros.filter(m => m.funcoes && m.funcoes.length > 0);
         const q = query(collection(db, idCol), where("data", "==", dataSelecionadaISO));
         const snap = await getDocs(q);
-        
-        // Verifica apenas quem tem função
-        const realizados = snap.docs.filter(d => membrosComFuncao.some(mc => mc.nome === d.data().nome)).length;
-        
-        if (realizados < membrosComFuncao.length) {
-            alert(`ATENÇÃO: A chamada não está completa!\nFaltam ${membrosComFuncao.length - realizados} membros com função.`);
-        } else {
-            alert("CHAMADA CONCLUÍDA COM SUCESSO!");
+        const nomesChamada = snap.docs.map(d => d.data().nome);
+        const faltantes = membrosComFuncao.filter(m => !nomesChamada.includes(m.nome));
+        if (faltantes.length > 0) alert(`Faltam registrar ${faltantes.length} membros com funcao.`);
+        else alert("CHAMADA CONCLUIDA COM SUCESSO!");
+    };
+
+    document.getElementById('btnExcluirMembro').onclick = async () => {
+        if(confirm(`Excluir ${window.membroSendoEditado} do banco definitivamente?`)) {
+            await deleteDoc(doc(db, "membros", window.membroSendoEditado));
+            alert("Membro removido!");
+            bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
         }
     };
 
-    function atualizarLabelsData(dataISO) {
-        const partes = dataISO.split('-');
-        const d = new Date(partes[0], partes[1] - 1, partes[2], 12, 0, 0);
-        document.getElementById('dataTopo').innerText = d.toLocaleDateString('pt-BR');
-        document.getElementById('exibirData').innerText = limparTexto(d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }));
-        document.getElementById('seletorDomingo').style.display = d.getDay() === 0 ? 'flex' : 'none';
-        window.colorirBotoes();
-    }
-
-    const inputData = document.getElementById('inputDataChamada');
-    inputData.value = dataSelecionadaISO;
-    inputData.onchange = (e) => { 
-        dataSelecionadaISO = e.target.value; 
-        atualizarLabelsData(dataSelecionadaISO);
+    window.abrirEditor = (nome) => {
+        window.membroSendoEditado = nome;
+        const m = cacheMembros.find(x => x.nome === nome);
+        document.getElementById('editNomeMembro').innerText = limparTexto(nome);
+        document.getElementById('inputMudarGrupo').value = limparTexto(m.grupo) || "";
+        document.getElementById('containerTagsFuncao').innerHTML = (m.funcoes || []).map(f => `<span class="badge-funcao">${limparTexto(f)} <i class="bi bi-x-circle-fill text-danger ms-2" onclick="window.removerFuncao('${f}')"></i></span>`).join('');
+        new bootstrap.Modal(document.getElementById('modalEditarMembro')).show();
     };
 
-    window.mudarPeriodo = (p) => { periodoAtual = p; window.colorirBotoes(); };
+    window.removerFuncao = async (f) => { if(confirm(`Remover ${f}?`)) await updateDoc(doc(db, "membros", window.membroSendoEditado), { funcoes: arrayRemove(f) }); };
+    
+    // ATUALIZAÇÃO REATIVA DE DATA
+    const inputData = document.getElementById('inputDataChamada');
+    inputData.onchange = (e) => { 
+        dataSelecionadaISO = e.target.value; 
+        const d = new Date(dataSelecionadaISO + 'T12:00:00');
+        document.getElementById('dataTopo').innerText = d.toLocaleDateString('pt-BR');
+        document.getElementById('exibirData').innerText = limparTexto(d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }));
+        const ehDom = d.getDay() === 0;
+        document.getElementById('seletorDomingo').style.display = ehDom ? 'flex' : 'none';
+        
+        // Dispara a busca de cores para a nova data
+        window.colorirBotoes();
+    };
+
     if (perfil === 'admin') document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
-    atualizarLabelsData(dataSelecionadaISO);
+    
+    const dH = new Date(dataSelecionadaISO + 'T12:00:00');
+    document.getElementById('dataTopo').innerText = dH.toLocaleDateString('pt-BR');
+    document.getElementById('exibirData').innerText = limparTexto(dH.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }));
+    if(dH.getDay() === 0) {
+        document.getElementById('seletorDomingo').style.display = 'flex';
+        window.mudarPeriodo('EBD');
+    }
 </script>
 </body>
 </html>
