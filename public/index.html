@@ -35,7 +35,7 @@
         .user-logged-info { background: var(--primary-blue); color: white; font-size: 0.75rem; text-align: center; padding: 4px; font-weight: bold; text-transform: uppercase; }
         .header-data { background: #1a1a1a; padding: 15px; border-bottom: 2px solid var(--primary-blue); text-align: center; }
         .data-texto { font-size: 1.1rem; font-weight: bold; color: var(--warning-yellow); margin: 0; }
-        .retroativo-container { background: #111; padding: 8px; border-bottom: 1px solid #333; display: none; align-items: center; justify-content: center; gap: 10px; }
+        .retroativo-container { background: #111; padding: 8px; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .input-retroativo { background: #333; color: white; border: 1px solid var(--primary-blue); border-radius: 5px; padding: 2px 8px; font-size: 0.85rem; }
         
         .periodo-selector { background: #222; padding: 10px; border-bottom: 1px solid #333; display: none; justify-content: center; gap: 10px; }
@@ -80,6 +80,11 @@
         .btn-dz.active-sr { background: var(--info-cyan); color: white; border-color: var(--info-cyan); }
         .sem-item-gestao { background: #000; border: 1px solid #333; padding: 4px 8px; border-radius: 4px; margin-bottom: 4px; font-size: 0.7rem; display: flex; justify-content: space-between; align-items: center; }
         
+        .status-ok { color: var(--success-green) !important; font-weight: bold; }
+        .status-no { color: var(--danger-red) !important; font-weight: bold; }
+        .status-sr { color: var(--info-cyan) !important; font-weight: bold; }
+        .status-null { color: #666 !important; font-style: italic; }
+
         .report-table { font-size: 0.75rem; color: white; width: 100%; border-collapse: collapse; }
         .report-table th { color: var(--warning-yellow); border-bottom: 1px solid #444; padding: 5px; }
         .report-table td { padding: 5px; border-bottom: 1px solid #222; }
@@ -119,7 +124,7 @@
     
     <div class="tab-pane fade" id="gestaoTab" role="tabpanel">
         <div class="p-3 text-center">
-            <h6 class="text-warning small fw-bold mb-3">CONTROLE DE DIZIMOS E SEMINARIOS</h6>
+            <h6 class="text-warning small fw-bold mb-3">CONTROLE DE DÍZIMOS E SEMINÁRIOS</h6>
             <div class="d-flex gap-2 justify-content-center mb-3">
                 <select id="filtroMesDizimo" class="form-select form-select-sm bg-dark text-white border-secondary" style="width: 120px;">
                     <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03" selected>Marco</option>
@@ -141,7 +146,7 @@
 </div>
 
 <div class="bottom-save-bar">
-    <button id="btnFinalizarChamada" class="btn btn-success w-75 fw-bold shadow mb-2">
+    <button id="btnFinalizarChamada" class="btn btn-success w-75 fw-bold shadow">
         <i class="bi bi-check-circle-fill"></i> FINALIZAR CHAMADA
     </button>
     <button class="btn btn-outline-danger btn-sm w-75 fw-bold admin-only" onclick="window.limparTodaChamadaDia()">
@@ -181,14 +186,14 @@
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title text-warning">Relatorio Administrativo</h5>
+                <h5 class="modal-title text-warning">Relatório Administrativo</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <button class="btn btn-danger btn-sm mb-3 fw-bold" onclick="window.baixarRelatorioPDF()">BAIXAR PDF</button>
                 <div class="table-responsive">
                     <table class="report-table" id="tabelaGestaoPDF">
-                        <thead><tr><th>Membro</th><th>Funcao</th><th>Dizimo</th><th>Seminarios</th></tr></thead>
+                        <thead><tr><th>Membro</th><th>Funcao</th><th>DÍzimo</th><th>Seminarios</th></tr></thead>
                         <tbody id="corpoRelatorioGestao"></tbody>
                     </table>
                 </div>
@@ -282,7 +287,7 @@
             const idM = m.nome.replace(/\s+/g, '');
             const t = gerarTentativasDeFoto(m.nome, m.foto);
             
-            const card = `<div class="member-card"><div class="member-main-row"><button class="btn-edit" onclick="window.abrirEditor('${m.nome}')"><i class="bi bi-pencil-square"></i></button><div class="photo-frame"><i class="bi bi-person-circle"></i><img src="fotos/${t[0]}" data-tentativas='${JSON.stringify(t)}' data-idx="0" onerror="window.proximaTentativaDeFoto(this)" onload="this.style.display='block';"></div><div class="member-info"><span class="member-name">${limparTexto(m.nome)}</span><div class="tag-container">${m.grupo?`<span class="badge-grupo">${limparTexto(m.grupo)}</span>`:''}${m.funcoes?m.funcoes.map(f=>`<span class="badge-funcao">${limparTexto(f)}</span>`).join(''):''}</div></div><div class="d-flex" id="group-${idM}"><button onclick="prepararChamada('${m.nome}','P')" class="btn-call btn-p">P</button><button onclick="prepararChamada('${m.nome}','F')" class="btn-call btn-f">F</button><button onclick="prepararChamada('${m.nome}','FJ')" class="btn-call btn-fj">FJ</button></div></div></div>`;
+            const card = `<div class="member-card"><div class="member-main-row"><button class="btn-edit" onclick="window.abrirEditor('${m.nome}')"><i class="bi bi-pencil-square"></i></button><div class="photo-frame"><i class="bi bi-person-circle"></i><img src="fotos/${t[0]}" data-tentativas='${JSON.stringify(t)}' data-idx="0" onerror="window.proximaTentativaDeFoto(this)" onload="this.style.display='block';"></div><div class="member-info"><span class="member-name">${limparTexto(m.nome)}</span><div class="tag-container">${m.funcoes?m.funcoes.map(f=>`<span class="badge-funcao">${limparTexto(f)}</span>`).join(''):''}</div></div><div class="d-flex" id="group-${idM}"><button onclick="prepararChamada('${m.nome}','P')" class="btn-call btn-p">P</button><button onclick="prepararChamada('${m.nome}','F')" class="btn-call btn-f">F</button><button onclick="prepararChamada('${m.nome}','FJ')" class="btn-call btn-fj">FJ</button></div></div></div>`;
             
             if(m.funcoes?.length > 0) listaCom.innerHTML += card; else listaSem.innerHTML += card;
 
@@ -295,7 +300,6 @@
                 </div><div id="sems-${idM}">${m.historicoSeminarios?.map((sem, i)=>`<div class="sem-item-gestao"><span>${limparTexto(sem.titulo)}</span> <i class="bi bi-trash text-danger" onclick="window.delSem('${m.nome}',${i})"></i></div>`).join('')||''}</div><div class="input-group input-group-sm mt-2"><input type="text" id="in-sem-${idM}" class="form-control bg-dark text-white border-secondary" placeholder="Curso"><button class="btn btn-warning" onclick="window.addSem('${m.nome}')">+</button></div></div>`;
             }
 
-            // ATUALIZAÇÃO EM TEMPO REAL DAS TAGS NO MODAL SE ESTIVER ABERTO
             if (window.membroSendoEditado === m.nome) {
                 document.getElementById('containerTagsFuncao').innerHTML = (m.funcoes || []).map(f => `<span class="badge-funcao">${limparTexto(f)} <i class="bi bi-x-circle-fill text-danger ms-2" style="cursor:pointer" onclick="window.removerFuncao('${f}')"></i></span>`).join('');
             }
@@ -362,14 +366,19 @@
 
     window.abrirRelatorioGestao = () => {
         const m = document.getElementById('filtroMesDizimo').value, a = document.getElementById('filtroAnoDizimo').value, c = `${m}_${a}`;
-        const corpo = document.getElementById('corpoRelatorioGestao'); corpo.innerHTML = "";
+        const corpo = document.getElementById('corpoRelatorioGestao'); 
+        if (!corpo) return;
+        corpo.innerHTML = "";
+
         cacheMembros.forEach(mem => {
-            const sB = mem.historicoDizimos?.[c];
-            let sT = "NAO INFORMADO", cS = "status-null";
-            if(sB === "OK") { sT = "OFERTADO"; cS = "status-ok"; }
-            else if(sB === "PENDENTE") { sT = "NAO OFERTADO"; cS = "status-no"; }
-            else if(sB === "SEM_RENDA") { sT = "SEM RENDA"; cS = "status-sr"; }
-            corpo.innerHTML += `<tr><td>${limparTexto(mem.nome)}</td><td>${mem.funcoes?.join(', ') || '-'}</td><td><span class="${cS}">${sT}</span></td><td>${mem.historicoSeminarios?.length || 0}</td></tr>`;
+            const statusBanco = mem.historicoDizimos?.[c];
+            let statusTexto = "NAO INFORMADO", classeStatus = "status-null";
+            if(statusBanco === "OK") { statusTexto = "OFERTADO"; classeStatus = "status-ok"; }
+            else if(statusBanco === "PENDENTE") { statusTexto = "NAO OFERTADO"; classeStatus = "status-no"; }
+            else if(statusBanco === "SEM_RENDA") { statusTexto = "SEM RENDA"; classeStatus = "status-sr"; }
+            
+            const sems = mem.historicoSeminarios?.map(s => limparTexto(s.titulo)).join(', ') || '-';
+            corpo.innerHTML += `<tr><td>${limparTexto(mem.nome)}</td><td>${mem.funcoes?.join(', ') || '-'}</td><td><span class="${classeStatus}">${statusTexto}</span></td><td>${sems}</td></tr>`;
         });
         new bootstrap.Modal(document.getElementById('modalRelatorioGestao')).show();
     };
@@ -377,7 +386,7 @@
     window.baixarRelatorioPDF = () => {
         const m = document.getElementById('filtroMesDizimo').value, a = document.getElementById('filtroAnoDizimo').value;
         const { jsPDF } = window.jspdf; const docPDF = new jsPDF();
-        docPDF.text(`Relatorio de Gestao - ${m}/${a}`, 14, 15);
+        docPDF.text(`Relatório de Gestão - ${m}/${a}`, 14, 15);
         docPDF.autoTable({ 
             head: [['Membro', 'Funcoes', 'Dizimo', 'Seminarios']], 
             body: cacheMembros.map(mem => [limparTexto(mem.nome), mem.funcoes?.join(', ') || '-', mem.historicoDizimos?.[`${m}_${a}`] || 'NAO INF.', mem.historicoSeminarios?.map(s => s.titulo).join(', ') || '-']),
@@ -386,15 +395,27 @@
         docPDF.save(`Gestao_${m}_${a}.pdf`);
     };
 
+    // REGRA ATUALIZADA: FINALIZAR SOMENTE SE MEMBROS COM FUNÇÃO ESTIVEREM MARCADOS
     document.getElementById('btnFinalizarChamada').onclick = async () => {
         const idCol = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
-        const membrosComFuncao = cacheMembros.filter(m => m.funcoes && m.funcoes.length > 0);
+        
+        // Pega quem já foi registrado
         const q = query(collection(db, idCol), where("data", "==", dataSelecionadaISO));
         const snap = await getDocs(q);
-        const nomesChamada = snap.docs.map(d => d.data().nome);
-        const faltantes = membrosComFuncao.filter(m => !nomesChamada.includes(m.nome));
-        if (faltantes.length > 0) alert(`Faltam registrar ${faltantes.length} membros com funcao.`);
-        else alert("CHAMADA CONCLUIDA COM SUCESSO!");
+        const nomesRegistrados = snap.docs.map(d => d.data().nome);
+
+        // Filtra apenas membros que possuem função
+        const membrosObrigatorios = cacheMembros.filter(m => m.funcoes && m.funcoes.length > 0);
+        
+        // Verifica quem desses obrigatórios não foi marcado
+        const faltantes = membrosObrigatorios.filter(m => !nomesRegistrados.includes(m.nome));
+
+        if (faltantes.length > 0) {
+            const listaNomes = faltantes.slice(0, 3).map(m => limparTexto(m.nome)).join(', ');
+            alert(`BLOQUEIO: Faltam registrar ${faltantes.length} membros COM FUNCAO.\n(Ex: ${listaNomes}...)`);
+        } else {
+            alert("CHAMADA CONCLUIDA! Todos os membros com funcao foram registrados.");
+        }
     };
 
     document.getElementById('btnExcluirMembro').onclick = async () => {
@@ -414,13 +435,11 @@
         new bootstrap.Modal(document.getElementById('modalEditarMembro')).show();
     };
 
-    // AJUSTE 2: ATUALIZAÇÃO IMEDIATA AO ADICIONAR FUNÇÃO
     document.getElementById('btnAddFuncao').onclick = async () => {
         const f = limparTexto(document.getElementById('inputNovaFuncao').value);
         if(f && window.membroSendoEditado) {
             await updateDoc(doc(db, "membros", window.membroSendoEditado), { funcoes: arrayUnion(f) });
             document.getElementById('inputNovaFuncao').value = "";
-            // O onSnapshot cuidará do resto automaticamente
         }
     };
 
