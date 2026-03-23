@@ -69,6 +69,7 @@
         
         .navbar-custom { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #000 !important; border-top: 1px solid #222; z-index: 1100; height: 70px; }
         .bottom-save-bar { position: fixed; bottom: 70px; left: 0; width: 100%; padding: 10px; background: #1a1a1a; border-top: 1px solid #333; z-index: 1050; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+        
         .modal-content { background-color: var(--modal-claro) !important; border: 2px solid var(--primary-blue) !important; border-radius: 15px !important; color: var(--text-white) !important; }
 
         .gestao-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; margin: 10px; padding: 15px; }
@@ -78,6 +79,11 @@
         .btn-dz.active-no { background: var(--danger-red); color: white; border-color: var(--danger-red); }
         .btn-dz.active-sr { background: var(--info-cyan); color: white; border-color: var(--info-cyan); }
         .sem-item-gestao { background: #000; border: 1px solid #333; padding: 4px 8px; border-radius: 4px; margin-bottom: 4px; font-size: 0.7rem; display: flex; justify-content: space-between; align-items: center; }
+        
+        .report-table { font-size: 0.75rem; color: white; width: 100%; border-collapse: collapse; }
+        .report-table th { color: var(--warning-yellow); border-bottom: 1px solid #444; padding: 5px; }
+        .report-table td { padding: 5px; border-bottom: 1px solid #222; }
+        .admin-only { display: none; }
     </style>
 </head>
 <body>
@@ -159,7 +165,7 @@
                     </div>
                     <label class="small mb-1">Adicionar Funcao:</label>
                     <div class="input-group mb-2">
-                        <input type="text" id="inputNovaFuncao" class="form-control">
+                        <input type="text" id="inputNovaFuncao" class="form-control" placeholder="EX: SOM, OBREIRO">
                         <button id="btnAddFuncao" class="btn btn-primary btn-sm">ADD</button>
                     </div>
                     <div id="containerTagsFuncao" class="d-flex flex-wrap gap-1 mb-3"></div>
@@ -243,15 +249,11 @@
         return [...new Set(t)];
     }
 
-    // FUNÇÃO QUE COLORE OS BOTÕES (CHAMADA SEMPRE QUE MUDA DATA OU PERÍODO)
     window.colorirBotoes = async function() {
-        // Limpa visual antes de buscar
         document.querySelectorAll('.btn-call').forEach(btn => btn.classList.remove('active'));
-        
         const idCol = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
         const q = query(collection(db, idCol), where("data", "==", dataSelecionadaISO));
         let snap = await getDocs(q);
-        
         snap.forEach(docSnap => {
             const d = docSnap.data();
             const idM = d.nome.replace(/\s+/g, '');
@@ -280,7 +282,7 @@
             const idM = m.nome.replace(/\s+/g, '');
             const t = gerarTentativasDeFoto(m.nome, m.foto);
             
-            const card = `<div class="member-card"><div class="member-main-row"><button class="btn-edit" onclick="window.abrirEditor('${m.nome}')"><i class="bi bi-pencil-square"></i></button><div class="photo-frame"><i class="bi bi-person-circle"></i><img src="fotos/${t[0]}" data-tentativas='${JSON.stringify(t)}' data-idx="0" onerror="window.proximaTentativaDeFoto(this)" onload="this.style.display='block';"></div><div class="member-info"><span class="member-name">${limparTexto(m.nome)}</span><div class="tag-container">${m.funcoes?m.funcoes.map(f=>`<span class="badge-funcao">${limparTexto(f)}</span>`).join(''):''}</div></div><div class="d-flex" id="group-${idM}"><button onclick="prepararChamada('${m.nome}','P')" class="btn-call btn-p">P</button><button onclick="prepararChamada('${m.nome}','F')" class="btn-call btn-f">F</button><button onclick="prepararChamada('${m.nome}','FJ')" class="btn-call btn-fj">FJ</button></div></div></div>`;
+            const card = `<div class="member-card"><div class="member-main-row"><button class="btn-edit" onclick="window.abrirEditor('${m.nome}')"><i class="bi bi-pencil-square"></i></button><div class="photo-frame"><i class="bi bi-person-circle"></i><img src="fotos/${t[0]}" data-tentativas='${JSON.stringify(t)}' data-idx="0" onerror="window.proximaTentativaDeFoto(this)" onload="this.style.display='block';"></div><div class="member-info"><span class="member-name">${limparTexto(m.nome)}</span><div class="tag-container">${m.grupo?`<span class="badge-grupo">${limparTexto(m.grupo)}</span>`:''}${m.funcoes?m.funcoes.map(f=>`<span class="badge-funcao">${limparTexto(f)}</span>`).join(''):''}</div></div><div class="d-flex" id="group-${idM}"><button onclick="prepararChamada('${m.nome}','P')" class="btn-call btn-p">P</button><button onclick="prepararChamada('${m.nome}','F')" class="btn-call btn-f">F</button><button onclick="prepararChamada('${m.nome}','FJ')" class="btn-call btn-fj">FJ</button></div></div></div>`;
             
             if(m.funcoes?.length > 0) listaCom.innerHTML += card; else listaSem.innerHTML += card;
 
@@ -291,6 +293,11 @@
                     <button onclick="window.setDizimo('${m.nome}','${cDiz}','PENDENTE', this)" class="btn-dz ${s==='PENDENTE'?'active-no':''}">NAO OFERTADO</button>
                     <button onclick="window.setDizimo('${m.nome}','${cDiz}','SEM_RENDA', this)" class="btn-dz ${s==='SEM_RENDA'?'active-sr':''}">SEM RENDA</button>
                 </div><div id="sems-${idM}">${m.historicoSeminarios?.map((sem, i)=>`<div class="sem-item-gestao"><span>${limparTexto(sem.titulo)}</span> <i class="bi bi-trash text-danger" onclick="window.delSem('${m.nome}',${i})"></i></div>`).join('')||''}</div><div class="input-group input-group-sm mt-2"><input type="text" id="in-sem-${idM}" class="form-control bg-dark text-white border-secondary" placeholder="Curso"><button class="btn btn-warning" onclick="window.addSem('${m.nome}')">+</button></div></div>`;
+            }
+
+            // ATUALIZAÇÃO EM TEMPO REAL DAS TAGS NO MODAL SE ESTIVER ABERTO
+            if (window.membroSendoEditado === m.nome) {
+                document.getElementById('containerTagsFuncao').innerHTML = (m.funcoes || []).map(f => `<span class="badge-funcao">${limparTexto(f)} <i class="bi bi-x-circle-fill text-danger ms-2" style="cursor:pointer" onclick="window.removerFuncao('${f}')"></i></span>`).join('');
             }
         });
         window.colorirBotoes();
@@ -407,9 +414,19 @@
         new bootstrap.Modal(document.getElementById('modalEditarMembro')).show();
     };
 
+    // AJUSTE 2: ATUALIZAÇÃO IMEDIATA AO ADICIONAR FUNÇÃO
+    document.getElementById('btnAddFuncao').onclick = async () => {
+        const f = limparTexto(document.getElementById('inputNovaFuncao').value);
+        if(f && window.membroSendoEditado) {
+            await updateDoc(doc(db, "membros", window.membroSendoEditado), { funcoes: arrayUnion(f) });
+            document.getElementById('inputNovaFuncao').value = "";
+            // O onSnapshot cuidará do resto automaticamente
+        }
+    };
+
     window.removerFuncao = async (f) => { if(confirm(`Remover ${f}?`)) await updateDoc(doc(db, "membros", window.membroSendoEditado), { funcoes: arrayRemove(f) }); };
+    document.getElementById('btnSalvarGrupo').onclick = async () => { if(window.membroSendoEditado) { await updateDoc(doc(db, "membros", window.membroSendoEditado), { grupo: document.getElementById('inputMudarGrupo').value.toUpperCase() }); alert("SALVO!"); } };
     
-    // ATUALIZAÇÃO REATIVA DE DATA
     const inputData = document.getElementById('inputDataChamada');
     inputData.onchange = (e) => { 
         dataSelecionadaISO = e.target.value; 
@@ -418,8 +435,6 @@
         document.getElementById('exibirData').innerText = limparTexto(d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }));
         const ehDom = d.getDay() === 0;
         document.getElementById('seletorDomingo').style.display = ehDom ? 'flex' : 'none';
-        
-        // Dispara a busca de cores para a nova data
         window.colorirBotoes();
     };
 
