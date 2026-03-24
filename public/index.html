@@ -35,7 +35,7 @@
         .user-logged-info { background: var(--primary-blue); color: white; font-size: 0.75rem; text-align: center; padding: 4px; font-weight: bold; text-transform: uppercase; }
         .header-data { background: #1a1a1a; padding: 15px; border-bottom: 2px solid var(--primary-blue); text-align: center; }
         .data-texto { font-size: 1.1rem; font-weight: bold; color: var(--warning-yellow); margin: 0; }
-        .retroativo-container { background: #111; padding: 8px; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .retroativo-container { background: #111; padding: 8px; border-bottom: 1px solid #333; display: none; align-items: center; justify-content: center; gap: 10px; }
         .input-retroativo { background: #333; color: white; border: 1px solid var(--primary-blue); border-radius: 5px; padding: 2px 8px; font-size: 0.85rem; }
         
         .periodo-selector { background: #222; padding: 10px; border-bottom: 1px solid #333; display: none; justify-content: center; gap: 10px; }
@@ -74,15 +74,19 @@
 
         .gestao-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; margin: 10px; padding: 15px; }
         .gestao-nome { color: var(--warning-yellow); font-weight: bold; font-size: 1rem; margin-bottom: 5px; display: block; }
-        .btn-dz { flex: 1; font-size: 0.6rem; font-weight: bold; padding: 8px 2px; border-radius: 6px; border: 1px solid #444; background: #222; color: #777; transition: 0.2s; }
+        /* Ajuste de fonte para caber 4 botões lado a lado */
+        .btn-dz { flex: 1; font-size: 0.5rem; font-weight: bold; padding: 8px 1px; border-radius: 6px; border: 1px solid #444; background: #222; color: #777; transition: 0.2s; }
         .btn-dz.active-ok { background: var(--success-green); color: white; border-color: var(--success-green); }
         .btn-dz.active-no { background: var(--danger-red); color: white; border-color: var(--danger-red); }
         .btn-dz.active-sr { background: var(--info-cyan); color: white; border-color: var(--info-cyan); }
+        .btn-dz.active-ds { background: #ff8c00; color: white; border-color: #ff8c00; }
+        
         .sem-item-gestao { background: #000; border: 1px solid #333; padding: 4px 8px; border-radius: 4px; margin-bottom: 4px; font-size: 0.7rem; display: flex; justify-content: space-between; align-items: center; }
         
         .status-ok { color: var(--success-green) !important; font-weight: bold; }
         .status-no { color: var(--danger-red) !important; font-weight: bold; }
         .status-sr { color: var(--info-cyan) !important; font-weight: bold; }
+        .status-ds { color: #ff8c00 !important; font-weight: bold; }
         .status-null { color: #666 !important; font-style: italic; }
 
         .report-table { font-size: 0.75rem; color: white; width: 100%; border-collapse: collapse; }
@@ -294,9 +298,10 @@
             if(perfil==='admin'){
                 const s = m.historicoDizimos ? m.historicoDizimos[cDiz] : null;
                 listaGestao.innerHTML += `<div class="gestao-card"><span class="gestao-nome">${limparTexto(m.nome)}</span><div class="btn-group-dizimo">
-                    <button onclick="window.setDizimo('${m.nome}','${cDiz}','OK', this)" class="btn-dz ${s==='OK'?'active-ok':''}">OFERTADO</button>
-                    <button onclick="window.setDizimo('${m.nome}','${cDiz}','PENDENTE', this)" class="btn-dz ${s==='PENDENTE'?'active-no':''}">NAO OFERTADO</button>
+                    <button onclick="window.setDizimo('${m.nome}','${cDiz}','OK', this)" class="btn-dz ${s==='OK'?'active-ok':''}">DIZIMISTA</button>
+                    <button onclick="window.setDizimo('${m.nome}','${cDiz}','PENDENTE', this)" class="btn-dz ${s==='PENDENTE'?'active-no':''}">NAO DIZIMISTA</button>
                     <button onclick="window.setDizimo('${m.nome}','${cDiz}','SEM_RENDA', this)" class="btn-dz ${s==='SEM_RENDA'?'active-sr':''}">SEM RENDA</button>
+                    <button onclick="window.setDizimo('${m.nome}','${cDiz}','DESEMPREGADO', this)" class="btn-dz ${s==='DESEMPREGADO'?'active-ds':''}">DESEMPREGADO</button>
                 </div><div id="sems-${idM}">${m.historicoSeminarios?.map((sem, i)=>`<div class="sem-item-gestao"><span>${limparTexto(sem.titulo)}</span> <i class="bi bi-trash text-danger" onclick="window.delSem('${m.nome}',${i})"></i></div>`).join('')||''}</div><div class="input-group input-group-sm mt-2"><input type="text" id="in-sem-${idM}" class="form-control bg-dark text-white border-secondary" placeholder="Curso"><button class="btn btn-warning" onclick="window.addSem('${m.nome}')">+</button></div></div>`;
             }
 
@@ -346,7 +351,7 @@
     };
 
     window.setDizimo = async (n, c, v, btn) => {
-        if (btn.classList.contains('active-ok') || btn.classList.contains('active-no') || btn.classList.contains('active-sr')) {
+        if (btn.classList.contains('active-ok') || btn.classList.contains('active-no') || btn.classList.contains('active-sr') || btn.classList.contains('active-ds')) {
             await updateDoc(doc(db, "membros", n), { [`historicoDizimos.${c}`]: deleteField() });
         } else {
             await updateDoc(doc(db, "membros", n), { [`historicoDizimos.${c}`]: v });
@@ -373,9 +378,10 @@
         cacheMembros.forEach(mem => {
             const statusBanco = mem.historicoDizimos?.[c];
             let statusTexto = "NAO INFORMADO", classeStatus = "status-null";
-            if(statusBanco === "OK") { statusTexto = "OFERTADO"; classeStatus = "status-ok"; }
-            else if(statusBanco === "PENDENTE") { statusTexto = "NAO OFERTADO"; classeStatus = "status-no"; }
+            if(statusBanco === "OK") { statusTexto = "DIZIMISTA"; classeStatus = "status-ok"; }
+            else if(statusBanco === "PENDENTE") { statusTexto = "NAO DIZIMISTA"; classeStatus = "status-no"; }
             else if(statusBanco === "SEM_RENDA") { statusTexto = "SEM RENDA"; classeStatus = "status-sr"; }
+            else if(statusBanco === "DESEMPREGADO") { statusTexto = "DESEMPREGADO"; classeStatus = "status-ds"; }
             
             const sems = mem.historicoSeminarios?.map(s => limparTexto(s.titulo)).join(', ') || '-';
             corpo.innerHTML += `<tr><td>${limparTexto(mem.nome)}</td><td>${mem.funcoes?.join(', ') || '-'}</td><td><span class="${classeStatus}">${statusTexto}</span></td><td>${sems}</td></tr>`;
@@ -389,25 +395,27 @@
         docPDF.text(`Relatório de Gestão - ${m}/${a}`, 14, 15);
         docPDF.autoTable({ 
             head: [['Membro', 'Funcoes', 'Dizimo', 'Seminarios']], 
-            body: cacheMembros.map(mem => [limparTexto(mem.nome), mem.funcoes?.join(', ') || '-', mem.historicoDizimos?.[`${m}_${a}`] || 'NAO INF.', mem.historicoSeminarios?.map(s => s.titulo).join(', ') || '-']),
+            body: cacheMembros.map(mem => {
+                const status = mem.historicoDizimos?.[`${m}_${a}`];
+                let statusTexto = 'NAO INF.';
+                if(status === 'OK') statusTexto = 'DIZIMISTA';
+                else if(status === 'PENDENTE') statusTexto = 'NAO DIZIMISTA';
+                else if(status === 'SEM_RENDA') statusTexto = 'SEM RENDA';
+                else if(status === 'DESEMPREGADO') statusTexto = 'DESEMPREGADO';
+                
+                return [limparTexto(mem.nome), mem.funcoes?.join(', ') || '-', statusTexto, mem.historicoSeminarios?.map(s => s.titulo).join(', ') || '-'];
+            }),
             startY: 20
         });
         docPDF.save(`Gestao_${m}_${a}.pdf`);
     };
 
-    // REGRA ATUALIZADA: FINALIZAR SOMENTE SE MEMBROS COM FUNÇÃO ESTIVEREM MARCADOS
     document.getElementById('btnFinalizarChamada').onclick = async () => {
         const idCol = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
-        
-        // Pega quem já foi registrado
         const q = query(collection(db, idCol), where("data", "==", dataSelecionadaISO));
         const snap = await getDocs(q);
         const nomesRegistrados = snap.docs.map(d => d.data().nome);
-
-        // Filtra apenas membros que possuem função
         const membrosObrigatorios = cacheMembros.filter(m => m.funcoes && m.funcoes.length > 0);
-        
-        // Verifica quem desses obrigatórios não foi marcado
         const faltantes = membrosObrigatorios.filter(m => !nomesRegistrados.includes(m.nome));
 
         if (faltantes.length > 0) {
