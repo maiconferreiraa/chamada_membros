@@ -31,7 +31,7 @@
             --info-cyan: #17a2b8;
         }
 
-        body { background-color: var(--bg-dark); color: var(--text-white); padding-bottom: 220px; font-family: sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-white); padding-bottom: 260px; font-family: sans-serif; }
         .user-logged-info { background: var(--primary-blue); color: white; font-size: 0.75rem; text-align: center; padding: 4px; font-weight: bold; text-transform: uppercase; }
         .header-data { background: #1a1a1a; padding: 15px; border-bottom: 2px solid var(--primary-blue); text-align: center; }
         .data-texto { font-size: 1.1rem; font-weight: bold; color: var(--warning-yellow); margin: 0; }
@@ -68,30 +68,30 @@
         .btn-edit { color: #555; border: none; background: transparent; font-size: 1.1rem; cursor: pointer; }
         
         .navbar-custom { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #000 !important; border-top: 1px solid #222; z-index: 1100; height: 70px; }
-        .bottom-save-bar { position: fixed; bottom: 70px; left: 0; width: 100%; padding: 10px; background: #1a1a1a; border-top: 1px solid #333; z-index: 1050; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+        .bottom-save-bar { position: fixed; bottom: 70px; left: 0; width: 100%; padding: 15px 10px 35px 10px; background: #1a1a1a; border-top: 1px solid #333; z-index: 1050; display: flex; flex-direction: column; gap: 8px; align-items: center; }
         
-        .modal-content { background-color: var(--modal-claro) !important; border: 2px solid var(--primary-blue) !important; border-radius: 15px !important; color: var(--text-white) !important; }
-
         .gestao-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; margin: 10px; padding: 15px; }
         .gestao-nome { color: var(--warning-yellow); font-weight: bold; font-size: 1rem; margin-bottom: 5px; display: block; }
         .btn-dz { flex: 1; font-size: 0.5rem; font-weight: bold; padding: 8px 1px; border-radius: 6px; border: 1px solid #444; background: #222; color: #777; transition: 0.2s; }
         .btn-dz.active-ok { background: var(--success-green); color: white; border-color: var(--success-green); }
         .btn-dz.active-no { background: var(--danger-red); color: white; border-color: var(--danger-red); }
         .btn-dz.active-sr { background: var(--info-cyan); color: white; border-color: var(--info-cyan); }
-        .btn-dz.active-ds { background: #6f42c1; color: white; border-color: #6f42c1; } 
+        .btn-dz.active-ds { background: #ff8c00; color: white; border-color: #ff8c00; } 
         
         .sem-item-gestao { background: #000; border: 1px solid #333; padding: 4px 8px; border-radius: 4px; margin-bottom: 4px; font-size: 0.7rem; display: flex; justify-content: space-between; align-items: center; }
         
         .status-ok { color: var(--success-green) !important; font-weight: bold; }
         .status-no { color: var(--danger-red) !important; font-weight: bold; }
         .status-sr { color: var(--info-cyan) !important; font-weight: bold; }
-        .status-ds { color: #6f42c1 !important; font-weight: bold; }
-        .status-null { color: #666 !important; font-style: italic; }
+        .status-ds { color: #ff8c00 !important; font-weight: bold; }
 
         .report-table { font-size: 0.75rem; color: white; width: 100%; border-collapse: collapse; }
         .report-table th { color: var(--warning-yellow); border-bottom: 1px solid #444; padding: 5px; }
         .report-table td { padding: 5px; border-bottom: 1px solid #222; }
         .admin-only { display: none; }
+
+        .dev-footer { position: fixed; bottom: 70px; left: 0; width: 100%; text-align: center; font-size: 0.65rem; color: #555; padding: 5px 0; background: #1a1a1a; z-index: 1060; border-top: 1px solid #222; letter-spacing: 0.5px; }
+        .dev-footer b { color: var(--primary-blue); }
     </style>
 </head>
 <body>
@@ -157,9 +157,19 @@
     </button>
 </div>
 
+<div class="dev-footer">Desenvolvedor: <b>Maicon Ferreira</b></div>
+
+<nav class="navbar fixed-bottom navbar-custom py-2">
+    <div class="container d-flex justify-content-around">
+        <a href="index.html" class="text-primary text-center text-decoration-none"><i class="bi bi-people-fill fs-4 d-block"></i><span style="font-size: 0.7rem;">Chamada</span></a>
+        <a href="relatorio.html" class="text-white-50 text-center text-decoration-none"><i class="bi bi-file-bar-graph fs-4 d-block"></i><span style="font-size: 0.7rem;">Relatorios</span></a>
+        <a href="#" onclick="sessionStorage.clear(); window.location.href='login.html';" class="text-danger text-center text-decoration-none"><i class="bi bi-box-arrow-right fs-4 d-block"></i><span style="font-size: 0.7rem;">Sair</span></a>
+    </div>
+</nav>
+
 <div class="modal fade" id="modalEditarMembro" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content" style="background-color: var(--modal-claro) !important; border: 2px solid var(--primary-blue) !important; border-radius: 15px !important; color: var(--text-white) !important;">
             <div class="modal-header">
                 <h5 class="modal-title" id="editNomeMembro">Gerenciar Registro</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -187,7 +197,7 @@
 
 <div class="modal fade" id="modalRelatorioGestao" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div class="modal-content">
+        <div class="modal-content" style="background-color: var(--modal-claro) !important; border: 2px solid var(--primary-blue) !important; border-radius: 15px !important; color: var(--text-white) !important;">
             <div class="modal-header">
                 <h5 class="modal-title text-warning">Relatório Administrativo</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -204,14 +214,6 @@
         </div>
     </div>
 </div>
-
-<nav class="navbar fixed-bottom navbar-custom py-2">
-    <div class="container d-flex justify-content-around">
-        <a href="index.html" class="text-primary text-center text-decoration-none"><i class="bi bi-people-fill fs-4 d-block"></i><span style="font-size: 0.7rem;">Chamada</span></a>
-        <a href="relatorio.html" class="text-white-50 text-center text-decoration-none"><i class="bi bi-file-bar-graph fs-4 d-block"></i><span style="font-size: 0.7rem;">Relatorios</span></a>
-        <a href="#" onclick="sessionStorage.clear(); window.location.href='login.html';" class="text-danger text-center text-decoration-none"><i class="bi bi-box-arrow-right fs-4 d-block"></i><span style="font-size: 0.7rem;">Sair</span></a>
-    </div>
-</nav>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -279,42 +281,25 @@
         const listaSem = document.getElementById('listaSemFuncao');
         const listaGestao = document.getElementById('listaGestao');
         listaCom.innerHTML = ""; listaSem.innerHTML = ""; listaGestao.innerHTML = "";
-        
         const mes = document.getElementById('filtroMesDizimo')?.value || "03";
         const ano = document.getElementById('filtroAnoDizimo')?.value || "2026";
         const cDiz = `${mes}_${ano}`;
-        
         cacheMembros = [];
         snap.forEach(docSnap => {
             const m = docSnap.data(); cacheMembros.push(m);
             const idM = m.nome.replace(/\s+/g, '');
             const t = gerarTentativasDeFoto(m.nome, m.foto);
-            
-            const card = `<div class="member-card"><div class="member-main-row"><button class="btn-edit" onclick="window.abrirEditor('${m.nome}')"><i class="bi bi-pencil-square"></i></button><div class="photo-frame"><i class="bi bi-person-circle"></i><img src="fotos/${t[0]}" data-tentativas='${JSON.stringify(t)}' data-idx="0" onerror="window.proximaTentativaDeFoto(this)" onload="this.style.display='block';"></div><div class="member-info"><span class="member-name">${limparTexto(m.nome)}</span><div class="tag-container">${m.funcoes?m.funcoes.map(f=>`<span class="badge-funcao">${limparTexto(f)}</span>`).join(''):''}</div></div><div class="d-flex" id="group-${idM}"><button onclick="prepararChamada('${m.nome}','P')" class="btn-call btn-p">P</button><button onclick="prepararChamada('${m.nome}','F')" class="btn-call btn-f">F</button><button onclick="prepararChamada('${m.nome}','FJ')" class="btn-call btn-fj">FJ</button></div></div></div>`;
-            
+            const card = `<div class="member-card"><div class="member-main-row"><button class="btn-edit" onclick="window.abrirEditor('${m.nome}')"><i class="bi bi-pencil-square"></i></button><div class="photo-frame"><i class="bi bi-person-circle"></i><img src="fotos/${t[0]}" data-tentativas='${JSON.stringify(t)}' data-idx="0" onerror="window.proximaTentativaDeFoto(this)" onload="this.style.display='block';"></div><div class="member-info"><span class="member-name">${limparTexto(m.nome)}</span><div class="tag-container">${m.grupo?`<span class="badge-grupo">${limparTexto(m.grupo)}</span>`:''}${m.funcoes?m.funcoes.map(f=>`<span class="badge-funcao">${limparTexto(f)}</span>`).join(''):''}</div></div><div class="d-flex" id="group-${idM}"><button onclick="prepararChamada('${m.nome}','P')" class="btn-call btn-p">P</button><button onclick="prepararChamada('${m.nome}','F')" class="btn-call btn-f">F</button><button onclick="prepararChamada('${m.nome}','FJ')" class="btn-call btn-fj">FJ</button></div></div></div>`;
             if(m.funcoes?.length > 0) listaCom.innerHTML += card; else listaSem.innerHTML += card;
-
             if(perfil==='admin'){
                 const s = m.historicoDizimos ? m.historicoDizimos[cDiz] : null;
-                listaGestao.innerHTML += `<div class="gestao-card">
-                    <span class="gestao-nome">${limparTexto(m.nome)}</span>
-                    <div class="btn-group-dizimo">
-                        <button onclick="window.setDizimo('${m.nome}','${cDiz}','OK', this)" class="btn-dz ${s==='OK'?'active-ok':''}">DIZIMISTA</button>
-                        <button onclick="window.setDizimo('${m.nome}','${cDiz}','PENDENTE', this)" class="btn-dz ${s==='PENDENTE'?'active-no':''}">NAO DIZIMISTA</button>
-                        <button onclick="window.setDizimo('${m.nome}','${cDiz}','SEM_RENDA', this)" class="btn-dz ${s==='SEM_RENDA'?'active-sr':''}">SEM RENDA</button>
-                        <button onclick="window.setDizimo('${m.nome}','${cDiz}','DESEMPREGADO', this)" class="btn-dz ${s==='DESEMPREGADO'?'active-ds':''}">DESEMPREGADO</button>
-                    </div>
-                    <div id="sems-${idM}">${m.historicoSeminarios?.map((sem, i)=>`<div class="sem-item-gestao"><span>${limparTexto(sem.titulo)}</span> <i class="bi bi-trash text-danger" onclick="window.delSem('${m.nome}',${i})"></i></div>`).join('')||''}</div>
-                    <div class="mt-2">
-                        <label class="small text-white-50 fw-bold">ADICIONE AQUI O SEMINÁRIO | PARA ADD CLIQUE NO "+":</label>
-                        <div class="input-group input-group-sm">
-                            <input type="text" id="in-sem-${idM}" class="form-control bg-dark text-white border-secondary" placeholder="TÍTULO DO SEMINÁRIO">
-                            <button class="btn btn-warning fw-bold" onclick="window.addSem('${m.nome}')">+</button>
-                        </div>
-                    </div>
-                </div>`;
+                listaGestao.innerHTML += `<div class="gestao-card"><span class="gestao-nome">${limparTexto(m.nome)}</span><div class="btn-group-dizimo d-flex gap-1">
+                    <button onclick="window.setDizimo('${m.nome}','${cDiz}','OK', this)" class="btn-dz ${s==='OK'?'active-ok':''}">DIZIMISTA</button>
+                    <button onclick="window.setDizimo('${m.nome}','${cDiz}','PENDENTE', this)" class="btn-dz ${s==='PENDENTE'?'active-no':''}">NAO DIZIMISTA</button>
+                    <button onclick="window.setDizimo('${m.nome}','${cDiz}','SEM_RENDA', this)" class="btn-dz ${s==='SEM_RENDA'?'active-sr':''}">SEM RENDA</button>
+                    <button onclick="window.setDizimo('${m.nome}','${cDiz}','DESEMPREGADO', this)" class="btn-dz ${s==='DESEMPREGADO'?'active-ds':''}">DESEMPREGADO</button>
+                </div><div id="sems-${idM}" class="mt-2">${m.historicoSeminarios?.map((sem, i)=>`<div class="sem-item-gestao"><span>${limparTexto(sem.titulo)}</span> <i class="bi bi-trash text-danger" onclick="window.delSem('${m.nome}',${i})"></i></div>`).join('')||''}</div><div class="mt-2"><label class="small text-white-50 fw-bold">ADICIONE AQUI O SEMINÁRIO / CURSO:</label><div class="input-group input-group-sm"><input type="text" id="in-sem-${idM}" class="form-control bg-dark text-white border-secondary" placeholder="TÍTULO DO SEMINÁRIO"><button class="btn btn-warning fw-bold" onclick="window.addSem('${m.nome}')">+</button></div></div></div>`;
             }
-
             if (window.membroSendoEditado === m.nome) {
                 document.getElementById('containerTagsFuncao').innerHTML = (m.funcoes || []).map(f => `<span class="badge-funcao">${limparTexto(f)} <i class="bi bi-x-circle-fill text-danger ms-2" style="cursor:pointer" onclick="window.removerFuncao('${f}')"></i></span>`).join('');
             }
@@ -337,6 +322,28 @@
         window.colorirBotoes();
     };
 
+    // BOTÃO LIMPAR MEMBRO NO MODAL (CORRIGIDO)
+    document.getElementById('btnLimparMembroDia').onclick = async () => {
+        if(!window.membroSendoEditado) return;
+        const idCol = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
+        const q = query(collection(db, idCol), where("data", "==", dataSelecionadaISO), where("nome", "==", window.membroSendoEditado));
+        const snap = await getDocs(q);
+        const promessas = snap.docs.map(d => deleteDoc(d.ref));
+        await Promise.all(promessas);
+        bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
+        window.colorirBotoes();
+    };
+
+    // BOTÃO EXCLUIR DEFINITIVAMENTE NO MODAL (CORRIGIDO)
+    document.getElementById('btnExcluirMembro').onclick = async () => {
+        if(!window.membroSendoEditado) return;
+        if(confirm(`Excluir ${window.membroSendoEditado} do banco definitivamente?`)) {
+            await deleteDoc(doc(db, "membros", window.membroSendoEditado));
+            alert("Membro removido!");
+            bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
+        }
+    };
+
     window.limparTodaChamadaDia = async () => {
         if(confirm(`Limpar todos os registros do dia ${dataSelecionadaISO}?`)) {
             const idCol = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
@@ -347,17 +354,6 @@
             window.colorirBotoes();
             alert("Dia limpo!");
         }
-    };
-
-    document.getElementById('btnLimparMembroDia').onclick = async () => {
-        if(!window.membroSendoEditado) return;
-        const idCol = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
-        const q = query(collection(db, idCol), where("data", "==", dataSelecionadaISO), where("nome", "==", window.membroSendoEditado));
-        const snap = await getDocs(q);
-        const promessas = snap.docs.map(d => deleteDoc(d.ref));
-        await Promise.all(promessas);
-        bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
-        window.colorirBotoes();
     };
 
     window.setDizimo = async (n, c, v, btn) => {
@@ -381,10 +377,7 @@
 
     window.abrirRelatorioGestao = () => {
         const m = document.getElementById('filtroMesDizimo').value, a = document.getElementById('filtroAnoDizimo').value, c = `${m}_${a}`;
-        const corpo = document.getElementById('corpoRelatorioGestao'); 
-        if (!corpo) return;
-        corpo.innerHTML = "";
-
+        const corpo = document.getElementById('corpoRelatorioGestao'); corpo.innerHTML = "";
         cacheMembros.forEach(mem => {
             const statusBanco = mem.historicoDizimos?.[c];
             let statusTexto = "NAO INFORMADO", classeStatus = "status-null";
@@ -392,7 +385,6 @@
             else if(statusBanco === "PENDENTE") { statusTexto = "NAO DIZIMISTA"; classeStatus = "status-no"; }
             else if(statusBanco === "SEM_RENDA") { statusTexto = "SEM RENDA"; classeStatus = "status-sr"; }
             else if(statusBanco === "DESEMPREGADO") { statusTexto = "DESEMPREGADO"; classeStatus = "status-ds"; }
-            
             const sems = mem.historicoSeminarios?.map(s => limparTexto(s.titulo)).join(', ') || '-';
             corpo.innerHTML += `<tr><td>${limparTexto(mem.nome)}</td><td>${mem.funcoes?.join(', ') || '-'}</td><td><span class="${classeStatus}">${statusTexto}</span></td><td>${sems}</td></tr>`;
         });
@@ -412,7 +404,6 @@
                 else if(status === 'PENDENTE') statusTexto = 'NAO DIZIMISTA';
                 else if(status === 'SEM_RENDA') statusTexto = 'SEM RENDA';
                 else if(status === 'DESEMPREGADO') statusTexto = 'DESEMPREGADO';
-                
                 return [limparTexto(mem.nome), mem.funcoes?.join(', ') || '-', statusTexto, mem.historicoSeminarios?.map(s => s.titulo).join(', ') || '-'];
             }),
             startY: 20
@@ -427,20 +418,11 @@
         const nomesRegistrados = snap.docs.map(d => d.data().nome);
         const membrosObrigatorios = cacheMembros.filter(m => m.funcoes && m.funcoes.length > 0);
         const faltantes = membrosObrigatorios.filter(m => !nomesRegistrados.includes(m.nome));
-
         if (faltantes.length > 0) {
             const listaNomes = faltantes.slice(0, 3).map(m => limparTexto(m.nome)).join(', ');
             alert(`BLOQUEIO: Faltam registrar ${faltantes.length} membros COM FUNCAO.\n(Ex: ${listaNomes}...)`);
         } else {
             alert("CHAMADA CONCLUIDA! Todos os membros com funcao foram registrados.");
-        }
-    };
-
-    document.getElementById('btnExcluirMembro').onclick = async () => {
-        if(confirm(`Excluir ${window.membroSendoEditado} do banco definitivamente?`)) {
-            await deleteDoc(doc(db, "membros", window.membroSendoEditado));
-            alert("Membro removido!");
-            bootstrap.Modal.getInstance(document.getElementById('modalEditarMembro')).hide();
         }
     };
 
@@ -472,7 +454,6 @@
         document.getElementById('exibirData').innerText = limparTexto(d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }));
         const ehDom = d.getDay() === 0;
         document.getElementById('seletorDomingo').style.display = ehDom ? 'flex' : 'none';
-        
         if(ehDom) {
             document.getElementById('btnEBD').classList.add('active');
             document.getElementById('btnNOITE').classList.remove('active');
@@ -485,7 +466,6 @@
 
     if (perfil === 'admin') document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
     
-    // Injetar data atual no input
     const inputDateRef = document.getElementById('inputDataChamada');
     inputDateRef.value = dataSelecionadaISO; 
 
