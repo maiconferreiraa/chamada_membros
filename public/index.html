@@ -35,7 +35,7 @@
         .user-logged-info { background: var(--primary-blue); color: white; font-size: 0.75rem; text-align: center; padding: 4px; font-weight: bold; text-transform: uppercase; }
         .header-data { background: #1a1a1a; padding: 15px; border-bottom: 2px solid var(--primary-blue); text-align: center; }
         .data-texto { font-size: 1.1rem; font-weight: bold; color: var(--warning-yellow); margin: 0; }
-        .retroativo-container { background: #111; padding: 8px; border-bottom: 1px solid #333; display: none; align-items: center; justify-content: center; gap: 10px; }
+        .retroativo-container { background: #111; padding: 8px; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .input-retroativo { background: #333; color: white; border: 1px solid var(--primary-blue); border-radius: 5px; padding: 2px 8px; font-size: 0.85rem; }
         
         .periodo-selector { background: #222; padding: 10px; border-bottom: 1px solid #333; display: none; justify-content: center; gap: 10px; }
@@ -74,19 +74,18 @@
 
         .gestao-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; margin: 10px; padding: 15px; }
         .gestao-nome { color: var(--warning-yellow); font-weight: bold; font-size: 1rem; margin-bottom: 5px; display: block; }
-        /* Ajuste de fonte para caber 4 botões lado a lado */
         .btn-dz { flex: 1; font-size: 0.5rem; font-weight: bold; padding: 8px 1px; border-radius: 6px; border: 1px solid #444; background: #222; color: #777; transition: 0.2s; }
         .btn-dz.active-ok { background: var(--success-green); color: white; border-color: var(--success-green); }
         .btn-dz.active-no { background: var(--danger-red); color: white; border-color: var(--danger-red); }
         .btn-dz.active-sr { background: var(--info-cyan); color: white; border-color: var(--info-cyan); }
-        .btn-dz.active-ds { background: #ff8c00; color: white; border-color: #ff8c00; }
+        .btn-dz.active-ds { background: #6f42c1; color: white; border-color: #6f42c1; } 
         
         .sem-item-gestao { background: #000; border: 1px solid #333; padding: 4px 8px; border-radius: 4px; margin-bottom: 4px; font-size: 0.7rem; display: flex; justify-content: space-between; align-items: center; }
         
         .status-ok { color: var(--success-green) !important; font-weight: bold; }
         .status-no { color: var(--danger-red) !important; font-weight: bold; }
         .status-sr { color: var(--info-cyan) !important; font-weight: bold; }
-        .status-ds { color: #ff8c00 !important; font-weight: bold; }
+        .status-ds { color: #6f42c1 !important; font-weight: bold; }
         .status-null { color: #666 !important; font-style: italic; }
 
         .report-table { font-size: 0.75rem; color: white; width: 100%; border-collapse: collapse; }
@@ -297,12 +296,23 @@
 
             if(perfil==='admin'){
                 const s = m.historicoDizimos ? m.historicoDizimos[cDiz] : null;
-                listaGestao.innerHTML += `<div class="gestao-card"><span class="gestao-nome">${limparTexto(m.nome)}</span><div class="btn-group-dizimo">
-                    <button onclick="window.setDizimo('${m.nome}','${cDiz}','OK', this)" class="btn-dz ${s==='OK'?'active-ok':''}">DIZIMISTA</button>
-                    <button onclick="window.setDizimo('${m.nome}','${cDiz}','PENDENTE', this)" class="btn-dz ${s==='PENDENTE'?'active-no':''}">NAO DIZIMISTA</button>
-                    <button onclick="window.setDizimo('${m.nome}','${cDiz}','SEM_RENDA', this)" class="btn-dz ${s==='SEM_RENDA'?'active-sr':''}">SEM RENDA</button>
-                    <button onclick="window.setDizimo('${m.nome}','${cDiz}','DESEMPREGADO', this)" class="btn-dz ${s==='DESEMPREGADO'?'active-ds':''}">DESEMPREGADO</button>
-                </div><div id="sems-${idM}">${m.historicoSeminarios?.map((sem, i)=>`<div class="sem-item-gestao"><span>${limparTexto(sem.titulo)}</span> <i class="bi bi-trash text-danger" onclick="window.delSem('${m.nome}',${i})"></i></div>`).join('')||''}</div><div class="input-group input-group-sm mt-2"><input type="text" id="in-sem-${idM}" class="form-control bg-dark text-white border-secondary" placeholder="Curso"><button class="btn btn-warning" onclick="window.addSem('${m.nome}')">+</button></div></div>`;
+                listaGestao.innerHTML += `<div class="gestao-card">
+                    <span class="gestao-nome">${limparTexto(m.nome)}</span>
+                    <div class="btn-group-dizimo">
+                        <button onclick="window.setDizimo('${m.nome}','${cDiz}','OK', this)" class="btn-dz ${s==='OK'?'active-ok':''}">DIZIMISTA</button>
+                        <button onclick="window.setDizimo('${m.nome}','${cDiz}','PENDENTE', this)" class="btn-dz ${s==='PENDENTE'?'active-no':''}">NAO DIZIMISTA</button>
+                        <button onclick="window.setDizimo('${m.nome}','${cDiz}','SEM_RENDA', this)" class="btn-dz ${s==='SEM_RENDA'?'active-sr':''}">SEM RENDA</button>
+                        <button onclick="window.setDizimo('${m.nome}','${cDiz}','DESEMPREGADO', this)" class="btn-dz ${s==='DESEMPREGADO'?'active-ds':''}">DESEMPREGADO</button>
+                    </div>
+                    <div id="sems-${idM}">${m.historicoSeminarios?.map((sem, i)=>`<div class="sem-item-gestao"><span>${limparTexto(sem.titulo)}</span> <i class="bi bi-trash text-danger" onclick="window.delSem('${m.nome}',${i})"></i></div>`).join('')||''}</div>
+                    <div class="mt-2">
+                        <label class="small text-white-50 fw-bold">ADICIONE AQUI O SEMINÁRIO | PARA ADD CLIQUE NO "+":</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" id="in-sem-${idM}" class="form-control bg-dark text-white border-secondary" placeholder="TÍTULO DO SEMINÁRIO">
+                            <button class="btn btn-warning fw-bold" onclick="window.addSem('${m.nome}')">+</button>
+                        </div>
+                    </div>
+                </div>`;
             }
 
             if (window.membroSendoEditado === m.nome) {
@@ -462,16 +472,30 @@
         document.getElementById('exibirData').innerText = limparTexto(d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }));
         const ehDom = d.getDay() === 0;
         document.getElementById('seletorDomingo').style.display = ehDom ? 'flex' : 'none';
+        
+        if(ehDom) {
+            document.getElementById('btnEBD').classList.add('active');
+            document.getElementById('btnNOITE').classList.remove('active');
+            periodoAtual = 'EBD';
+        } else {
+            periodoAtual = '';
+        }
         window.colorirBotoes();
     };
 
     if (perfil === 'admin') document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
     
+    // Injetar data atual no input
+    const inputDateRef = document.getElementById('inputDataChamada');
+    inputDateRef.value = dataSelecionadaISO; 
+
     const dH = new Date(dataSelecionadaISO + 'T12:00:00');
     document.getElementById('dataTopo').innerText = dH.toLocaleDateString('pt-BR');
     document.getElementById('exibirData').innerText = limparTexto(dH.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }));
+    
     if(dH.getDay() === 0) {
         document.getElementById('seletorDomingo').style.display = 'flex';
+        document.getElementById('btnEBD').classList.add('active');
         window.mudarPeriodo('EBD');
     }
 </script>
