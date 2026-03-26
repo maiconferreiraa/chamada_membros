@@ -101,7 +101,7 @@
 </div>
 
 <div class="retroativo-container admin-only" id="containerFiltroData" style="display: flex;">
-    <span class="small fw-bold text-info">LANCAR RETROATIVO:</span>
+    <span class="small fw-bold text-info">LANÇAR RETROATIVO:</span>
     <input type="date" id="inputDataChamada" class="input-retroativo">
 </div>
 
@@ -116,9 +116,9 @@
 </div>
 
 <ul class="nav nav-tabs sticky-top" id="maranataTabs" role="tablist">
-    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#comFuncao" type="button">Com Funcao</button></li>
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#comFuncao" type="button">Com Função</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#semFuncao" type="button">Geral</button></li>
-    <li class="nav-item admin-only"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#gestaoTab" type="button">Gestao</button></li>
+    <li class="nav-item admin-only"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#gestaoTab" type="button">Gestão</button></li>
 </ul>
 
 <div class="tab-content" id="maranataTabContent">
@@ -130,7 +130,7 @@
             <h6 class="text-warning small fw-bold mb-3">CONTROLE DE DÍZIMOS E SEMINÁRIOS</h6>
             <div class="d-flex gap-2 justify-content-center mb-3">
                 <select id="filtroMesDizimo" class="form-select form-select-sm bg-dark text-white border-secondary" style="width: 120px;">
-                    <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03" selected>Marco</option>
+                    <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03" selected>Março</option>
                     <option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option>
                     <option value="07">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
                     <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
@@ -141,7 +141,7 @@
                 <button class="btn btn-primary btn-sm" onclick="window.recarregarGestao()">OK</button>
             </div>
             <button class="btn btn-warning btn-sm fw-bold w-100 mb-2" onclick="window.abrirRelatorioGestao()">
-                <i class="bi bi-file-earmark-pdf"></i> GERAR RELATORIO PDF
+                <i class="bi bi-file-earmark-pdf"></i> GERAR RELATÓRIO PDF
             </button>
         </div>
         <div id="listaGestao"></div>
@@ -298,7 +298,7 @@
                     <button onclick="window.setDizimo('${m.nome}','${cDiz}','PENDENTE', this)" class="btn-dz ${s==='PENDENTE'?'active-no':''}">NAO DIZIMISTA</button>
                     <button onclick="window.setDizimo('${m.nome}','${cDiz}','SEM_RENDA', this)" class="btn-dz ${s==='SEM_RENDA'?'active-sr':''}">SEM RENDA</button>
                     <button onclick="window.setDizimo('${m.nome}','${cDiz}','DESEMPREGADO', this)" class="btn-dz ${s==='DESEMPREGADO'?'active-ds':''}">DESEMPREGADO</button>
-                </div><div id="sems-${idM}" class="mt-2">${m.historicoSeminarios?.map((sem, i)=>`<div class="sem-item-gestao"><span>${limparTexto(sem.titulo)}</span> <i class="bi bi-trash text-danger" onclick="window.delSem('${m.nome}',${i})"></i></div>`).join('')||''}</div><div class="mt-2"><label class="small text-white-50 fw-bold">ADICIONE AQUI O SEMINÁRIO / CURSO:</label><div class="input-group input-group-sm"><input type="text" id="in-sem-${idM}" class="form-control bg-dark text-white border-secondary" placeholder="TÍTULO DO SEMINÁRIO"><button class="btn btn-warning fw-bold" onclick="window.addSem('${m.nome}')">+</button></div></div></div>`;
+                </div><div id="sems-${idM}" class="mt-2">${m.historicoSeminarios?.map((sem, i)=>`<div class="sem-item-gestao"><span>${limparTexto(sem.titulo)}</span> <i class="bi bi-trash text-danger" onclick="window.delSem('${m.nome}',${i})"></i></div>`).join('')||''}</div><div class="mt-2"><label class="small text-white-50 fw-bold">ADICIONE AQUI O SEMINÁRIO | CLIQUE NO "+":</label><div class="input-group input-group-sm"><input type="text" id="in-sem-${idM}" class="form-control bg-dark text-white border-secondary" placeholder="TÍTULO DO SEMINÁRIO"><button class="btn btn-warning fw-bold" onclick="window.addSem('${m.nome}')">+</button></div></div></div>`;
             }
             if (window.membroSendoEditado === m.nome) {
                 document.getElementById('containerTagsFuncao').innerHTML = (m.funcoes || []).map(f => `<span class="badge-funcao">${limparTexto(f)} <i class="bi bi-x-circle-fill text-danger ms-2" style="cursor:pointer" onclick="window.removerFuncao('${f}')"></i></span>`).join('');
