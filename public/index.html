@@ -322,7 +322,51 @@
         window.colorirBotoes();
     };
 
-    // BOTÃO LIMPAR MEMBRO NO MODAL (CORRIGIDO)
+    window.recarregarGestao = () => {
+        // Força o onSnapshot a atualizar a interface com os novos filtros de data
+        const event = new Event('change');
+        document.dispatchEvent(event);
+    };
+
+    // EXPOSTO PARA FUNCIONAR O BOTÃO DE RELATÓRIO
+    window.abrirRelatorioGestao = () => {
+        const m = document.getElementById('filtroMesDizimo').value, a = document.getElementById('filtroAnoDizimo').value, c = `${m}_${a}`;
+        const corpo = document.getElementById('corpoRelatorioGestao'); corpo.innerHTML = "";
+        cacheMembros.forEach(mem => {
+            const statusBanco = mem.historicoDizimos?.[c];
+            let statusTexto = "NAO INFORMADO", classeStatus = "status-null";
+            if(statusBanco === "OK") { statusTexto = "DIZIMISTA"; classeStatus = "status-ok"; }
+            else if(statusBanco === "PENDENTE") { statusTexto = "NAO DIZIMISTA"; classeStatus = "status-no"; }
+            else if(statusBanco === "SEM_RENDA") { statusTexto = "SEM RENDA"; classeStatus = "status-sr"; }
+            else if(statusBanco === "DESEMPREGADO") { statusTexto = "DESEMPREGADO"; classeStatus = "status-ds"; }
+            const sems = mem.historicoSeminarios?.map(s => limparTexto(s.titulo)).join(', ') || '-';
+            corpo.innerHTML += `<tr><td>${limparTexto(mem.nome)}</td><td>${mem.funcoes?.join(', ') || '-'}</td><td><span class="${classeStatus}">${statusTexto}</span></td><td>${sems}</td></tr>`;
+        });
+        new bootstrap.Modal(document.getElementById('modalRelatorioGestao')).show();
+    };
+
+    // EXPOSTO PARA FUNCIONAR O BOTÃO BAIXAR PDF
+    window.baixarRelatorioPDF = () => {
+        const m = document.getElementById('filtroMesDizimo').value, a = document.getElementById('filtroAnoDizimo').value;
+        const { jsPDF } = window.jspdf; const docPDF = new jsPDF();
+        docPDF.text(`Relatorio de Gestao - ${m}/${a}`, 14, 15);
+        docPDF.autoTable({ 
+            head: [['Membro', 'Funcoes', 'Dizimo', 'Seminarios']], 
+            body: cacheMembros.map(mem => {
+                const status = mem.historicoDizimos?.[`${m}_${a}`];
+                let statusTexto = 'NAO INF.';
+                if(status === 'OK') statusTexto = 'DIZIMISTA';
+                else if(status === 'PENDENTE') statusTexto = 'NAO DIZIMISTA';
+                else if(status === 'SEM_RENDA') statusTexto = 'SEM RENDA';
+                else if(status === 'DESEMPREGADO') statusTexto = 'DESEMPREGADO';
+                return [limparTexto(mem.nome), mem.funcoes?.join(', ') || '-', statusTexto, mem.historicoSeminarios?.map(s => s.titulo).join(', ') || '-'];
+            }),
+            startY: 20
+        });
+        docPDF.save(`Gestao_${m}_${a}.pdf`);
+    };
+
+    // BOTÃO LIMPAR MEMBRO NO MODAL
     document.getElementById('btnLimparMembroDia').onclick = async () => {
         if(!window.membroSendoEditado) return;
         const idCol = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
@@ -334,7 +378,7 @@
         window.colorirBotoes();
     };
 
-    // BOTÃO EXCLUIR DEFINITIVAMENTE NO MODAL (CORRIGIDO)
+    // BOTÃO EXCLUIR DEFINITIVAMENTE NO MODAL
     document.getElementById('btnExcluirMembro').onclick = async () => {
         if(!window.membroSendoEditado) return;
         if(confirm(`Excluir ${window.membroSendoEditado} do banco definitivamente?`)) {
@@ -374,42 +418,6 @@
     };
 
     window.delSem = async (n, i) => { if(confirm("Excluir?")){ const m = cacheMembros.find(x => x.nome === n); const nV = [...m.historicoSeminarios]; nV.splice(i, 1); await updateDoc(doc(db, "membros", n), { historicoSeminarios: nV }); } };
-
-    window.abrirRelatorioGestao = () => {
-        const m = document.getElementById('filtroMesDizimo').value, a = document.getElementById('filtroAnoDizimo').value, c = `${m}_${a}`;
-        const corpo = document.getElementById('corpoRelatorioGestao'); corpo.innerHTML = "";
-        cacheMembros.forEach(mem => {
-            const statusBanco = mem.historicoDizimos?.[c];
-            let statusTexto = "NAO INFORMADO", classeStatus = "status-null";
-            if(statusBanco === "OK") { statusTexto = "DIZIMISTA"; classeStatus = "status-ok"; }
-            else if(statusBanco === "PENDENTE") { statusTexto = "NAO DIZIMISTA"; classeStatus = "status-no"; }
-            else if(statusBanco === "SEM_RENDA") { statusTexto = "SEM RENDA"; classeStatus = "status-sr"; }
-            else if(statusBanco === "DESEMPREGADO") { statusTexto = "DESEMPREGADO"; classeStatus = "status-ds"; }
-            const sems = mem.historicoSeminarios?.map(s => limparTexto(s.titulo)).join(', ') || '-';
-            corpo.innerHTML += `<tr><td>${limparTexto(mem.nome)}</td><td>${mem.funcoes?.join(', ') || '-'}</td><td><span class="${classeStatus}">${statusTexto}</span></td><td>${sems}</td></tr>`;
-        });
-        new bootstrap.Modal(document.getElementById('modalRelatorioGestao')).show();
-    };
-
-    window.baixarRelatorioPDF = () => {
-        const m = document.getElementById('filtroMesDizimo').value, a = document.getElementById('filtroAnoDizimo').value;
-        const { jsPDF } = window.jspdf; const docPDF = new jsPDF();
-        docPDF.text(`Relatório de Gestão - ${m}/${a}`, 14, 15);
-        docPDF.autoTable({ 
-            head: [['Membro', 'Funcoes', 'Dizimo', 'Seminarios']], 
-            body: cacheMembros.map(mem => {
-                const status = mem.historicoDizimos?.[`${m}_${a}`];
-                let statusTexto = 'NAO INF.';
-                if(status === 'OK') statusTexto = 'DIZIMISTA';
-                else if(status === 'PENDENTE') statusTexto = 'NAO DIZIMISTA';
-                else if(status === 'SEM_RENDA') statusTexto = 'SEM RENDA';
-                else if(status === 'DESEMPREGADO') statusTexto = 'DESEMPREGADO';
-                return [limparTexto(mem.nome), mem.funcoes?.join(', ') || '-', statusTexto, mem.historicoSeminarios?.map(s => s.titulo).join(', ') || '-'];
-            }),
-            startY: 20
-        });
-        docPDF.save(`Gestao_${m}_${a}.pdf`);
-    };
 
     document.getElementById('btnFinalizarChamada').onclick = async () => {
         const idCol = periodoAtual ? `chamada_${periodoAtual}` : "chamada_diaria";
